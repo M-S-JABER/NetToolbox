@@ -8,9 +8,13 @@ enum ToolRegistry {
     static let all: [any NetworkTool] = [
         // Phase 1 — calculators & reference
         SubnetCalculatorTool(),
+        VLSMTool(),
         MACLookupTool(),
         PortReferenceTool(),
+        NumberConverterTool(),
         TextConverterTool(),
+        PasswordGeneratorTool(),
+        QRGeneratorTool(),
         // Phase 2 — diagnostics
         PublicIPTool(),
         IPInfoTool(),

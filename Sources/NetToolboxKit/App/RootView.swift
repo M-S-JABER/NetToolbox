@@ -25,6 +25,9 @@ struct RootView: View {
                             categorySection(category)
                         }
                     } else {
+                        if let suggestion = smartSuggestion {
+                            smartBanner(suggestion)
+                        }
                         searchResults
                     }
                 }
@@ -60,6 +63,53 @@ struct RootView: View {
 
     private var searchMatches: [any NetworkTool] {
         ToolRegistry.all.filter(matches)
+    }
+
+    /// Detects when the query looks like an IP / MAC / URL / domain and
+    /// suggests the most relevant tool.
+    private var smartSuggestion: (kind: InputClassifier.Kind, tool: any NetworkTool)? {
+        let kind = InputClassifier.classify(search)
+        guard let id = kind.suggestedToolID, let tool = ToolRegistry.tool(withID: id) else {
+            return nil
+        }
+        return (kind, tool)
+    }
+
+    private func smartBanner(_ suggestion: (kind: InputClassifier.Kind, tool: any NetworkTool)) -> some View {
+        NavigationLink(value: AppRoute.tool(id: suggestion.tool.id)) {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: "sparkles")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(
+                        RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous)
+                            .fill(suggestion.tool.category.gradient)
+                    )
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n(suggestion.kind.messageKey ?? ""))
+                        .font(AppTypography.caption)
+                        .foregroundStyle(theme.textSecondary)
+                    Text(suggestion.tool.titleKey)
+                        .font(AppTypography.headline)
+                        .foregroundStyle(theme.textPrimary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(theme.textSecondary)
+            }
+            .padding(Spacing.lg)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
+                    .fill(theme.surface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
+                    .strokeBorder(suggestion.tool.category.tint.opacity(0.4), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Hero

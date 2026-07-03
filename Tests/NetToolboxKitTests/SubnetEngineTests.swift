@@ -291,4 +291,43 @@ final class SubnetEngineTests: XCTestCase {
             "WIFI:T:nopass;S:Open;H:false;;"
         )
     }
+
+    func testBaseConversion() throws {
+        XCTAssertEqual(try NumberConverter.parse("0xFF"), 255)
+        XCTAssertEqual(try NumberConverter.parse("0b1010"), 10)
+        XCTAssertEqual(try NumberConverter.parse("255"), 255)
+        XCTAssertEqual(NumberConverter.format(255).hex, "FF")
+        XCTAssertEqual(NumberConverter.format(10).binary, "1010")
+        XCTAssertThrowsError(try NumberConverter.parse("nope"))
+    }
+
+    func testVLSMAllocation() throws {
+        let allocations = try VLSMEngine.allocate(
+            baseCIDR: "192.168.1.0/24",
+            requests: [
+                VLSMRequest(name: "A", hosts: 50),
+                VLSMRequest(name: "B", hosts: 20),
+                VLSMRequest(name: "C", hosts: 10),
+            ]
+        )
+        XCTAssertEqual(allocations.map(\.cidr), ["192.168.1.0/26", "192.168.1.64/27", "192.168.1.96/28"])
+        XCTAssertEqual(VLSMEngine.prefixFor(hosts: 50), 26)
+        XCTAssertEqual(VLSMEngine.prefixFor(hosts: 100), 25)
+    }
+
+    func testPasswordStrength() {
+        let options = PasswordGenerator.Options()
+        XCTAssertEqual(PasswordGenerator.pool(for: options).count, 86)
+        XCTAssertEqual(PasswordGenerator.generate(options).count, 16)
+        XCTAssertGreaterThan(PasswordGenerator.entropyBits(for: options), 100)
+        XCTAssertEqual(PasswordGenerator.strength(bits: 30), .weak)
+    }
+
+    func testInputClassification() {
+        XCTAssertEqual(InputClassifier.classify("192.168.1.1"), .ipv4)
+        XCTAssertEqual(InputClassifier.classify("aa:bb:cc:dd:ee:ff"), .mac)
+        XCTAssertEqual(InputClassifier.classify("https://apple.com"), .url)
+        XCTAssertEqual(InputClassifier.classify("apple.com"), .domain)
+        XCTAssertEqual(InputClassifier.classify("hello"), .none)
+    }
 }

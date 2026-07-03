@@ -481,5 +481,59 @@ struct EngineTestSuite: Sendable {
                 expect(open, equals: "WIFI:T:nopass;S:Open;H:false;;", "open payload")
             )
         },
+        Case(name: "Base conversion") {
+            do {
+                let hex = try NumberConverter.parse("0xFF")
+                let bin = try NumberConverter.parse("0b1010")
+                let dec = try NumberConverter.parse("255")
+                return firstFailure(
+                    expect(hex, equals: 255, "0xFF"),
+                    expect(bin, equals: 10, "0b1010"),
+                    expect(dec, equals: 255, "decimal"),
+                    expect(NumberConverter.format(255).hex, equals: "FF", "format hex"),
+                    expect(NumberConverter.format(10).binary, equals: "1010", "format binary")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
+        Case(name: "VLSM allocation") {
+            do {
+                let allocations = try VLSMEngine.allocate(
+                    baseCIDR: "192.168.1.0/24",
+                    requests: [
+                        VLSMRequest(name: "A", hosts: 50),
+                        VLSMRequest(name: "B", hosts: 20),
+                        VLSMRequest(name: "C", hosts: 10),
+                    ]
+                )
+                guard allocations.count == 3 else { return "expected 3 allocations, got \(allocations.count)" }
+                return firstFailure(
+                    expect(VLSMEngine.prefixFor(hosts: 50), equals: 26, "prefix for 50"),
+                    expect(allocations[0].cidr, equals: "192.168.1.0/26", "first block"),
+                    expect(allocations[1].cidr, equals: "192.168.1.64/27", "second block"),
+                    expect(allocations[2].cidr, equals: "192.168.1.96/28", "third block")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
+        Case(name: "Password strength maths") {
+            let options = PasswordGenerator.Options()
+            let pool = PasswordGenerator.pool(for: options)
+            let generated = PasswordGenerator.generate(options)
+            let bits = PasswordGenerator.entropyBits(for: options)
+            return firstFailure(
+                expect(pool.count, equals: 86, "full pool size"),
+                expect(generated.count, equals: 16, "default length"),
+                expect(bits > 100, equals: true, "entropy over 100 bits"),
+                expect(PasswordGenerator.strength(bits: 30), equals: .weak, "weak threshold")
+            )
+        },
+        Case(name: "Smart input classification") {
+            firstFailure(
+                expect(InputClassifier.classify("192.168.1.1"), equals: .ipv4, "ipv4"),
+                expect(InputClassifier.classify("aa:bb:cc:dd:ee:ff"), equals: .mac, "mac"),
+                expect(InputClassifier.classify("https://apple.com"), equals: .url, "url"),
+                expect(InputClassifier.classify("apple.com"), equals: .domain, "domain"),
+                expect(InputClassifier.classify("hello"), equals: .none, "plain text")
+            )
+        },
     ]
 }

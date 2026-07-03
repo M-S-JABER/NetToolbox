@@ -46,8 +46,13 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | Tool | Highlights |
 |---|---|
 | **Subnet Calculator** | Full IPv4 (network, broadcast, usable range, host counts, wildcard, binary, class, private/public, `/31` RFC 3021, `/32`), IPv6 basics (expand/compress, network prefix, address type). Pure `SubnetEngine` with unit tests. |
+| **VLSM Planner** | Packs requested subnets (largest-first) into a base network; pure `VLSMEngine` with tests. |
 | **MAC / OUI Lookup** | Accepts any format (`:`/`-`/Cisco dots/raw hex), normalizes, offline vendor lookup from bundled `oui.json` (~300 well-known OUIs), multicast + locally-administered bit analysis. |
 | **Common Ports** | Searchable, filterable reference of well-known TCP/UDP ports. |
+| **Base Converter** | Binary / octal / decimal / hex with `0x`/`0b`/`0o` auto-detection (pure, tested). |
+| **Text Converter** | Offline Base64 / Hex / URL encode & decode. |
+| **Password Generator** | CSPRNG passwords / Wi-Fi keys with live entropy & strength. |
+| **QR Generator** | Any text or URL → QR (CoreImage). |
 
 **Phase 2 — diagnostics**
 
