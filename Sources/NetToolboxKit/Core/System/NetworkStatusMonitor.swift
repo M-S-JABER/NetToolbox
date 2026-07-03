@@ -56,7 +56,9 @@ final class NetworkStatusMonitor {
         monitor.start(queue: queue)
     }
 
-    private static func classify(_ path: NWPath) -> Connection {
+    // `nonisolated` because it only reads the passed-in path — it runs on
+    // the monitor's background queue, not the main actor.
+    private nonisolated static func classify(_ path: NWPath) -> Connection {
         guard path.status == .satisfied else { return .offline }
         if path.usesInterfaceType(.wifi) { return .wifi }
         if path.usesInterfaceType(.cellular) { return .cellular }
