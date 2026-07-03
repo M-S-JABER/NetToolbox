@@ -1,0 +1,15 @@
+# === OS / editor junk ===
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+
+# === Swift / Xcode / Swift Playgrounds ===
+.build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+**/.swiftpm/xcode/
+Package.resolved
