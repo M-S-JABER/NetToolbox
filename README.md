@@ -39,15 +39,36 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 
 **On macOS:** open the repo folder as a package in Xcode 15+ (runs `swift test` too), or open `NetToolbox.swiftpm` and run on an iPad simulator.
 
-## Phase 1 tools (shipped & working)
+## Shipped tools (all working, no external dependencies)
+
+**Phase 1 — calculators & reference**
 
 | Tool | Highlights |
 |---|---|
 | **Subnet Calculator** | Full IPv4 (network, broadcast, usable range, host counts, wildcard, binary, class, private/public, `/31` RFC 3021, `/32`), IPv6 basics (expand/compress, network prefix, address type). Pure `SubnetEngine` with unit tests. |
 | **MAC / OUI Lookup** | Accepts any format (`:`/`-`/Cisco dots/raw hex), normalizes, offline vendor lookup from bundled `oui.json` (~300 well-known OUIs), multicast + locally-administered bit analysis. |
 | **Common Ports** | Searchable, filterable reference of well-known TCP/UDP ports. |
-| **Public IP & ISP** | Public IP, country, city, ISP, org, ASN via `ipwho.is` (HTTPS), plus local interface addresses via `getifaddrs`. Offline handling + retry. |
-| **Engine Self-Tests** | Runs the full engine test suite **on-device** — same vectors as `Tests/SubnetEngineTests.swift`, since XCTest can't run in Swift Playgrounds. |
+
+**Phase 2 — diagnostics**
+
+| Tool | Highlights |
+|---|---|
+| **Public IP & ISP** | Public IP, country, city, ISP, org, ASN via `ipwho.is` (HTTPS), plus local interface addresses via `getifaddrs`. |
+| **Ping (TCP)** | Repeated TCP-handshake latency to a host/port with min/avg/max + packet loss. iOS blocks raw ICMP, so this is the reliable native equivalent. |
+| **Port Scanner** | Concurrent TCP port probing (`NWConnection`) with common/web/all presets and service names. |
+| **DNS Lookup** | Custom UDP resolver (pure `DNSMessage` codec) for A, AAAA, CNAME, MX, NS, TXT, SOA, PTR against any server. |
+| **WHOIS** | TCP port-43 client with per-TLD server selection. |
+| **SSL/TLS Checker** | TLS handshake inspection: subject, issuer, validity window, days-to-expiry, chain length, system trust. |
+| **Wake-on-LAN** | Broadcast magic packet via a `SO_BROADCAST` UDP socket. |
+| **Engine Self-Tests** | Runs the full engine + codec test suite **on-device** — same vectors as the XCTest target, since XCTest can't run in Swift Playgrounds. |
+
+**Phase 3 — professional**
+
+| Tool | Highlights |
+|---|---|
+| **Telnet** | Interactive plaintext TCP terminal with RFC 854 option negotiation (pure `TelnetProtocol`). |
+| **MikroTik API** | RouterOS API client (port 8728) — variable-length word framing, plain login (6.43+), send any command and read `!re`/`!done`/`!trap` replies. |
+| **SNMP GET** | SNMP v2c GET over UDP with a hand-rolled BER codec (`SNMPMessage`) and common `sysX` OID presets. |
 
 ## Architecture
 
@@ -87,18 +108,17 @@ Rules enforced across the codebase:
 - **Wi-Fi analyzer** (scanning nearby networks/channels/signal): **not possible on iOS** — no public API.
 - **Packet capture**: not possible without special VPN/NE entitlements.
 - **Current Wi-Fi SSID/BSSID**: requires an entitlement + location permission — deferred.
-- **LAN scanning**: requires the *Local Network* permission (iOS 14+) — planned for Phase 2.
+- **Ping** is a TCP-handshake latency probe, not ICMP echo — iOS has no public raw-socket API.
+- **LAN scanning** (Bonjour + ping sweep) and reading the **current Wi-Fi SSID** need the *Local Network* / location entitlements, which a `.swiftpm` playground cannot declare reliably — deferred.
 - The bundled OUI database is **abridged** (~300 famous vendors). Replace `Resources/oui.json` with a fuller IEEE-derived map anytime — same `{"XXXXXX": "Vendor"}` format.
 
-## Roadmap
+## Remaining roadmap
 
-**Phase 2 — Diagnostics** (needs the Local Network permission for LAN tools):
-Ping (e.g. SwiftyPing), Traceroute, DNS Lookup, Port Scanner (Network.framework), Whois, SSL certificate checker, Wake-on-LAN, LAN scanner (ping sweep + Bonjour).
+- **Traceroute** — needs per-hop TTL control and reading ICMP time-exceeded replies via raw sockets, which iOS does not permit. A UDP/TCP-TTL best-effort variant is possible later.
+- **LAN scanner** (ping sweep + Bonjour `NWBrowser`) — pending a host app that declares `NSLocalNetworkUsageDescription` + `NSBonjourServices`.
+- **SSH client** — genuinely requires a vetted crypto/transport dependency (e.g. SwiftNIO SSH / Citadel). That conflicts with the current zero-dependency, Playgrounds-buildable constraint, so it's kept out until we decide to add an external package. Everything else in Phases 2–3 ships here with no dependencies.
 
-**Phase 3 — Professional**:
-SSH client (Citadel) for MikroTik/Cisco, MikroTik API client with ready-made commands, SNMP, Telnet.
-
-Each new tool follows the same pattern: `Features/<Name>/` with `<Name>Tool.swift` conforming to `NetworkTool`, registered in `ToolRegistry.all`.
+Each tool follows the same pattern: `Features/<Name>/` with a type conforming to `NetworkTool`, registered in `ToolRegistry.all` — the home screen updates itself.
 
 ## License
 
@@ -169,10 +189,17 @@ struct MyApp: App {
 - **قراءة SSID/BSSID الحالي**: يتطلب entitlement وإذن الموقع — مؤجل.
 - **مسح الشبكة المحلية**: يتطلب إذن *Local Network* — مخطط للمرحلة الثانية.
 
-## خارطة الطريق
+## الأدوات المُنجَزة (كلها تعمل بدون مكتبات خارجية)
 
-- **المرحلة 2 — تشخيص:** Ping، Traceroute، DNS Lookup، Port Scanner، Whois، فاحص شهادات SSL، Wake-on-LAN، ماسح الشبكة المحلية (ping sweep + Bonjour).
-- **المرحلة 3 — احترافي:** عميل SSH (مكتبة Citadel) لأجهزة MikroTik/Cisco، عميل MikroTik API بأوامر جاهزة، SNMP، Telnet.
+- **المرحلة 1 — حسابات ومراجع:** حاسبة الشبكات الفرعية، فحص MAC/OUI، مرجع المنافذ.
+- **المرحلة 2 — تشخيص:** العنوان العام والمزوّد، Ping (عبر TCP)، ماسح المنافذ، استعلام DNS، WHOIS، فاحص SSL/TLS، Wake-on-LAN، والاختبارات الذاتية على الجهاز.
+- **المرحلة 3 — احترافي:** Telnet، عميل MikroTik API (RouterOS)، واستعلام SNMP v2c.
+
+## ما تبقّى في خارطة الطريق
+
+- **Traceroute:** يتطلب التحكم في TTL لكل قفزة وقراءة ردود ICMP، وهو غير متاح على iOS عبر واجهات عامة.
+- **ماسح الشبكة المحلية** (ping sweep + Bonjour) وقراءة **SSID الحالي:** يحتاجان إذن *Local Network* الذي لا يمكن لمشروع `.swiftpm` الإعلان عنه بموثوقية — مؤجّلان.
+- **عميل SSH:** يحتاج فعلاً مكتبة تشفير خارجية موثوقة (SwiftNIO SSH / Citadel)، وهذا يتعارض مع قيد "بدون مكتبات خارجية + قابل للبناء في Playgrounds"، لذا أُبقي خارجاً حتى تُقرَّ إضافة تبعية خارجية. كل ما عداه في المرحلتين 2 و3 مُنجَز هنا بدون أي تبعيات.
 
 ## الرخصة
 

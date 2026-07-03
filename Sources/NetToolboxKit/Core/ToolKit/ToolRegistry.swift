@@ -6,14 +6,24 @@ import SwiftUI
 @MainActor
 enum ToolRegistry {
     static let all: [any NetworkTool] = [
-        // Phase 1 — shipped
+        // Phase 1 — calculators & reference
         SubnetCalculatorTool(),
         MACLookupTool(),
         PortReferenceTool(),
+        // Phase 2 — diagnostics
         PublicIPTool(),
+        PingTool(),
+        PortScannerTool(),
+        DNSLookupTool(),
+        WhoisTool(),
+        SSLCheckerTool(),
         SelfTestTool(),
-        // Phase 2 (diagnostics) and Phase 3 (professional) tools
-        // are registered here as they land. See README roadmap.
+        // Phase 2 — local network
+        WakeOnLANTool(),
+        // Phase 3 — professional
+        TelnetTool(),
+        MikroTikAPITool(),
+        SNMPTool(),
     ]
 
     static func tools(in category: ToolCategory) -> [any NetworkTool] {

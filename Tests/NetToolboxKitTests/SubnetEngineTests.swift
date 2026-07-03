@@ -156,4 +156,84 @@ final class SubnetEngineTests: XCTestCase {
         XCTAssertEqual(database.vendor(forOUI: "f0189d"), "Test Vendor")
         XCTAssertNil(database.vendor(forOUI: "000000"))
     }
+
+    // MARK: Phase 2 & 3 codecs
+
+    func testWakeOnLANMagicPacket() throws {
+        let mac = try MACAddress(parsing: "F0:18:9D:AA:BB:CC")
+        let packet = [UInt8](WakeOnLAN.magicPacket(for: mac))
+        XCTAssertEqual(packet.count, 102)
+        XCTAssertEqual(Array(packet.prefix(6)), [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF])
+        XCTAssertEqual(Array(packet[6..<12]), [0xF0, 0x18, 0x9D, 0xAA, 0xBB, 0xCC])
+    }
+
+    func testMikroTikLengthCoding() {
+        XCTAssertEqual(MikroTikProtocol.encodeLength(0x7F), [0x7F])
+        XCTAssertEqual(MikroTikProtocol.encodeLength(0x80), [0x80, 0x80])
+        let decoded = MikroTikProtocol.decodeLength([0x80, 0x80], at: 0)
+        XCTAssertEqual(decoded?.length, 0x80)
+        XCTAssertEqual(decoded?.consumed, 2)
+    }
+
+    func testMikroTikSentenceRoundTrip() {
+        let encoded = MikroTikProtocol.encodeSentence(["/login", "=name=admin"])
+        let sentences = MikroTikProtocol.decodeSentences(encoded)
+        XCTAssertEqual(sentences, [["/login", "=name=admin"]])
+    }
+
+    func testDNSNameEncoding() {
+        XCTAssertEqual([UInt8](DNSMessage.encodeName("a.bc")), [1, 0x61, 2, 0x62, 0x63, 0])
+    }
+
+    func testDNSCompressionPointer() throws {
+        let bytes: [UInt8] = [0x01, 0x61, 0x00, 0xC0, 0x01]
+        let (name, next) = try DNSMessage.readName(bytes, at: 3)
+        XCTAssertEqual(name, "a")
+        XCTAssertEqual(next, 5)
+    }
+
+    func testDNSARecordDecode() throws {
+        let response: [UInt8] = [
+            0x12, 0x34, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+            0x01, 0x61, 0x00, 0x00, 0x01, 0x00, 0x01,
+            0xC0, 0x0C, 0x00, 0x01, 0x00, 0x01,
+            0x00, 0x00, 0x00, 0x3C,
+            0x00, 0x04, 0x01, 0x02, 0x03, 0x04,
+        ]
+        let records = try DNSMessage.decodeAnswers(Data(response))
+        XCTAssertEqual(records.count, 1)
+        XCTAssertEqual(records.first?.type, .a)
+        XCTAssertEqual(records.first?.value, "1.2.3.4")
+        XCTAssertEqual(records.first?.ttl, 60)
+    }
+
+    func testSNMPBERPrimitives() throws {
+        XCTAssertEqual(SNMPMessage.encodeLength(200), [0x81, 0xC8])
+        XCTAssertEqual(SNMPMessage.encodeBase128(300), [0x82, 0x2C])
+        XCTAssertEqual(try SNMPMessage.encodeOID("1.3.6.1"), [0x06, 0x03, 0x2B, 0x06, 0x01])
+        XCTAssertEqual(SNMPMessage.decodeOID([0x2B, 0x06, 0x01]), "1.3.6.1")
+    }
+
+    func testSNMPResponseDecode() throws {
+        let oidBytes = try SNMPMessage.encodeOID("1.3.6.1.2.1.1.5.0")
+        let varbind = SNMPMessage.encodeTLV(tag: 0x30, content: oidBytes + SNMPMessage.encodeOctetString("rtr"))
+        let varbindList = SNMPMessage.encodeTLV(tag: 0x30, content: varbind)
+        let pduBody = SNMPMessage.encodeInteger(1) + SNMPMessage.encodeInteger(0)
+            + SNMPMessage.encodeInteger(0) + varbindList
+        let pdu = SNMPMessage.encodeTLV(tag: 0xA2, content: pduBody)
+        let message = SNMPMessage.encodeInteger(1) + SNMPMessage.encodeOctetString("public") + pdu
+        let full = SNMPMessage.encodeTLV(tag: 0x30, content: message)
+        let result = try SNMPMessage.decodeResponse(Data(full))
+        XCTAssertEqual(result.oid, "1.3.6.1.2.1.1.5.0")
+        XCTAssertEqual(result.typeName, "OCTET STRING")
+        XCTAssertEqual(result.value, "rtr")
+    }
+
+    func testTelnetNegotiation() {
+        let doEcho = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.doo, 1, 0x68, 0x69])
+        XCTAssertEqual(doEcho.text, "hi")
+        XCTAssertEqual(doEcho.reply, [255, 252, 1])
+        let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])
+        XCTAssertEqual(willSup.reply, [255, 254, 3])
+    }
 }

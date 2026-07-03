@@ -109,4 +109,9 @@ enum PortDatabase {
         PortEntry(port: 27017, protocols: [.tcp], service: "MongoDB", summary: "MongoDB database"),
         PortEntry(port: 51820, protocols: [.udp], service: "WireGuard", summary: "WireGuard VPN tunnel"),
     ]
+
+    /// Well-known service name for a port number, if any (used by the scanner).
+    static func serviceName(for port: Int) -> String? {
+        all.first { $0.port == port }?.service
+    }
 }

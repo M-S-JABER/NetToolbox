@@ -58,7 +58,7 @@ struct EngineTestSuite: Sendable {
 
     // MARK: - Test vectors
 
-    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases
+    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases
 
     private static let ipv4Cases: [Case] = [
         Case(name: "IPv4 /24 standard network") {
@@ -308,6 +308,118 @@ struct EngineTestSuite: Sendable {
             return database.count > 100
                 ? nil
                 : "bundled database has only \(database.count) entries"
+        },
+    ]
+
+    private static let codecCases: [Case] = [
+        Case(name: "Wake-on-LAN magic packet") {
+            let mac: MACAddress
+            do {
+                mac = try MACAddress(parsing: "F0:18:9D:AA:BB:CC")
+            } catch { return "unexpected error: \(error)" }
+            let packet = [UInt8](WakeOnLAN.magicPacket(for: mac))
+            let header = Array(packet.prefix(6))
+            let firstRepeat = Array(packet[6..<12])
+            return firstFailure(
+                expect(packet.count, equals: 102, "packet length"),
+                expect(header, equals: [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF], "sync stream"),
+                expect(firstRepeat, equals: [0xF0, 0x18, 0x9D, 0xAA, 0xBB, 0xCC], "first MAC copy")
+            )
+        },
+        Case(name: "MikroTik length encoding") {
+            let short = MikroTikProtocol.encodeLength(0x7F)
+            let medium = MikroTikProtocol.encodeLength(0x80)
+            let decoded = MikroTikProtocol.decodeLength(medium, at: 0)
+            return firstFailure(
+                expect(short, equals: [0x7F], "short length"),
+                expect(medium, equals: [0x80, 0x80], "medium length"),
+                expect(decoded?.length, equals: 0x80, "decoded length"),
+                expect(decoded?.consumed, equals: 2, "decoded consumed")
+            )
+        },
+        Case(name: "MikroTik sentence round-trip") {
+            let encoded = MikroTikProtocol.encodeSentence(["/login", "=name=admin"])
+            let sentences = MikroTikProtocol.decodeSentences(encoded)
+            return firstFailure(
+                expect(sentences.count, equals: 1, "sentence count"),
+                expect(sentences.first ?? [], equals: ["/login", "=name=admin"], "words")
+            )
+        },
+        Case(name: "DNS name encoding") {
+            let encoded = [UInt8](DNSMessage.encodeName("a.bc"))
+            return expect(encoded, equals: [1, 0x61, 2, 0x62, 0x63, 0], "encoded labels")
+        },
+        Case(name: "DNS name compression pointer") {
+            // "a" at offset 1, then a pointer to it at offset 3.
+            let bytes: [UInt8] = [0x01, 0x61, 0x00, 0xC0, 0x01]
+            do {
+                let (name, next) = try DNSMessage.readName(bytes, at: 3)
+                return firstFailure(
+                    expect(name, equals: "a", "pointer name"),
+                    expect(next, equals: 5, "offset past pointer")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
+        Case(name: "DNS A-record response decode") {
+            let response: [UInt8] = [
+                0x12, 0x34, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+                0x01, 0x61, 0x00, 0x00, 0x01, 0x00, 0x01,          // question "a" A IN
+                0xC0, 0x0C, 0x00, 0x01, 0x00, 0x01,               // answer name ptr, A, IN
+                0x00, 0x00, 0x00, 0x3C,                           // TTL 60
+                0x00, 0x04, 0x01, 0x02, 0x03, 0x04,               // rdlength 4, 1.2.3.4
+            ]
+            do {
+                let records = try DNSMessage.decodeAnswers(Data(response))
+                guard let first = records.first else { return "no records decoded" }
+                return firstFailure(
+                    expect(records.count, equals: 1, "record count"),
+                    expect(first.type, equals: .a, "type"),
+                    expect(first.value, equals: "1.2.3.4", "value"),
+                    expect(first.ttl, equals: 60, "ttl")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
+        Case(name: "SNMP BER primitives") {
+            let oid: [UInt8]
+            do {
+                oid = try SNMPMessage.encodeOID("1.3.6.1")
+            } catch { return "unexpected error: \(error)" }
+            return firstFailure(
+                expect(SNMPMessage.encodeLength(200), equals: [0x81, 0xC8], "long-form length"),
+                expect(SNMPMessage.encodeBase128(300), equals: [0x82, 0x2C], "base-128"),
+                expect(oid, equals: [0x06, 0x03, 0x2B, 0x06, 0x01], "OID TLV"),
+                expect(SNMPMessage.decodeOID([0x2B, 0x06, 0x01]), equals: "1.3.6.1", "OID decode")
+            )
+        },
+        Case(name: "SNMP response decode") {
+            let oidBytes: [UInt8]
+            do {
+                oidBytes = try SNMPMessage.encodeOID("1.3.6.1.2.1.1.5.0")
+            } catch { return "unexpected error: \(error)" }
+            let varbind = SNMPMessage.encodeTLV(tag: 0x30, content: oidBytes + SNMPMessage.encodeOctetString("rtr"))
+            let varbindList = SNMPMessage.encodeTLV(tag: 0x30, content: varbind)
+            let pduBody = SNMPMessage.encodeInteger(1) + SNMPMessage.encodeInteger(0)
+                + SNMPMessage.encodeInteger(0) + varbindList
+            let pdu = SNMPMessage.encodeTLV(tag: 0xA2, content: pduBody)
+            let message = SNMPMessage.encodeInteger(1) + SNMPMessage.encodeOctetString("public") + pdu
+            let full = SNMPMessage.encodeTLV(tag: 0x30, content: message)
+            do {
+                let result = try SNMPMessage.decodeResponse(Data(full))
+                return firstFailure(
+                    expect(result.oid, equals: "1.3.6.1.2.1.1.5.0", "oid"),
+                    expect(result.typeName, equals: "OCTET STRING", "type"),
+                    expect(result.value, equals: "rtr", "value")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
+        Case(name: "Telnet option negotiation") {
+            let doEcho = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.doo, 1, 0x68, 0x69])
+            let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])
+            return firstFailure(
+                expect(doEcho.text, equals: "hi", "stripped text"),
+                expect(doEcho.reply, equals: [255, 252, 1], "WONT reply"),
+                expect(willSup.reply, equals: [255, 254, 3], "DONT reply")
+            )
         },
     ]
 }
