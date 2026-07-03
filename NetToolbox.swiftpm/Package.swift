@@ -1,14 +1,17 @@
 // swift-tools-version: 5.9
 
-// NetToolbox — Network tools for iOS, built as a Swift Playgrounds App project.
-// Opens in Swift Playgrounds on iPad and in Xcode on macOS.
+// NetToolbox — thin app playground for Swift Playgrounds on iPad.
+//
+// All real code lives in the NetToolboxKit library at the root of this
+// repository; this app only provides the @main entry point. It pulls the
+// kit from GitHub, so you can also skip this project entirely and add
+// the repo URL as a package to your own App playground instead.
 
 import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "NetToolbox",
-    defaultLocalization: "en",
+    name: "NetToolboxApp",
     platforms: [
         .iOS("17.0")
     ],
@@ -33,21 +36,16 @@ let package = Package(
             ]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.0.0")
+    ],
     targets: [
         .executableTarget(
             name: "AppModule",
-            path: ".",
-            exclude: [
-                "Tests"
+            dependencies: [
+                .product(name: "NetToolboxKit", package: "NetToolbox")
             ],
-            resources: [
-                .process("Resources")
-            ],
-            swiftSettings: [
-                // Swift 6-style strict concurrency checking while staying
-                // compatible with the Swift Playgrounds (5.9/5.10) toolchain.
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            path: "."
         )
     ]
 )
