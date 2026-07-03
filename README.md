@@ -65,7 +65,7 @@ The core idea is a **Tool Registry**: the home screen (sidebar + grid) is genera
 │   │   ├── Persistence/Models/       # SwiftData: HistoryEntry, SavedHost, Favorite
 │   │   └── Extensions/               # incl. L10n helpers (package-bundle lookups)
 │   ├── Features/                     # One folder per tool: Tool + View + ViewModel (+ Engine)
-│   └── Resources/                    # Localizable.xcstrings (en/ar), oui.json
+│   └── Resources/                    # en/ar .lproj string tables, oui.json
 ├── Tests/NetToolboxKitTests/         # XCTest mirror of the on-device suite
 └── NetToolbox.swiftpm/               # Thin app playground (@main only, depends on the kit)
 ```
