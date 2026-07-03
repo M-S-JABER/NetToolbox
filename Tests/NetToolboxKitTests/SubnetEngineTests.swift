@@ -236,4 +236,17 @@ final class SubnetEngineTests: XCTestCase {
         let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])
         XCTAssertEqual(willSup.reply, [255, 254, 3])
     }
+
+    func testX509TimeParsing() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        let utc = X509.parseTime(tag: X509.utcTimeTag, bytes: Array("230615120000Z".utf8))
+        XCTAssertEqual(utc.map(formatter.string(from:)), "2023-06-15")
+
+        let generalized = X509.parseTime(tag: X509.generalizedTimeTag, bytes: Array("20230615120000Z".utf8))
+        XCTAssertEqual(generalized.map(formatter.string(from:)), "2023-06-15")
+    }
 }

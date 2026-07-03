@@ -67,63 +67,41 @@ struct SSLInspector: SSLInspecting {
         }
     }
 
-    /// Pulls subject/issuer/validity out of the evaluated trust object.
+    /// Pulls subject/issuer/validity out of the evaluated trust object,
+    /// using only APIs available on iOS.
     private static func extract(host: String, trust: SecTrust) -> SSLCertInfo? {
         var trustError: CFError?
         let trusted = SecTrustEvaluateWithError(trust, &trustError)
 
-        let count = SecTrustGetCertificateCount(trust)
-        guard count > 0, let leaf = SecTrustGetCertificateAtIndex(trust, 0) else {
+        guard let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate],
+              let leaf = chain.first else {
             return nil
         }
         let subject = (SecCertificateCopySubjectSummary(leaf) as String?) ?? "—"
-
         var issuer = "—"
-        if count > 1, let issuerCert = SecTrustGetCertificateAtIndex(trust, 1) {
-            issuer = (SecCertificateCopySubjectSummary(issuerCert) as String?) ?? "—"
+        if chain.count > 1 {
+            issuer = (SecCertificateCopySubjectSummary(chain[1]) as String?) ?? "—"
         }
 
-        let (notBefore, notAfter, daysRemaining) = validity(of: leaf)
-
-        return SSLCertInfo(
-            host: host,
-            subject: subject,
-            issuer: issuer,
-            notBefore: notBefore,
-            notAfter: notAfter,
-            daysRemaining: daysRemaining,
-            chainLength: count,
-            systemTrusted: trusted
-        )
-    }
-
-    /// Reads the certificate validity window via `SecCertificateCopyValues`.
-    private static func validity(of certificate: SecCertificate) -> (String, String, Int?) {
-        let keys = [kSecOIDX509V1ValidityNotBefore, kSecOIDX509V1ValidityNotAfter] as CFArray
-        guard let values = SecCertificateCopyValues(certificate, keys, nil) as? [CFString: Any] else {
-            return ("—", "—", nil)
-        }
-
-        func date(for key: CFString) -> Date? {
-            guard let entry = values[key] as? [CFString: Any],
-                  let seconds = entry[kSecPropertyKeyValue] as? Double else {
-                return nil
-            }
-            // Values are seconds since the CF reference date (2001-01-01).
-            return Date(timeIntervalSinceReferenceDate: seconds)
-        }
+        // iOS has no API to read validity dates from a SecCertificate, so
+        // parse them out of the DER ourselves.
+        let der = SecCertificateCopyData(leaf) as Data
+        let (notBefore, notAfter) = X509.validity(fromDER: der)
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "en_US_POSIX")
 
-        let before = date(for: kSecOIDX509V1ValidityNotBefore)
-        let after = date(for: kSecOIDX509V1ValidityNotAfter)
-
-        let beforeText = before.map(formatter.string(from:)) ?? "—"
-        let afterText = after.map(formatter.string(from:)) ?? "—"
-        let days = after.map { Int($0.timeIntervalSinceNow / 86_400) }
-        return (beforeText, afterText, days)
+        return SSLCertInfo(
+            host: host,
+            subject: subject,
+            issuer: issuer,
+            notBefore: notBefore.map(formatter.string(from:)) ?? "—",
+            notAfter: notAfter.map(formatter.string(from:)) ?? "—",
+            daysRemaining: notAfter.map { Int($0.timeIntervalSinceNow / 86_400) },
+            chainLength: chain.count,
+            systemTrusted: trusted
+        )
     }
 }
 

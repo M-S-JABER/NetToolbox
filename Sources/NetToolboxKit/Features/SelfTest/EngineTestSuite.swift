@@ -421,5 +421,17 @@ struct EngineTestSuite: Sendable {
                 expect(willSup.reply, equals: [255, 254, 3], "DONT reply")
             )
         },
+        Case(name: "X.509 time parsing") {
+            let utc = X509.parseTime(tag: X509.utcTimeTag, bytes: Array("230615120000Z".utf8))
+            let generalized = X509.parseTime(tag: X509.generalizedTimeTag, bytes: Array("20230615120000Z".utf8))
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            return firstFailure(
+                expect(utc.map(formatter.string(from:)) ?? "nil", equals: "2023-06-15", "UTCTime"),
+                expect(generalized.map(formatter.string(from:)) ?? "nil", equals: "2023-06-15", "GeneralizedTime")
+            )
+        },
     ]
 }
