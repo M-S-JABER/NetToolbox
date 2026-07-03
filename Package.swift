@@ -10,6 +10,14 @@
 //     WindowGroup { NetToolboxRootView() }
 //
 // The bundled `NetToolbox.swiftpm` app playground does exactly that.
+//
+// NOTE ON THE SSH DEPENDENCY:
+// The SSH client uses Citadel (SwiftNIO SSH). This is the *only* external
+// dependency in the whole project — everything else is native. It pulls a
+// large transitive tree (swift-nio, swift-crypto, ...). If a build
+// environment (e.g. Swift Playgrounds on iPad) can't resolve or build it,
+// pin the package to 1.2.0, which ships all 20 native tools with **zero**
+// dependencies and is otherwise identical minus SSH.
 
 import PackageDescription
 
@@ -25,9 +33,17 @@ let package = Package(
             targets: ["NetToolboxKit"]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/orlandos-nl/Citadel.git", from: "0.7.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0")
+    ],
     targets: [
         .target(
             name: "NetToolboxKit",
+            dependencies: [
+                .product(name: "Citadel", package: "Citadel"),
+                .product(name: "NIOCore", package: "swift-nio")
+            ],
             resources: [
                 .process("Resources")
             ],

@@ -315,3 +315,16 @@
 "wifiqr.security.WPA" = "WPA/WPA2";
 "wifiqr.security.nopass" = "None";
 "wifiqr.security.title" = "Security";
+
+/* SSH */
+"ssh.input.command" = "Command (e.g. uname -a)";
+"ssh.input.host" = "Host or IP";
+"ssh.input.password" = "Password";
+"ssh.input.title" = "Connection";
+"ssh.input.user" = "Username";
+"ssh.noOutput" = "(command produced no output)";
+"ssh.note" = "Encrypted SSH via the Citadel library. Password auth over SSH2; each run opens a fresh connection, runs one command, and disconnects. Use a dedicated account.";
+"ssh.section.command" = "Command";
+"ssh.section.output" = "Output";
+"tool.ssh.subtitle" = "Run a command on a device over SSH";
+"tool.ssh.title" = "SSH";

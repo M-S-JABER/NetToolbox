@@ -67,6 +67,7 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | Tool | Highlights |
 |---|---|
 | **Telnet** | Interactive plaintext TCP terminal with RFC 854 option negotiation (pure `TelnetProtocol`). |
+| **SSH** | Encrypted command execution over SSH2 (password auth) via the Citadel library — the project's one external dependency. |
 | **MikroTik API** | RouterOS API client (port 8728) — variable-length word framing, plain login (6.43+), send any command and read `!re`/`!done`/`!trap` replies. |
 | **SNMP GET** | SNMP v2c GET over UDP with a hand-rolled BER codec (`SNMPMessage`) and common `sysX` OID presets. |
 
@@ -127,7 +128,7 @@ Rules enforced across the codebase:
 
 - **Traceroute** — needs per-hop TTL control and reading ICMP time-exceeded replies via raw sockets, which iOS does not permit. A UDP/TCP-TTL best-effort variant is possible later.
 - **LAN scanner** (ping sweep + Bonjour `NWBrowser`) — pending a host app that declares `NSLocalNetworkUsageDescription` + `NSBonjourServices`.
-- **SSH client** — genuinely requires a vetted crypto/transport dependency (e.g. SwiftNIO SSH / Citadel). That conflicts with the current zero-dependency, Playgrounds-buildable constraint, so it's kept out until we decide to add an external package. Everything else in Phases 2–3 ships here with no dependencies.
+- **SSH client** — shipped (v1.3.0+) via **Citadel**, the project's only external dependency. If a build environment can't resolve/build the SwiftNIO SSH tree, pin the package to **1.2.0**, which has all 20 native tools with zero dependencies (everything except SSH).
 
 Each tool follows the same pattern: `Features/<Name>/` with a type conforming to `NetworkTool`, registered in `ToolRegistry.all` — the home screen updates itself.
 

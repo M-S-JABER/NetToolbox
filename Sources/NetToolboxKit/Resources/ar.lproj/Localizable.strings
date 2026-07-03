@@ -315,3 +315,16 @@
 "wifiqr.security.WPA" = "WPA/WPA2";
 "wifiqr.security.nopass" = "بدون";
 "wifiqr.security.title" = "الحماية";
+
+/* SSH */
+"ssh.input.command" = "الأمر (مثل uname -a)";
+"ssh.input.host" = "المضيف أو IP";
+"ssh.input.password" = "كلمة المرور";
+"ssh.input.title" = "الاتصال";
+"ssh.input.user" = "اسم المستخدم";
+"ssh.noOutput" = "(الأمر لم يُنتج مخرجات)";
+"ssh.note" = "SSH مشفّر عبر مكتبة Citadel. مصادقة بكلمة مرور عبر SSH2؛ كل تنفيذ يفتح اتصالاً جديداً وينفّذ أمراً واحداً ثم يقطع. استخدم حساباً مخصصاً.";
+"ssh.section.command" = "الأمر";
+"ssh.section.output" = "المخرجات";
+"tool.ssh.subtitle" = "تنفيذ أمر على جهاز عبر SSH";
+"tool.ssh.title" = "SSH";
