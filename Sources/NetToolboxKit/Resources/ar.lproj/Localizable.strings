@@ -407,3 +407,14 @@
 "vlsm.input.title" = "المتطلبات";
 "vlsm.name" = "الاسم";
 "vlsm.section.result" = "التوزيع";
+
+/* LAN scanner */
+"lan.action.scan" = "امسح الشبكة";
+"lan.note" = "يستخدم Bonjour (NWBrowser). يتطلب iOS إذن الشبكة المحلية؛ والمسح المباشر غير ممكن بدونه. يستمر الاكتشاف لبضع ثوانٍ.";
+"lan.permission" = "لم تُكتشف خدمات بعد. اضغط \"امسح\". إن لم يظهر شيء، فعّل إذن \"الشبكة المحلية\" لهذا التطبيق من إعدادات iOS، وتأكد أن التطبيق يعلن أنواع خدمات Bonjour.";
+"lan.scanning" = "جارٍ مسح الشبكة المحلية…";
+"lan.section.discover" = "الاكتشاف";
+"lan.section.found" = "الأجهزة والخدمات";
+"lan.section.permission" = "الوصول للشبكة المحلية";
+"tool.lan.subtitle" = "اكتشاف خدمات Bonjour حولك";
+"tool.lan.title" = "ماسح الشبكة المحلية";

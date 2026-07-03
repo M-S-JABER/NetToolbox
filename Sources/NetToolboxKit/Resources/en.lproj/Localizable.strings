@@ -407,3 +407,14 @@
 "vlsm.input.title" = "Requirements";
 "vlsm.name" = "Name";
 "vlsm.section.result" = "Allocation";
+
+/* LAN scanner */
+"lan.action.scan" = "Scan network";
+"lan.note" = "Uses Bonjour (NWBrowser). iOS requires the Local Network permission; a raw ping-sweep isn't possible without it. Discovery runs for a few seconds.";
+"lan.permission" = "No services found yet. Tap Scan. If nothing appears, enable the Local Network permission for this app in iOS Settings, and make sure the app declares the Bonjour service types.";
+"lan.scanning" = "Scanning the local network…";
+"lan.section.discover" = "Discovery";
+"lan.section.found" = "Devices & services";
+"lan.section.permission" = "Local Network access";
+"tool.lan.subtitle" = "Discover Bonjour services around you";
+"tool.lan.title" = "LAN Scanner";

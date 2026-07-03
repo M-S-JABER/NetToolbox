@@ -28,6 +28,7 @@ enum ToolRegistry {
         NTPTool(),
         SelfTestTool(),
         // Phase 2 — local network
+        LANScannerTool(),
         WakeOnLANTool(),
         WiFiQRTool(),
         // Phase 3 — professional

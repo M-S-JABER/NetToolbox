@@ -131,7 +131,7 @@ Rules enforced across the codebase:
 ## Remaining roadmap
 
 - **Traceroute** — needs per-hop TTL control and reading ICMP time-exceeded replies via raw sockets, which iOS does not permit. A UDP/TCP-TTL best-effort variant is possible later.
-- **LAN scanner** (ping sweep + Bonjour `NWBrowser`) — pending a host app that declares `NSLocalNetworkUsageDescription` + `NSBonjourServices`.
+- **LAN scanner** — shipped as a Bonjour (`NWBrowser`) discovery tool. It needs the host app to declare `NSLocalNetworkUsageDescription` + the browsed `NSBonjourServices`; without them iOS returns no results (it degrades gracefully rather than crashing). A raw ping-sweep isn't possible on iOS without the same permission.
 - **SSH client** — a working SSH needs a crypto/transport library (SwiftNIO SSH / Citadel). Adding it as a package dependency is a dead end for the primary target: **Swift Playgrounds on iPad cannot evaluate a manifest with remote SPM dependencies** ("Could not decode ContextModel parameter"), which breaks loading of the whole package. A future option is a from-scratch SSH transport built on the system **CryptoKit** (no dependency) — large but Playgrounds-safe.
 
 Each tool follows the same pattern: `Features/<Name>/` with a type conforming to `NetworkTool`, registered in `ToolRegistry.all` — the home screen updates itself.
