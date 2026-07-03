@@ -70,6 +70,17 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | **MikroTik API** | RouterOS API client (port 8728) — variable-length word framing, plain login (6.43+), send any command and read `!re`/`!done`/`!trap` replies. |
 | **SNMP GET** | SNMP v2c GET over UDP with a hand-rolled BER codec (`SNMPMessage`) and common `sysX` OID presets. |
 
+**Native utilities**
+
+| Tool | Highlights |
+|---|---|
+| **Traceroute** | ICMP echo with increasing TTL over an unprivileged `SOCK_DGRAM`/`IPPROTO_ICMP` socket (Apple's SimplePing socket type) — shows each hop and RTT, no entitlement needed. |
+| **IP Info Lookup** | Geo/ISP/ASN for any IP or hostname (not just the device's own) via ipwho.is. |
+| **HTTP Headers** | Fetches a URL and lists status code, final URL and all response headers. |
+| **NTP Time** | SNTP query (pure `NTP` codec) reporting server time and this device's clock offset. |
+| **Text Converter** | Offline Base64 / Hex / URL encode & decode (pure `TextConverter`). |
+| **Wi-Fi QR Code** | Generates a `WIFI:` QR (pure payload builder + CoreImage) to share network access. |
+
 ## Architecture
 
 The core idea is a **Tool Registry**: the home screen (sidebar + grid) is generated from `ToolRegistry.all`. Adding a tool = one type conforming to `NetworkTool` + one registration line — the main screen is never touched.

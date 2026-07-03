@@ -249,4 +249,46 @@ final class SubnetEngineTests: XCTestCase {
         let generalized = X509.parseTime(tag: X509.generalizedTimeTag, bytes: Array("20230615120000Z".utf8))
         XCTAssertEqual(generalized.map(formatter.string(from:)), "2023-06-15")
     }
+
+    func testTextConversions() throws {
+        XCTAssertEqual(try TextConverter.apply(.base64Encode, to: "hi"), "aGk=")
+        XCTAssertEqual(try TextConverter.apply(.base64Decode, to: "aGk="), "hi")
+        XCTAssertEqual(try TextConverter.apply(.hexEncode, to: "hi"), "6869")
+        XCTAssertEqual(try TextConverter.apply(.hexDecode, to: "6869"), "hi")
+        XCTAssertThrowsError(try TextConverter.apply(.hexDecode, to: "xyz"))
+    }
+
+    func testICMPEchoRequest() {
+        XCTAssertEqual(ICMP.checksum([0x08, 0, 0, 0, 0, 1, 0, 1]), 0xF7FD)
+        let packet = ICMP.echoRequest(identifier: 1, sequence: 1)
+        XCTAssertEqual(Array(packet.prefix(4)), [0x08, 0x00, 0xF7, 0xFD])
+        XCTAssertEqual(Array(packet[4..<8]), [0x00, 0x01, 0x00, 0x01])
+    }
+
+    func testNTPRequestAndParse() {
+        let request = [UInt8](NTP.request())
+        XCTAssertEqual(request.count, 48)
+        XCTAssertEqual(request.first, 0x1B)
+
+        let unix: UInt32 = 1_000_000_000
+        let ntpSeconds = unix + NTP.ntpToUnixOffset
+        var response = [UInt8](repeating: 0, count: 48)
+        response[40] = UInt8((ntpSeconds >> 24) & 0xFF)
+        response[41] = UInt8((ntpSeconds >> 16) & 0xFF)
+        response[42] = UInt8((ntpSeconds >> 8) & 0xFF)
+        response[43] = UInt8(ntpSeconds & 0xFF)
+        let parsed = NTP.parse(Data(response))
+        XCTAssertEqual(parsed.map { Int($0.timeIntervalSince1970) }, 1_000_000_000)
+    }
+
+    func testWiFiQRPayload() {
+        XCTAssertEqual(
+            WiFiQR.payload(ssid: "MyNet", security: .wpa, password: "p;w", hidden: false),
+            "WIFI:T:WPA;S:MyNet;P:p\\;w;H:false;;"
+        )
+        XCTAssertEqual(
+            WiFiQR.payload(ssid: "Open", security: .none, password: "", hidden: false),
+            "WIFI:T:nopass;S:Open;H:false;;"
+        )
+    }
 }

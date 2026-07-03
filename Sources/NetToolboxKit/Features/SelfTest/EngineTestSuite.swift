@@ -433,5 +433,53 @@ struct EngineTestSuite: Sendable {
                 expect(generalized.map(formatter.string(from:)) ?? "nil", equals: "2023-06-15", "GeneralizedTime")
             )
         },
+        Case(name: "Text conversions") {
+            do {
+                let b64 = try TextConverter.apply(.base64Encode, to: "hi")
+                let b64Back = try TextConverter.apply(.base64Decode, to: "aGk=")
+                let hex = try TextConverter.apply(.hexEncode, to: "hi")
+                let hexBack = try TextConverter.apply(.hexDecode, to: "6869")
+                return firstFailure(
+                    expect(b64, equals: "aGk=", "base64 encode"),
+                    expect(b64Back, equals: "hi", "base64 decode"),
+                    expect(hex, equals: "6869", "hex encode"),
+                    expect(hexBack, equals: "hi", "hex decode")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
+        Case(name: "ICMP echo request") {
+            let sum = ICMP.checksum([0x08, 0, 0, 0, 0, 1, 0, 1])
+            let packet = ICMP.echoRequest(identifier: 1, sequence: 1)
+            return firstFailure(
+                expect(sum, equals: 0xF7FD, "checksum"),
+                expect(Array(packet.prefix(4)), equals: [0x08, 0x00, 0xF7, 0xFD], "header + checksum"),
+                expect(Array(packet[4..<8]), equals: [0x00, 0x01, 0x00, 0x01], "id + sequence")
+            )
+        },
+        Case(name: "NTP request and parse") {
+            let request = [UInt8](NTP.request())
+            let unix: UInt32 = 1_000_000_000
+            let ntpSeconds = unix + NTP.ntpToUnixOffset
+            var response = [UInt8](repeating: 0, count: 48)
+            response[40] = UInt8((ntpSeconds >> 24) & 0xFF)
+            response[41] = UInt8((ntpSeconds >> 16) & 0xFF)
+            response[42] = UInt8((ntpSeconds >> 8) & 0xFF)
+            response[43] = UInt8(ntpSeconds & 0xFF)
+            let parsed = NTP.parse(Data(response))
+            let parsedUnix = parsed.map { Int($0.timeIntervalSince1970) } ?? -1
+            return firstFailure(
+                expect(request.count, equals: 48, "request length"),
+                expect(request.first ?? 0, equals: 0x1B, "LI/VN/Mode byte"),
+                expect(parsedUnix, equals: 1_000_000_000, "parsed transmit time")
+            )
+        },
+        Case(name: "Wi-Fi QR payload") {
+            let wpa = WiFiQR.payload(ssid: "MyNet", security: .wpa, password: "p;w", hidden: false)
+            let open = WiFiQR.payload(ssid: "Open", security: .none, password: "", hidden: false)
+            return firstFailure(
+                expect(wpa, equals: "WIFI:T:WPA;S:MyNet;P:p\\;w;H:false;;", "WPA payload with escaping"),
+                expect(open, equals: "WIFI:T:nopass;S:Open;H:false;;", "open payload")
+            )
+        },
     ]
 }

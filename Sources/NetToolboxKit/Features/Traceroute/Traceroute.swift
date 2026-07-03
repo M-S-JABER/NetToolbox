@@ -1,0 +1,260 @@
+import SwiftUI
+import Observation
+#if canImport(Darwin)
+import Darwin
+#endif
+
+/// One traceroute hop.
+struct TracerouteHop: Identifiable, Equatable, Sendable {
+    let ttl: Int
+    /// Responding router address, or nil on timeout.
+    let address: String?
+    let rttMs: Double?
+    /// True when this hop is the final destination (echo reply).
+    let reached: Bool
+
+    var id: Int { ttl }
+}
+
+/// Probes a single TTL and reports the responding hop.
+protocol TracerouteProbing: Sendable {
+    func probe(host: String, ttl: Int, timeout: Double) async -> TracerouteHop
+}
+
+/// Traceroute over an unprivileged `SOCK_DGRAM`/`IPPROTO_ICMP` socket — the
+/// same socket type Apple's SimplePing uses, so no entitlement is needed.
+/// Intermediate routers answer with ICMP Time Exceeded; the destination
+/// answers with an Echo Reply.
+struct ICMPTraceroute: TracerouteProbing {
+    func probe(host: String, ttl: Int, timeout: Double) async -> TracerouteHop {
+        await withCheckedContinuation { continuation in
+            let shot = OneShot(continuation)
+            DispatchQueue.global(qos: .userInitiated).async {
+                shot.resume(Self.blockingProbe(host: host, ttl: ttl, timeout: timeout))
+            }
+        }
+    }
+
+    #if canImport(Darwin)
+    private static func blockingProbe(host: String, ttl: Int, timeout: Double) -> TracerouteHop {
+        func fail() -> TracerouteHop {
+            TracerouteHop(ttl: ttl, address: nil, rttMs: nil, reached: false)
+        }
+
+        // Resolve the target to an IPv4 address.
+        var hints = addrinfo(
+            ai_flags: 0, ai_family: AF_INET, ai_socktype: SOCK_DGRAM,
+            ai_protocol: IPPROTO_ICMP, ai_addrlen: 0,
+            ai_canonname: nil, ai_addr: nil, ai_next: nil
+        )
+        var infoPointer: UnsafeMutablePointer<addrinfo>?
+        guard getaddrinfo(host, nil, &hints, &infoPointer) == 0,
+              let info = infoPointer,
+              let addr = info.pointee.ai_addr else {
+            if infoPointer != nil { freeaddrinfo(infoPointer) }
+            return fail()
+        }
+        var target = sockaddr_in()
+        memcpy(&target, addr, Int(MemoryLayout<sockaddr_in>.size))
+        freeaddrinfo(infoPointer)
+
+        let fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP)
+        guard fd >= 0 else { return fail() }
+        defer { close(fd) }
+
+        var ttlValue = Int32(ttl)
+        _ = setsockopt(fd, IPPROTO_IP, IP_TTL, &ttlValue, socklen_t(MemoryLayout<Int32>.size))
+        var tv = timeval(tv_sec: Int(timeout), tv_usec: Int32((timeout - Double(Int(timeout))) * 1_000_000))
+        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, socklen_t(MemoryLayout<timeval>.size))
+
+        let packet = ICMP.echoRequest(identifier: UInt16(getpid() & 0xFFFF), sequence: UInt16(ttl))
+        let clock = ContinuousClock()
+        let start = clock.now
+
+        let sent = packet.withUnsafeBytes { buffer -> Int in
+            withUnsafePointer(to: &target) { addressPointer in
+                addressPointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockaddrPointer in
+                    sendto(fd, buffer.baseAddress, buffer.count, 0,
+                           sockaddrPointer, socklen_t(MemoryLayout<sockaddr_in>.size))
+                }
+            }
+        }
+        guard sent > 0 else { return fail() }
+
+        var responseBuffer = [UInt8](repeating: 0, count: 512)
+        var source = sockaddr_in()
+        var sourceLength = socklen_t(MemoryLayout<sockaddr_in>.size)
+        let received = withUnsafeMutablePointer(to: &source) { sourcePointer -> Int in
+            sourcePointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockaddrPointer in
+                recvfrom(fd, &responseBuffer, responseBuffer.count, 0, sockaddrPointer, &sourceLength)
+            }
+        }
+        guard received > 0 else { return fail() }
+
+        let elapsed = start.duration(to: clock.now)
+        let ms = Double(elapsed.components.seconds) * 1000
+            + Double(elapsed.components.attoseconds) / 1_000_000_000_000_000
+
+        var addressBuffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
+        inet_ntop(AF_INET, &source.sin_addr, &addressBuffer, socklen_t(INET_ADDRSTRLEN))
+        let address = String(cString: addressBuffer)
+
+        // On a DGRAM ICMP socket the IP header is stripped, so the ICMP
+        // type is the first byte of the response.
+        let type = responseBuffer.first ?? 0xFF
+        let reached = type == ICMP.echoReplyType
+        return TracerouteHop(ttl: ttl, address: address, rttMs: ms, reached: reached)
+    }
+    #else
+    private static func blockingProbe(host: String, ttl: Int, timeout: Double) -> TracerouteHop {
+        TracerouteHop(ttl: ttl, address: nil, rttMs: nil, reached: false)
+    }
+    #endif
+}
+
+@MainActor
+@Observable
+final class TracerouteViewModel {
+    var host = ""
+    var maxHopsText = "20"
+    private(set) var hops: [TracerouteHop] = []
+    private(set) var isRunning = false
+    private(set) var errorMessage: String?
+
+    private let prober: any TracerouteProbing
+
+    init(prober: any TracerouteProbing = ICMPTraceroute()) {
+        self.prober = prober
+    }
+
+    func run() async {
+        let target = host.trimmingCharacters(in: .whitespaces)
+        guard !target.isEmpty else { return }
+        let maxHops = max(1, min(30, Int(maxHopsText) ?? 20))
+
+        isRunning = true
+        errorMessage = nil
+        hops = []
+
+        for ttl in 1...maxHops {
+            if !isRunning { break }
+            let hop = await prober.probe(host: target, ttl: ttl, timeout: 3)
+            hops.append(hop)
+            if hop.reached { break }
+        }
+        isRunning = false
+    }
+
+    func stop() { isRunning = false }
+}
+
+struct TracerouteTool: NetworkTool {
+    let id = "traceroute"
+    let titleKey = L10n("tool.traceroute.title")
+    let subtitleKey = L10n("tool.traceroute.subtitle")
+    let systemImage = "arrow.triangle.turn.up.right.diamond"
+    let category: ToolCategory = .diagnostics
+
+    func makeView() -> AnyView { AnyView(TracerouteView()) }
+}
+
+struct TracerouteView: View {
+    @Environment(\.theme) private var theme
+    @State private var viewModel = TracerouteViewModel()
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                inputSection
+                if !viewModel.hops.isEmpty {
+                    hopsSection
+                }
+                Text(L10n("traceroute.note"))
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
+            .padding(Spacing.xl)
+            .frame(maxWidth: 900)
+            .frame(maxWidth: .infinity)
+        }
+        .background(theme.background)
+        .navigationTitle(Text(L10n("tool.traceroute.title")))
+        .navigationBarTitleDisplayMode(.large)
+    }
+
+    private var inputSection: some View {
+        SectionCard(title: L10n("traceroute.input.title"), systemImage: "target") {
+            HStack(spacing: Spacing.md) {
+                TextField(L10nString("traceroute.input.host"), text: $viewModel.host)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                TextField("20", text: $viewModel.maxHopsText)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .keyboardType(.numberPad)
+                    .frame(maxWidth: 70)
+                    .environment(\.layoutDirection, .leftToRight)
+            }
+
+            HStack {
+                Button {
+                    Task { await viewModel.run() }
+                } label: {
+                    Label(L10nString("traceroute.action.start"), systemImage: "play.fill")
+                        .font(AppTypography.headline)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(viewModel.isRunning)
+
+                if viewModel.isRunning {
+                    Button(L10nString("common.stop"), role: .destructive) { viewModel.stop() }
+                        .buttonStyle(.bordered)
+                    ProgressView()
+                }
+            }
+
+            if let message = viewModel.errorMessage {
+                Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)
+            }
+        }
+    }
+
+    private var hopsSection: some View {
+        SectionCard(title: L10n("traceroute.section.hops"), systemImage: "list.number") {
+            VStack(spacing: Spacing.sm) {
+                ForEach(viewModel.hops) { hop in
+                    HStack(spacing: Spacing.md) {
+                        Text(String(format: "%2d", hop.ttl))
+                            .font(AppTypography.monoBody)
+                            .foregroundStyle(theme.textSecondary)
+                            .environment(\.layoutDirection, .leftToRight)
+                        if let address = hop.address {
+                            Text(address)
+                                .font(AppTypography.monoBody)
+                                .foregroundStyle(hop.reached ? theme.success : theme.mono)
+                                .environment(\.layoutDirection, .leftToRight)
+                        } else {
+                            Text("*")
+                                .font(AppTypography.monoBody)
+                                .foregroundStyle(theme.textSecondary)
+                        }
+                        Spacer()
+                        if let ms = hop.rttMs {
+                            Text(String(format: "%.1f ms", ms))
+                                .font(AppTypography.monoCaption)
+                                .foregroundStyle(theme.textSecondary)
+                                .environment(\.layoutDirection, .leftToRight)
+                        }
+                        if hop.reached {
+                            StatusBadge(kind: .success, text: L10n("traceroute.reached"))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

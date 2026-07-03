@@ -10,16 +10,22 @@ enum ToolRegistry {
         SubnetCalculatorTool(),
         MACLookupTool(),
         PortReferenceTool(),
+        TextConverterTool(),
         // Phase 2 — diagnostics
         PublicIPTool(),
+        IPInfoTool(),
         PingTool(),
+        TracerouteTool(),
         PortScannerTool(),
         DNSLookupTool(),
         WhoisTool(),
         SSLCheckerTool(),
+        HTTPHeadersTool(),
+        NTPTool(),
         SelfTestTool(),
         // Phase 2 — local network
         WakeOnLANTool(),
+        WiFiQRTool(),
         // Phase 3 — professional
         TelnetTool(),
         MikroTikAPITool(),
