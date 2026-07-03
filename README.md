@@ -9,14 +9,35 @@ A modular network-tools app for **iPad**, built as a **Swift Playgrounds App pro
 - **No external dependencies** in Phase 1
 - Bilingual UI (English + Arabic) with correct RTL — technical values (IP/MAC/hex/ports) always render LTR
 
-## Opening the project
+## Using it — directly from the repo URL (recommended)
 
-**On iPad (Swift Playgrounds 4.5+):**
-1. Get the repo onto the iPad — e.g. clone with the *Working Copy* app, or download the repo ZIP.
-2. Copy the `NetToolbox.swiftpm` folder into *On My iPad → Playgrounds* (or open it via Files).
-3. Tap it in Swift Playgrounds and press **Run**.
+The repo root is a Swift package with a library product **`NetToolboxKit`** and semver version tags, so Swift Playgrounds can consume it straight from the URL:
 
-**On macOS:** open `NetToolbox.swiftpm` with Xcode 15+ and run on an iPad simulator.
+1. In Swift Playgrounds, open (or create) an **App** playground.
+2. Tap **⋯ → Add Package** (or *Package Dependencies*), paste
+   `https://github.com/M-S-JABER/NetToolbox`
+   pick the latest version (e.g. **1.0.0**) and **Add to App Playground**.
+3. Replace your `MyApp.swift` body with:
+
+```swift
+import SwiftUI
+import NetToolboxKit
+
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup { NetToolboxRootView() }
+    }
+}
+```
+
+That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom `Theme` to re-skin the whole app.
+
+## Alternative: the bundled app playground
+
+`NetToolbox.swiftpm` is a thin app (just the `@main` entry point) that depends on this repo's package. Copy that folder into *Playgrounds* via the Files app and run it; Swift Playgrounds resolves `NetToolboxKit` from GitHub on first open.
+
+**On macOS:** open the repo folder as a package in Xcode 15+ (runs `swift test` too), or open `NetToolbox.swiftpm` and run on an iPad simulator.
 
 ## Phase 1 tools (shipped & working)
 
@@ -33,18 +54,20 @@ A modular network-tools app for **iPad**, built as a **Swift Playgrounds App pro
 The core idea is a **Tool Registry**: the home screen (sidebar + grid) is generated from `ToolRegistry.all`. Adding a tool = one type conforming to `NetworkTool` + one registration line — the main screen is never touched.
 
 ```
-NetToolbox.swiftpm/
-├── Package.swift                 # Swift Playgrounds App manifest (iOS 17, iPad-only)
-├── App/                          # Entry point, registry-driven root, routes
-├── Core/
-│   ├── DesignSystem/             # Theme protocol + tokens + shared components
-│   ├── ToolKit/                  # NetworkTool protocol + ToolRegistry
-│   ├── Networking/               # HTTPDataClient protocol + URLSession client
-│   ├── Persistence/Models/       # SwiftData: HistoryEntry, SavedHost, Favorite
-│   └── Extensions/
-├── Features/                     # One folder per tool: Tool + View + ViewModel (+ Engine)
-├── Resources/                    # Localizable.xcstrings (en/ar), oui.json
-└── Tests/                        # XCTest mirror of the on-device suite
+├── Package.swift                     # Root library package: NetToolboxKit (iOS 17)
+├── Sources/NetToolboxKit/
+│   ├── NetToolboxRootView.swift      # Public entry view (the only public surface + Theme)
+│   ├── App/                          # Registry-driven root screen, routes
+│   ├── Core/
+│   │   ├── DesignSystem/             # Theme protocol + tokens + shared components
+│   │   ├── ToolKit/                  # NetworkTool protocol + ToolRegistry
+│   │   ├── Networking/               # HTTPDataClient protocol + URLSession client
+│   │   ├── Persistence/Models/       # SwiftData: HistoryEntry, SavedHost, Favorite
+│   │   └── Extensions/               # incl. L10n helpers (package-bundle lookups)
+│   ├── Features/                     # One folder per tool: Tool + View + ViewModel (+ Engine)
+│   └── Resources/                    # Localizable.xcstrings (en/ar), oui.json
+├── Tests/NetToolboxKitTests/         # XCTest mirror of the on-device suite
+└── NetToolbox.swiftpm/               # Thin app playground (@main only, depends on the kit)
 ```
 
 Rules enforced across the codebase:
@@ -57,7 +80,7 @@ Rules enforced across the codebase:
 ## Tests
 
 - On iPad: open **Diagnostics → Engine Self-Tests** inside the app and tap *Run tests* (covers `/24`, `/30`, `/31`, `/32`, dotted & non-contiguous masks, invalid input, IPv6 parsing/types, MAC normalization, OUI lookup).
-- In Xcode: `Tests/SubnetEngineTests.swift` contains the same vectors as XCTest (add a test target to run them; the file is excluded from the app target).
+- On macOS: open the repo as a package and run `swift test` — `Tests/NetToolboxKitTests/SubnetEngineTests.swift` contains the same vectors as XCTest.
 
 ## Notes & known limitations on iOS (why some tools aren't here)
 
@@ -92,11 +115,33 @@ MIT — see [LICENSE](LICENSE).
 - بدون أي مكتبات خارجية في المرحلة الأولى
 - واجهة ثنائية اللغة (عربي/إنجليزي) مع دعم RTL صحيح — القيم التقنية (IP/MAC/hex) تبقى دائماً باتجاه LTR
 
-## فتح المشروع على الآيباد
+## الاستخدام — مباشرة من رابط الريبو (الطريقة الموصى بها)
 
-1. انقل المستودع إلى الآيباد — مثلاً عبر تطبيق *Working Copy* (استنساخ git) أو بتنزيل ZIP.
-2. انسخ مجلد `NetToolbox.swiftpm` إلى *Playgrounds* في تطبيق الملفات.
-3. افتحه في Swift Playgrounds واضغط **تشغيل**.
+جذر المستودع حزمة Swift بمنتج مكتبة **`NetToolboxKit`** مع وسوم إصدارات، لذا يمكن لـ Swift Playgrounds استهلاكها من الرابط مباشرة:
+
+1. في Swift Playgrounds افتح (أو أنشئ) مشروع **App**.
+2. اضغط **⋯ ← Add Package**، والصق الرابط
+   `https://github.com/M-S-JABER/NetToolbox`
+   واختر أحدث إصدار (مثل **1.0.0**) ثم **Add to App Playground**.
+3. استبدل محتوى `MyApp.swift` بـ:
+
+```swift
+import SwiftUI
+import NetToolboxKit
+
+@main
+struct MyApp: App {
+    var body: some Scene {
+        WindowGroup { NetToolboxRootView() }
+    }
+}
+```
+
+اضغط **تشغيل** وينتهي الأمر. كما تقبل `NetToolboxRootView(theme:)` ثيماً مخصصاً لتغيير مظهر التطبيق كاملاً.
+
+## بديل: مشروع التطبيق المرفق
+
+مجلد `NetToolbox.swiftpm` تطبيق رفيع (نقطة دخول `@main` فقط) يعتمد على حزمة هذا الريبو. انسخه إلى *Playgrounds* عبر تطبيق الملفات وشغّله — وسيجلب Swift Playgrounds مكتبة `NetToolboxKit` من GitHub عند أول فتح.
 
 ## أدوات المرحلة الأولى (جاهزة وشغّالة)
 
