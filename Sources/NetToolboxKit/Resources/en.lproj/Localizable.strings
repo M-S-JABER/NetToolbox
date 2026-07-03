@@ -328,3 +328,37 @@
 "ssh.section.output" = "Output";
 "tool.ssh.subtitle" = "Run a command on a device over SSH";
 "tool.ssh.title" = "SSH";
+
+/* Redesign: dashboard, themes, status */
+"category.caption.calculators" = "Subnetting, MAC, ports & encoders";
+"category.caption.diagnostics" = "Reachability, DNS, TLS & lookups";
+"category.caption.localNetwork" = "Wake devices & share Wi-Fi";
+"category.caption.professional" = "Router & device management";
+"common.done" = "Done";
+"home.favorite" = "Favorite";
+"home.favorites" = "Favorites";
+"home.favorites.caption" = "Your starred tools";
+"home.noResults" = "No tools found";
+"home.noResults.caption" = "Try a different keyword.";
+"home.search" = "Search tools…";
+"home.subtitle" = "Your network toolkit, on iPad";
+"home.toolsCount" = "tools";
+"settings.about" = "About";
+"settings.tagline" = "A modular, native network toolbox — no external dependencies.";
+"settings.theme" = "Accent theme";
+"settings.title" = "Settings";
+"settings.tools" = "Tools";
+"settings.version" = "Version";
+"status.cellular" = "Cellular";
+"status.metered" = "metered";
+"status.offline" = "Offline";
+"status.other" = "Connected";
+"status.unknown" = "Checking…";
+"status.wifi" = "Wi-Fi";
+"status.wired" = "Wired";
+"theme.emerald" = "Emerald";
+"theme.graphite" = "Graphite";
+"theme.indigo" = "Indigo";
+"theme.rose" = "Rose";
+"theme.sunset" = "Sunset";
+"theme.teal" = "Teal";

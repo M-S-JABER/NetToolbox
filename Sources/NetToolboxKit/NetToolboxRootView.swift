@@ -15,20 +15,33 @@ import SwiftData
 /// }
 /// ```
 public struct NetToolboxRootView: View {
-    private let theme: any Theme
+    /// Optional hard override; when nil the user's chosen accent theme is used.
+    private let themeOverride: (any Theme)?
 
-    /// - Parameter theme: swap the entire look by passing a custom `Theme`.
-    public init(theme: any Theme = DefaultTheme()) {
-        self.theme = theme
+    @AppStorage("nettoolbox.theme") private var themeSelection = ThemeOption.teal.rawValue
+    @State private var status = NetworkStatusMonitor()
+    @State private var favorites = FavoritesStore()
+
+    /// - Parameter theme: pass a custom `Theme` to force one look and hide
+    ///   the built-in theme picker's effect; omit to let the user choose.
+    public init(theme: (any Theme)? = nil) {
+        self.themeOverride = theme
+    }
+
+    private var activeTheme: any Theme {
+        if let themeOverride { return themeOverride }
+        return (ThemeOption(rawValue: themeSelection) ?? .teal).makeTheme()
     }
 
     public var body: some View {
-        RootView()
-            .environment(\.theme, theme)
-            .tint(theme.accent)
-            // Dark-first design; both appearances are fully supported —
-            // remove this line to follow the system appearance.
+        RootView(themeSelection: $themeSelection)
+            .environment(\.theme, activeTheme)
+            .environment(status)
+            .environment(favorites)
+            .tint(activeTheme.accent)
+            // Dark-first design; both appearances are fully supported.
             .preferredColorScheme(.dark)
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])
+            .task { status.start() }
     }
 }

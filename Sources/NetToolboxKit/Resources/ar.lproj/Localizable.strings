@@ -328,3 +328,37 @@
 "ssh.section.output" = "المخرجات";
 "tool.ssh.subtitle" = "تنفيذ أمر على جهاز عبر SSH";
 "tool.ssh.title" = "SSH";
+
+/* Redesign: dashboard, themes, status */
+"category.caption.calculators" = "الشبكات الفرعية و MAC والمنافذ والمحوّلات";
+"category.caption.diagnostics" = "الوصول و DNS و TLS والاستعلامات";
+"category.caption.localNetwork" = "إيقاظ الأجهزة ومشاركة الواي فاي";
+"category.caption.professional" = "إدارة الموجّهات والأجهزة";
+"common.done" = "تم";
+"home.favorite" = "تفضيل";
+"home.favorites" = "المفضّلة";
+"home.favorites.caption" = "أدواتك المميّزة بنجمة";
+"home.noResults" = "لا توجد أدوات";
+"home.noResults.caption" = "جرّب كلمة مختلفة.";
+"home.search" = "ابحث في الأدوات…";
+"home.subtitle" = "عدّة أدوات الشبكة على آيبادك";
+"home.toolsCount" = "أداة";
+"settings.about" = "حول";
+"settings.tagline" = "صندوق أدوات شبكات أصلي ومرن — بدون أي مكتبات خارجية.";
+"settings.theme" = "سمة اللون";
+"settings.title" = "الإعدادات";
+"settings.tools" = "الأدوات";
+"settings.version" = "الإصدار";
+"status.cellular" = "بيانات خلوية";
+"status.metered" = "محدود";
+"status.offline" = "غير متصل";
+"status.other" = "متصل";
+"status.unknown" = "جارٍ الفحص…";
+"status.wifi" = "واي فاي";
+"status.wired" = "سلكي";
+"theme.emerald" = "زمردي";
+"theme.graphite" = "رمادي";
+"theme.indigo" = "نيلي";
+"theme.rose" = "وردي";
+"theme.sunset" = "غروب";
+"theme.teal" = "فيروزي";
