@@ -1,0 +1,29 @@
+# Creates a semver tag so the package can be consumed by version from
+# Swift Playgrounds (Add Package requires version tags).
+#
+# Run it from the GitHub UI (Actions → Tag release → Run workflow) or the
+# API — handy when developing from an iPad with no local git tooling.
+name: Tag release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Semver tag to create (e.g. 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ inputs.version }}" -m "NetToolbox ${{ inputs.version }}"
+          git push origin "refs/tags/${{ inputs.version }}"
