@@ -8,12 +8,9 @@ struct SubnetCalculatorView: View {
 
     @State private var viewModel = SubnetCalculatorViewModel()
 
-    @Query(
-        filter: #Predicate<HistoryEntry> { $0.toolID == "subnet-calculator" },
-        sort: \HistoryEntry.date,
-        order: .reverse
-    )
-    private var history: [HistoryEntry]
+    // Fetched manually instead of @Query: the macro's stored key paths
+    // trip Sendable warnings under strict concurrency.
+    @State private var history: [HistoryEntry] = []
 
     var body: some View {
         ScrollView {
@@ -47,6 +44,24 @@ struct SubnetCalculatorView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.subnet.title")))
         .navigationBarTitleDisplayMode(.large)
+        .task { reloadHistory() }
+    }
+
+    /// Runs the calculation and refreshes the history list.
+    private func calculate() {
+        viewModel.calculate(context: modelContext)
+        reloadHistory()
+    }
+
+    /// Loads the five most recent calculations for this tool.
+    private func reloadHistory() {
+        let toolID = "subnet-calculator"
+        var descriptor = FetchDescriptor<HistoryEntry>(
+            predicate: #Predicate { $0.toolID == toolID },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = 5
+        history = (try? modelContext.fetch(descriptor)) ?? []
     }
 
     // MARK: Input
@@ -61,7 +76,7 @@ struct SubnetCalculatorView: View {
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .environment(\.layoutDirection, .leftToRight)
-                    .onSubmit { viewModel.calculate(context: modelContext) }
+                    .onSubmit { calculate() }
 
                 TextField(
                     L10nString(viewModel.isIPv6Input ? "subnet.input.prefix" : "subnet.input.mask"),
@@ -74,12 +89,12 @@ struct SubnetCalculatorView: View {
                 .textInputAutocapitalization(.never)
                 .environment(\.layoutDirection, .leftToRight)
                 .frame(maxWidth: 220)
-                .onSubmit { viewModel.calculate(context: modelContext) }
+                .onSubmit { calculate() }
             }
 
             HStack {
                 Button {
-                    viewModel.calculate(context: modelContext)
+                    calculate()
                 } label: {
                     Label(L10nString("common.calculate"), systemImage: "equal.circle.fill")
                         .font(AppTypography.headline)
