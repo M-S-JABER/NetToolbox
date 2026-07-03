@@ -1,0 +1,31 @@
+import SwiftUI
+
+/// Single source of truth for every tool in the app.
+/// The home screen builds itself from this list — register a tool here
+/// and it appears in its category with navigation wired up.
+@MainActor
+enum ToolRegistry {
+    static let all: [any NetworkTool] = [
+        // Phase 1 — shipped
+        SubnetCalculatorTool(),
+        MACLookupTool(),
+        PortReferenceTool(),
+        PublicIPTool(),
+        SelfTestTool(),
+        // Phase 2 (diagnostics) and Phase 3 (professional) tools
+        // are registered here as they land. See README roadmap.
+    ]
+
+    static func tools(in category: ToolCategory) -> [any NetworkTool] {
+        all.filter { $0.category == category }
+    }
+
+    static func tool(withID id: String) -> (any NetworkTool)? {
+        all.first { $0.id == id }
+    }
+
+    /// Categories that currently contain at least one tool.
+    static var activeCategories: [ToolCategory] {
+        ToolCategory.allCases.filter { !tools(in: $0).isEmpty }
+    }
+}
