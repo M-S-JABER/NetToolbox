@@ -6,6 +6,7 @@ enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
     case diagnostics
     case localNetwork
     case professional
+    case bgp
 
     var id: String { rawValue }
 
@@ -15,6 +16,7 @@ enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
         case .diagnostics: L10n("category.diagnostics")
         case .localNetwork: L10n("category.localNetwork")
         case .professional: L10n("category.professional")
+        case .bgp: L10n("category.bgp")
         }
     }
 
@@ -24,6 +26,7 @@ enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
         case .diagnostics: "waveform.path.ecg"
         case .localNetwork: "wifi.router"
         case .professional: "terminal"
+        case .bgp: "arrow.triangle.branch"
         }
     }
 }

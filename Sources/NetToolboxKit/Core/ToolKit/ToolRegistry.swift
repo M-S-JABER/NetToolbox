@@ -52,6 +52,9 @@ enum ToolRegistry {
         FTPTool(),
         MikroTikAPITool(),
         SNMPTool(),
+        // BGP / global routing (RIPEstat)
+        ASNInfoTool(),
+        IPBGPTool(),
     ]
 
     static func tools(in category: ToolCategory) -> [any NetworkTool] {

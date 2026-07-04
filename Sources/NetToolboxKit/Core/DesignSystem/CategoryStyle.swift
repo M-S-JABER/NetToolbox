@@ -15,6 +15,8 @@ extension ToolCategory {
             [Color(hex: 0x34D399), Color(hex: 0x10B981)]   // emerald
         case .professional:
             [Color(hex: 0xF472B6), Color(hex: 0xA855F7)]   // pink → purple
+        case .bgp:
+            [Color(hex: 0xF59E0B), Color(hex: 0xEF4444)]   // amber → red
         }
     }
 
@@ -36,6 +38,7 @@ extension ToolCategory {
         case .diagnostics: "category.caption.diagnostics"
         case .localNetwork: "category.caption.localNetwork"
         case .professional: "category.caption.professional"
+        case .bgp: "category.caption.bgp"
         }
     }
 }
