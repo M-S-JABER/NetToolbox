@@ -99,9 +99,17 @@ struct ICMPTraceroute: TracerouteProbing {
         inet_ntop(AF_INET, &source.sin_addr, &addressBuffer, socklen_t(INET_ADDRSTRLEN))
         let address = String(cString: addressBuffer)
 
-        // On a DGRAM ICMP socket the IP header is stripped, so the ICMP
-        // type is the first byte of the response.
-        let type = responseBuffer.first ?? 0xFF
+        // On a DGRAM ICMP socket echo replies arrive with the IP header
+        // stripped, but Time Exceeded errors are sometimes delivered *with*
+        // the 20-byte IPv4 header still attached. Detect that (first nibble
+        // == 4) and skip past it so we read the real ICMP type either way.
+        var icmpOffset = 0
+        if let first = responseBuffer.first, (first >> 4) == 4 {
+            icmpOffset = Int(first & 0x0F) * 4
+        }
+        let type = received > icmpOffset ? responseBuffer[icmpOffset] : 0xFF
+        // Reaching the destination = an echo reply; a router en route sends
+        // Time Exceeded (or, on the last hop of some hosts, Dest Unreachable).
         let reached = type == ICMP.echoReplyType
         return TracerouteHop(ttl: ttl, address: address, rttMs: ms, reached: reached)
     }
@@ -131,18 +139,44 @@ final class TracerouteViewModel {
         let target = host.trimmingCharacters(in: .whitespaces)
         guard !target.isEmpty else { return }
         let maxHops = max(1, min(30, Int(maxHopsText) ?? 20))
+        let prober = self.prober
 
         isRunning = true
         errorMessage = nil
         hops = []
 
-        for ttl in 1...maxHops {
-            if !isRunning { break }
-            let hop = await prober.probe(host: target, ttl: ttl, timeout: 3)
-            hops.append(hop)
-            if hop.reached { break }
+        // Probe every TTL at once instead of walking them one-by-one: a
+        // sequential walk stalls the whole trace on each silent router (up
+        // to `timeout` per hop). Fanning out keeps the total time close to a
+        // single hop's timeout, and results stream in as routers answer.
+        var collected: [Int: TracerouteHop] = [:]
+        await withTaskGroup(of: TracerouteHop.self) { group in
+            for ttl in 1...maxHops {
+                group.addTask { await prober.probe(host: target, ttl: ttl, timeout: 2) }
+            }
+            for await hop in group {
+                collected[hop.ttl] = hop
+                publish(collected, maxHops: maxHops)
+                if !isRunning { group.cancelAll() }
+            }
         }
+
         isRunning = false
+        if hops.contains(where: { $0.reached }) == false,
+           hops.allSatisfy({ $0.address == nil }) {
+            errorMessage = L10nString("traceroute.error.noResponse")
+        }
+    }
+
+    /// Rebuilds the ordered hop list from whatever has come back so far,
+    /// filling gaps with timeouts and trimming everything past the hop that
+    /// reached the destination.
+    private func publish(_ collected: [Int: TracerouteHop], maxHops: Int) {
+        let reachedTTL = collected.values.filter(\.reached).map(\.ttl).min()
+        let limit = reachedTTL ?? maxHops
+        hops = (1...limit).map { ttl in
+            collected[ttl] ?? TracerouteHop(ttl: ttl, address: nil, rttMs: nil, reached: false)
+        }
     }
 
     func stop() { isRunning = false }
