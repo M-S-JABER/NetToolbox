@@ -688,6 +688,21 @@ struct EngineTestSuite: Sendable {
                 expect(first.height ?? 0, equals: 1080, "height")
             )
         },
+        Case(name: "MQTT wire encoding") {
+            let string = MQTTClient.encodeString("MQTT")
+            let long = MQTTClient.encodeRemainingLength(321)
+            let short = MQTTClient.encodeRemainingLength(64)
+            guard let decoded = MQTTClient.decodeRemainingLength(Data([0xC1, 0x02]), from: 0) else {
+                return "remaining length did not decode"
+            }
+            return firstFailure(
+                expect(string, equals: [0x00, 0x04, 0x4D, 0x51, 0x54, 0x54], "encoded MQTT string"),
+                expect(short, equals: [0x40], "short remaining length"),
+                expect(long, equals: [0xC1, 0x02], "multi-byte remaining length (321)"),
+                expect(decoded.value, equals: 321, "decoded remaining length"),
+                expect(decoded.bytes, equals: 2, "decoded byte count")
+            )
+        },
         Case(name: "Backup JSON round-trip") {
             var backup = AppBackup()
             backup.hosts = [SavedHostsStore.Host(name: "h", address: "1.2.3.4", notes: "")]

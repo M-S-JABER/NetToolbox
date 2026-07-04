@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.39.0** · Tools: **51** · Localization: **en/ar at parity (834 keys)**
+Latest working tag: **1.40.0** · Tools: **52** · Localization: **en/ar at parity (855 keys)**
 
 ---
 
@@ -25,7 +25,7 @@ Latest working tag: **1.39.0** · Tools: **51** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (51 tools)
+## 2) What's done / ما أُنجز (52 tools)
 
 **Calculators (10):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator · Hash & JWT (MD5/SHA + JWT decode, CryptoKit).
 
@@ -33,7 +33,7 @@ Latest working tag: **1.39.0** · Tools: **51** · Localization: **en/ar at pari
 
 **Local Network (9):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ + grid + recording) · Wi-Fi QR · **WireGuard QR** (Curve25519 keygen + scannable tunnel config).
 
-**Professional (7):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**, saved profiles) · SFTP (browse + download over the SSH transport) · Telnet (saved addresses) · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port) · WebSocket (URLSessionWebSocketTask; send/receive frames, live transcript).
+**Professional (8):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**, saved profiles) · SFTP (browse + download over the SSH transport) · Telnet (saved addresses) · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port) · WebSocket (URLSessionWebSocketTask; send/receive frames, live transcript) · MQTT (native 3.1.1 over TCP/TLS; connect/subscribe/publish QoS 0, live messages).
 
 **BGP (2):** ASN Info · IP→BGP (origin AS / prefix, via the public RIPEstat API).
 
