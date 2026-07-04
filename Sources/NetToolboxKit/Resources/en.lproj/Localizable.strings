@@ -20,6 +20,14 @@
 "camera.form.title" = "Camera";
 "camera.form.username" = "Username";
 "camera.note" = "Live view speaks RTSP over TCP and decodes H.264/H.265 in hardware — no external player. Streams keep running while you use other tools. Works on cameras you are authorized to access.";
+"camera.ptz.down" = "Tilt down";
+"camera.ptz.left" = "Pan left";
+"camera.ptz.presets" = "Presets";
+"camera.ptz.right" = "Pan right";
+"camera.ptz.title" = "Pan / Tilt / Zoom";
+"camera.ptz.up" = "Tilt up";
+"camera.ptz.zoomIn" = "Zoom in";
+"camera.ptz.zoomOut" = "Zoom out";
 "camera.scan.base" = "Subnet prefix (e.g. 192.168.1.)";
 "camera.scan.empty" = "No cameras found on the RTSP port in this subnet.";
 "camera.scan.found" = "Cameras found";

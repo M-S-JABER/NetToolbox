@@ -56,6 +56,12 @@ struct CameraView: View {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 if viewModel.selectedID != nil, viewModel.session.camera != nil {
                     playerCard
+                    if let camera = selectedCamera,
+                       let ptzXAddr = camera.ptzXAddr, !ptzXAddr.isEmpty,
+                       let profileToken = camera.profileToken, !profileToken.isEmpty {
+                        PTZSection(camera: camera, ptzXAddr: ptzXAddr, profileToken: profileToken)
+                            .id(camera.id)
+                    }
                 }
                 camerasSection
                 Text(L10n("camera.note"))

@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.30.0** · Tools: **46** · Localization: **en/ar at parity (731 keys)**
+Latest working tag: **1.31.0** · Tools: **46** · Localization: **en/ar at parity (739 keys)**
 
 ---
 
@@ -93,8 +93,12 @@ Native, zero-dep camera stack (no VLCKit/ffmpeg — AVPlayer can't do RTSP).
   `CameraScanner` unicast /24 sweep of port 554 (multicast WS-Discovery needs an
   entitlement unavailable in Playgrounds). `Camera` gained optional
   `snapshotURI`/`ptzXAddr`/`profileToken` (optional = old cameras still decode).
-- **Phase 3 — PTZ (next):** ONVIF `ContinuousMove`/`Stop`/`GotoPreset` using the
-  stored `ptzXAddr` + on-screen pad and preset controls.
+- **Phase 3 — PTZ (1.31.0, DONE):** `ONVIFClient` PTZ ops (`ContinuousMove`,
+  `Stop`, `GetPresets`, `GotoPreset`) with a per-request WS-Security `Created`
+  aligned to the camera clock via `measureClockOffset()`. `CameraPTZ.swift`:
+  `PTZController` + `PTZSection` control pad (press-and-hold pan/tilt/zoom via
+  `PTZHoldButton`) + preset recall, shown under the live view when the camera
+  reports a PTZ service. IP-camera stack complete.
 
 ## 5) Release checklist / قائمة الإصدار
 

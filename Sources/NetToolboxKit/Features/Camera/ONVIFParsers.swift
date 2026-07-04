@@ -122,6 +122,48 @@ final class ONVIFCapabilitiesParser: NSObject, XMLParserDelegate {
     }
 }
 
+/// Builds the PTZ preset list from `GetPresets`.
+final class ONVIFPresetsParser: NSObject, XMLParserDelegate {
+    private(set) var presets: [ONVIFPreset] = []
+    private var token: String?
+    private var name = ""
+    private var current: String?
+    private var buffer = ""
+
+    func run(_ xml: String) {
+        let parser = XMLParser(data: Data(xml.utf8))
+        parser.shouldProcessNamespaces = true
+        parser.delegate = self
+        parser.parse()
+    }
+
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName: String?, attributes: [String: String]) {
+        if elementName == "Preset" {
+            token = attributes["token"]
+            name = ""
+        } else if elementName == "Name" {
+            current = elementName
+            buffer = ""
+        }
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        if current != nil { buffer += string }
+    }
+
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName: String?) {
+        if elementName == "Preset" {
+            if let token {
+                presets.append(ONVIFPreset(token: token, name: name.isEmpty ? token : name))
+            }
+            token = nil
+        } else if current == elementName {
+            if name.isEmpty { name = buffer.trimmingCharacters(in: .whitespacesAndNewlines) }
+            current = nil
+        }
+    }
+}
+
 /// Builds the media profile list from `GetProfiles`.
 final class ONVIFProfilesParser: NSObject, XMLParserDelegate {
     private(set) var profiles: [ONVIFProfile] = []
