@@ -18,6 +18,11 @@ final class CameraStore {
         /// RTSP stream path, e.g. `/stream1` or `/Streaming/Channels/101`.
         /// When empty and ONVIF is used, it is filled from `GetStreamUri`.
         var streamPath = "/"
+        /// Optional ONVIF-derived data (added after the first camera release,
+        /// hence optional so previously saved cameras still decode).
+        var snapshotURI: String?
+        var ptzXAddr: String?
+        var profileToken: String?
 
         /// Falls back to host when no name is given.
         var displayName: String {

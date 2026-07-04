@@ -2,6 +2,8 @@
 
 "app.title" = "عدة الشبكات";
 "camera.action.add" = "إضافة كاميرا";
+"camera.action.scan" = "مسح الشبكة";
+"camera.action.snapshot" = "لقطة";
 "camera.badge.idle" = "متوقف";
 "camera.badge.live" = "مباشر";
 "camera.empty" = "لا توجد كاميرات محفوظة بعد. أضف واحدة لبدء العرض المباشر.";
@@ -18,8 +20,28 @@
 "camera.form.title" = "الكاميرا";
 "camera.form.username" = "اسم المستخدم";
 "camera.note" = "العرض المباشر يتحدث RTSP عبر TCP ويفكّ ترميز H.264/H.265 عبر العتاد — دون مشغّل خارجي. يستمر البث أثناء استخدامك لأدوات أخرى. يعمل على الكاميرات المصرّح لك بالوصول إليها.";
+"camera.scan.base" = "بادئة الشبكة الفرعية (مثل ‎192.168.1.‎)";
+"camera.scan.empty" = "لم يُعثر على كاميرات على منفذ RTSP في هذه الشبكة.";
+"camera.scan.found" = "الكاميرات المكتشفة";
+"camera.scan.note" = "يفحص منفذ RTSP (554) عبر شبكتك الفرعية. البث المتعدد WS-Discovery غير متاح على iOS، لذا هذا مسح مباشر للمنافذ على المضيفين المصرّح لك بفحصهم.";
+"camera.scan.scanning" = "جارٍ المسح…";
+"camera.scan.start" = "ابدأ المسح";
+"camera.scan.title" = "البحث عن كاميرات";
 "camera.section.saved" = "الكاميرات";
+"camera.snapshot.failed" = "تعذّر تحميل لقطة من هذه الكاميرا.";
+"camera.snapshot.loading" = "جارٍ تحميل اللقطة…";
+"camera.snapshot.title" = "لقطة";
 "camera.status.connecting" = "جارٍ الاتصال…";
+"onvif.action.fetch" = "إعداد تلقائي عبر ONVIF";
+"onvif.device.firmware" = "الإصدار";
+"onvif.device.manufacturer" = "المُصنّع";
+"onvif.device.model" = "الطراز";
+"onvif.error.network" = "تعذّر الوصول إلى الكاميرا عبر ONVIF. تحقق من منفذ ONVIF والاتصال.";
+"onvif.error.noProfiles" = "لم تُرجع الكاميرا أي ملفات وسائط.";
+"onvif.error.unauthorized" = "فشلت مصادقة ONVIF — تحقق من اسم المستخدم وكلمة المرور.";
+"onvif.probing" = "جارٍ الاستعلام من الكاميرا…";
+"onvif.profile" = "الملف";
+"onvif.section" = "إعداد ONVIF التلقائي";
 "category.calculators" = "حاسبات";
 "category.diagnostics" = "تشخيص";
 "category.localNetwork" = "الشبكة المحلية";

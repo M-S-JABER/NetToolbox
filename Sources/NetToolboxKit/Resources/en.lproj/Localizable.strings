@@ -2,6 +2,8 @@
 
 "app.title" = "NetToolbox";
 "camera.action.add" = "Add camera";
+"camera.action.scan" = "Scan network";
+"camera.action.snapshot" = "Snapshot";
 "camera.badge.idle" = "Idle";
 "camera.badge.live" = "LIVE";
 "camera.empty" = "No cameras saved yet. Add one to start a live view.";
@@ -18,8 +20,28 @@
 "camera.form.title" = "Camera";
 "camera.form.username" = "Username";
 "camera.note" = "Live view speaks RTSP over TCP and decodes H.264/H.265 in hardware — no external player. Streams keep running while you use other tools. Works on cameras you are authorized to access.";
+"camera.scan.base" = "Subnet prefix (e.g. 192.168.1.)";
+"camera.scan.empty" = "No cameras found on the RTSP port in this subnet.";
+"camera.scan.found" = "Cameras found";
+"camera.scan.note" = "Probes the RTSP port (554) across your subnet. WS-Discovery multicast is unavailable on iOS, so this is a direct port sweep of hosts you are authorized to scan.";
+"camera.scan.scanning" = "Scanning…";
+"camera.scan.start" = "Start scan";
+"camera.scan.title" = "Find cameras";
 "camera.section.saved" = "Cameras";
+"camera.snapshot.failed" = "Could not load a snapshot from this camera.";
+"camera.snapshot.loading" = "Loading snapshot…";
+"camera.snapshot.title" = "Snapshot";
 "camera.status.connecting" = "Connecting…";
+"onvif.action.fetch" = "Configure via ONVIF";
+"onvif.device.firmware" = "Firmware";
+"onvif.device.manufacturer" = "Manufacturer";
+"onvif.device.model" = "Model";
+"onvif.error.network" = "Could not reach the camera over ONVIF. Check the ONVIF port and connection.";
+"onvif.error.noProfiles" = "The camera returned no media profiles.";
+"onvif.error.unauthorized" = "ONVIF authentication failed — check the username and password.";
+"onvif.probing" = "Querying camera…";
+"onvif.profile" = "Profile";
+"onvif.section" = "ONVIF auto-setup";
 "category.calculators" = "Calculators";
 "category.diagnostics" = "Diagnostics";
 "category.localNetwork" = "Local Network";

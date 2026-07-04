@@ -34,6 +34,8 @@ struct CameraView: View {
     @Environment(CameraStore.self) private var store
 
     @State private var editing: CameraStore.Camera?
+    @State private var snapshotCamera: CameraStore.Camera?
+    @State private var isScanning = false
     @State private var isFullscreen = false
 
     private var viewModel: CameraViewModel {
@@ -43,6 +45,10 @@ struct CameraView: View {
             session.activity = activity
             return CameraViewModel(session: session)
         }
+    }
+
+    private var selectedCamera: CameraStore.Camera? {
+        store.cameras.first { $0.id == viewModel.selectedID }
     }
 
     var body: some View {
@@ -65,16 +71,35 @@ struct CameraView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    editing = CameraStore.Camera()
+                Menu {
+                    Button {
+                        editing = CameraStore.Camera()
+                    } label: {
+                        Label(L10nString("camera.action.add"), systemImage: "plus")
+                    }
+                    Button {
+                        isScanning = true
+                    } label: {
+                        Label(L10nString("camera.action.scan"), systemImage: "dot.radiowaves.left.and.right")
+                    }
                 } label: {
-                    Label(L10nString("camera.action.add"), systemImage: "plus")
+                    Image(systemName: "plus")
                 }
             }
         }
         .sheet(item: $editing) { camera in
             CameraEditorSheet(camera: camera) { saved in
                 store.save(saved)
+            }
+        }
+        .sheet(item: $snapshotCamera) { camera in
+            SnapshotSheet(camera: camera)
+        }
+        .sheet(isPresented: $isScanning) {
+            CameraScanSheet { ip in
+                var draft = CameraStore.Camera()
+                draft.host = ip
+                editing = draft
             }
         }
         .fullScreenCover(isPresented: $isFullscreen) {
@@ -94,6 +119,13 @@ struct CameraView: View {
             HStack(spacing: Spacing.md) {
                 phaseBadge
                 Spacer()
+                if selectedCamera?.snapshotURI?.isEmpty == false {
+                    Button {
+                        snapshotCamera = selectedCamera
+                    } label: {
+                        Image(systemName: "camera")
+                    }
+                }
                 Button {
                     isFullscreen = true
                 } label: {
@@ -245,6 +277,13 @@ struct CameraView: View {
                 } label: {
                     Label(L10nString("common.edit"), systemImage: "pencil")
                 }
+                if camera.snapshotURI?.isEmpty == false {
+                    Button {
+                        snapshotCamera = camera
+                    } label: {
+                        Label(L10nString("camera.action.snapshot"), systemImage: "camera")
+                    }
+                }
                 Button(role: .destructive) {
                     if viewModel.selectedID == camera.id { viewModel.session.stop() }
                     store.remove(camera)
@@ -260,76 +299,5 @@ struct CameraView: View {
         .padding(.vertical, Spacing.xs)
         .contentShape(Rectangle())
         .onTapGesture { viewModel.select(camera) }
-    }
-}
-
-/// Add / edit form for a saved camera, presented as a sheet.
-struct CameraEditorSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @Environment(\.theme) private var theme
-
-    @State private var draft: CameraStore.Camera
-    private let onSave: (CameraStore.Camera) -> Void
-
-    init(camera: CameraStore.Camera, onSave: @escaping (CameraStore.Camera) -> Void) {
-        _draft = State(initialValue: camera)
-        self.onSave = onSave
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section(L10nString("camera.form.identity")) {
-                    TextField(L10nString("camera.form.name"), text: $draft.name)
-                    HStack {
-                        TextField(L10nString("camera.form.host"), text: $draft.host)
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.URL)
-                            .environment(\.layoutDirection, .leftToRight)
-                        SavedHostMenu(host: $draft.host)
-                    }
-                }
-                Section(L10nString("camera.form.stream")) {
-                    TextField(L10nString("camera.form.rtspPort"), text: $draft.rtspPort)
-                        .keyboardType(.numberPad)
-                        .environment(\.layoutDirection, .leftToRight)
-                    TextField(L10nString("camera.form.path"), text: $draft.streamPath)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .environment(\.layoutDirection, .leftToRight)
-                    TextField(L10nString("camera.form.onvifPort"), text: $draft.onvifPort)
-                        .keyboardType(.numberPad)
-                        .environment(\.layoutDirection, .leftToRight)
-                }
-                Section(L10nString("camera.form.credentials")) {
-                    TextField(L10nString("camera.form.username"), text: $draft.username)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                        .environment(\.layoutDirection, .leftToRight)
-                    SecureField(L10nString("camera.form.password"), text: $draft.password)
-                        .environment(\.layoutDirection, .leftToRight)
-                }
-                Section {
-                    Text(L10n("camera.form.hint"))
-                        .font(AppTypography.footnote)
-                        .foregroundStyle(theme.textSecondary)
-                }
-            }
-            .navigationTitle(Text(L10n("camera.form.title")))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L10nString("common.cancel")) { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(L10nString("common.save")) {
-                        onSave(draft)
-                        dismiss()
-                    }
-                    .disabled(draft.host.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-            }
-        }
     }
 }

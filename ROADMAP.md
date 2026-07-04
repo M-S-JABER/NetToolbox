@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.29.0** · Tools: **46** · Localization: **en/ar at parity (709 keys)**
+Latest working tag: **1.30.0** · Tools: **46** · Localization: **en/ar at parity (731 keys)**
 
 ---
 
@@ -84,11 +84,17 @@ Native, zero-dep camera stack (no VLCKit/ffmpeg — AVPlayer can't do RTSP).
   `AVSampleBufferDisplayLayer`. `CameraStore` bank, `CameraSession` persists the
   stream across navigation, fullscreen. Tested on real hardware — expect
   per-vendor RTP quirks to iterate on.
-- **Phase 2 — ONVIF (next):** SOAP/XML over URLSession + WS-UsernameToken —
-  `GetStreamUri` (auto-fill RTSP path), `GetDeviceInformation`, `GetProfiles`,
-  `GetSnapshotUri`; unicast subnet camera scan (WS-Discovery multicast is
-  blocked without the entitlement, so scan 554/80/8000 instead).
-- **Phase 3 — PTZ:** ONVIF `ContinuousMove`/`Stop`/`GotoPreset` + on-screen pad.
+- **Phase 2 — ONVIF (1.30.0, DONE):** `ONVIFClient` (SOAP 1.2 over URLSession,
+  WS-UsernameToken PasswordDigest with camera-clock `Created`), `ONVIFParsers`
+  (XMLParser delegates). `GetSystemDateAndTime`, `GetDeviceInformation`,
+  `GetCapabilities` (Media/PTZ XAddr), `GetProfiles`, `GetStreamUri`
+  (auto-fills RTSP path/port), `GetSnapshotUri`. Editor "Configure via ONVIF"
+  with profile picker + device info; `SnapshotFetcher` (Basic/Digest JPEG);
+  `CameraScanner` unicast /24 sweep of port 554 (multicast WS-Discovery needs an
+  entitlement unavailable in Playgrounds). `Camera` gained optional
+  `snapshotURI`/`ptzXAddr`/`profileToken` (optional = old cameras still decode).
+- **Phase 3 — PTZ (next):** ONVIF `ContinuousMove`/`Stop`/`GotoPreset` using the
+  stored `ptzXAddr` + on-screen pad and preset controls.
 
 ## 5) Release checklist / قائمة الإصدار
 
