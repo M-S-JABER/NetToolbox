@@ -27,12 +27,8 @@ struct SectionCard<Content: View>: View {
         .padding(Spacing.lg)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous)
+            RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
                 .fill(theme.surface)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous)
-                .strokeBorder(theme.separator, lineWidth: 1)
         )
     }
 }

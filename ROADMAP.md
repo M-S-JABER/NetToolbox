@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.15.0** · Tools: **41** · Localization: **en/ar at parity (606 keys)**
+Latest working tag: **1.16.0** · Tools: **41** · Localization: **en/ar at parity (608 keys)**
 
 ---
 
@@ -35,7 +35,7 @@ Latest working tag: **1.15.0** · Tools: **41** · Localization: **en/ar at pari
 
 **Professional (5):** SSH (native SSH-2, curve25519 + AES-256-GCM, password auth, single-command exec) · Telnet · FTP (passive LIST) · MikroTik RouterOS API · SNMP (GET + Walk, configurable port).
 
-**Design/UX:** dashboard home, live network-status pill, global search with smart input detection, favorites, 6 accent themes, unified history + share, colour-coded categories.
+**Design/UX (native iOS, 1.16.0):** the home is a native inset-grouped `List` (Settings-app idiom) with system search, Settings-style colored icon tiles, a Favorites section, swipe-to-favorite, and a live network-status row. All surfaces use the system grouped-background / label colors (`ColorTokens` → `systemGroupedBackground` etc.), so every screen matches iOS and follows the system Light/Dark automatically (no more forced dark). 6 accent themes still tint controls; global search keeps smart input detection; unified history + share.
 
 ---
 

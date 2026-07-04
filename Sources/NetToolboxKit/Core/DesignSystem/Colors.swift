@@ -1,65 +1,61 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
-/// Semantic color tokens for the default look.
-/// Views must never use raw colors — always go through `Theme` (which the
-/// default theme maps to these tokens), so the whole app can be re-skinned
-/// by swapping a single `Theme` value.
+/// Semantic color tokens for the app's look.
+///
+/// The design language is **native iOS**: surfaces map onto the system
+/// grouped-background family and text onto the system label colors, so every
+/// screen matches the Settings app and adapts automatically to Light/Dark and
+/// accessibility contrast. Views must never use raw colors — always go
+/// through `Theme` (which maps to these tokens), so the whole app can still be
+/// re-skinned by swapping a single `Theme` value.
 enum ColorTokens {
-    // Dark-first palette: deep navy background with a calm teal accent.
+    #if canImport(UIKit)
+    /// The grouped table background behind cards and list sections.
+    static let background = Color(uiColor: .systemGroupedBackground)
+    /// The card / row surface that sits on the grouped background.
+    static let surface = Color(uiColor: .secondarySystemGroupedBackground)
+    /// A slightly raised inset surface (e.g. terminals, code blocks).
+    static let surfaceElevated = Color(uiColor: .tertiarySystemGroupedBackground)
+    static let textPrimary = Color(uiColor: .label)
+    static let textSecondary = Color(uiColor: .secondaryLabel)
+    static let separator = Color(uiColor: .separator)
+    #else
+    static let background = Color(hex: 0xF2F2F7)
+    static let surface = Color.white
+    static let surfaceElevated = Color(hex: 0xF2F2F7)
+    static let textPrimary = Color.primary
+    static let textSecondary = Color.secondary
+    static let separator = Color.gray.opacity(0.3)
+    #endif
 
-    static let background = Color(
-        light: Color(hex: 0xF4F6FA),
-        dark: Color(hex: 0x0B1220)
-    )
-
-    static let surface = Color(
-        light: Color(hex: 0xFFFFFF),
-        dark: Color(hex: 0x121C2E)
-    )
-
-    static let surfaceElevated = Color(
-        light: Color(hex: 0xFFFFFF),
-        dark: Color(hex: 0x1A2740)
-    )
-
+    /// Calm teal accent used by the default theme; the selectable themes
+    /// override this with their own accent.
     static let accent = Color(
         light: Color(hex: 0x0D9488),
         dark: Color(hex: 0x2DD4BF)
     )
 
-    static let textPrimary = Color(
-        light: Color(hex: 0x0F172A),
-        dark: Color(hex: 0xE8EDF5)
-    )
-
-    static let textSecondary = Color(
-        light: Color(hex: 0x5B6B82),
-        dark: Color(hex: 0x93A1B5)
-    )
-
     static let success = Color(
-        light: Color(hex: 0x059669),
-        dark: Color(hex: 0x34D399)
+        light: Color(hex: 0x34C759, opacity: 1),
+        dark: Color(hex: 0x30D158)
     )
 
     static let warning = Color(
-        light: Color(hex: 0xB45309),
-        dark: Color(hex: 0xFBBF24)
+        light: Color(hex: 0xFF9500),
+        dark: Color(hex: 0xFF9F0A)
     )
 
     static let danger = Color(
-        light: Color(hex: 0xDC2626),
-        dark: Color(hex: 0xF87171)
+        light: Color(hex: 0xFF3B30),
+        dark: Color(hex: 0xFF453A)
     )
 
     /// Tint used for technical monospaced values (IPs, MACs, hex, ports).
     static let mono = Color(
-        light: Color(hex: 0x0369A1),
-        dark: Color(hex: 0x7DD3FC)
-    )
-
-    static let separator = Color(
-        light: Color(hex: 0x0F172A, opacity: 0.08),
-        dark: Color(hex: 0xE8EDF5, opacity: 0.08)
+        light: Color(hex: 0x007AFF),
+        dark: Color(hex: 0x64D2FF)
     )
 }

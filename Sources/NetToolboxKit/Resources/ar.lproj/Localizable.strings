@@ -364,6 +364,8 @@
 "common.done" = "تم";
 "home.favorite" = "تفضيل";
 "home.favorites" = "المفضّلة";
+"home.smart.title" = "اقتراح ذكي";
+"home.unfavorite" = "إزالة من المفضّلة";
 "home.favorites.caption" = "أدواتك المميّزة بنجمة";
 "home.noResults" = "لا توجد أدوات";
 "home.noResults.caption" = "جرّب كلمة مختلفة.";

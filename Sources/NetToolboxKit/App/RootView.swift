@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Home dashboard: a hero header with a live network-status pill, global
-/// search, a favourites strip, and colour-coded category sections — all
-/// generated from `ToolRegistry`.
+/// Home screen in the native iOS idiom: an inset-grouped list of tools by
+/// category, a system search bar, a Favorites section, and a live
+/// network-status row — all generated from `ToolRegistry`, so it reads like
+/// the Settings app rather than a bespoke dashboard.
 struct RootView: View {
     @Environment(\.theme) private var theme
     @Environment(NetworkStatusMonitor.self) private var status
@@ -12,30 +13,46 @@ struct RootView: View {
     @State private var search = ""
     @State private var showSettings = false
 
-    private let columns = [GridItem(.adaptive(minimum: 260), spacing: Spacing.lg)]
-
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
-                    hero
-                    if searchQuery.isEmpty {
-                        if !favoriteTools.isEmpty { favoritesSection }
-                        ForEach(ToolRegistry.activeCategories) { category in
-                            categorySection(category)
-                        }
-                    } else {
-                        if let suggestion = smartSuggestion {
-                            smartBanner(suggestion)
-                        }
-                        searchResults
+            List {
+                if searchQuery.isEmpty {
+                    statusSection
+                    if !favoriteTools.isEmpty { favoritesSection }
+                    ForEach(ToolRegistry.activeCategories) { category in
+                        categorySection(category)
+                    }
+                } else {
+                    if let suggestion = smartSuggestion { smartSection(suggestion) }
+                    if !searchMatches.isEmpty { searchSection }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(theme.background)
+            .navigationTitle(Text(L10n("app.title")))
+            .searchable(text: $search, prompt: Text(L10n("home.search")))
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+            .overlay {
+                if !searchQuery.isEmpty && searchMatches.isEmpty && smartSuggestion == nil {
+                    ContentUnavailableView {
+                        Label(L10nString("home.noResults"), systemImage: "magnifyingglass")
+                    } description: {
+                        Text(L10n("home.noResults.caption"))
                     }
                 }
-                .padding(Spacing.xl)
             }
-            .background(theme.background)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel(Text(L10n("settings.title")))
+                }
+            }
             .navigationDestination(for: AppRoute.self) { destination(for: $0) }
             .sheet(isPresented: $showSettings) {
                 SettingsView(themeSelection: $themeSelection)
@@ -75,245 +92,134 @@ struct RootView: View {
         return (kind, tool)
     }
 
-    private func smartBanner(_ suggestion: (kind: InputClassifier.Kind, tool: any NetworkTool)) -> some View {
-        NavigationLink(value: AppRoute.tool(id: suggestion.tool.id)) {
-            HStack(spacing: Spacing.md) {
-                Image(systemName: "sparkles")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(
-                        RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous)
-                            .fill(suggestion.tool.category.gradient)
-                    )
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(L10n(suggestion.kind.messageKey ?? ""))
-                        .font(AppTypography.caption)
-                        .foregroundStyle(theme.textSecondary)
-                    Text(suggestion.tool.titleKey)
-                        .font(AppTypography.headline)
-                        .foregroundStyle(theme.textPrimary)
-                }
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(theme.textSecondary)
-            }
-            .padding(Spacing.lg)
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
-                    .fill(theme.surface)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
-                    .strokeBorder(suggestion.tool.category.tint.opacity(0.4), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: Hero
-
-    private var hero: some View {
-        VStack(alignment: .leading, spacing: Spacing.lg) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text(L10n("app.title"))
-                        .font(AppTypography.largeTitle)
-                        .foregroundStyle(theme.textPrimary)
-                    Text(L10n("home.subtitle"))
-                        .font(AppTypography.footnote)
-                        .foregroundStyle(theme.textSecondary)
-                }
-                Spacer()
-                Button {
-                    showSettings = true
-                } label: {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.title3)
-                        .foregroundStyle(theme.accent)
-                        .frame(width: 44, height: 44)
-                        .background(Circle().fill(theme.surface))
-                        .overlay(Circle().strokeBorder(theme.separator, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(Text(L10n("settings.title")))
-            }
-
-            statusPill
-            searchField
-        }
-    }
-
-    private var statusPill: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: status.connection.symbol)
-                .foregroundStyle(status.connection.isOnline ? theme.success : theme.danger)
-            Text(L10n(status.connection.labelKey))
-                .font(AppTypography.footnote.weight(.semibold))
-                .foregroundStyle(theme.textPrimary)
-            if status.isExpensive {
-                Text(L10n("status.metered"))
-                    .font(AppTypography.caption)
-                    .foregroundStyle(theme.warning)
-            }
-            Spacer()
-            Text("\(ToolRegistry.all.count) \(L10nString("home.toolsCount"))")
-                .font(AppTypography.caption)
-                .foregroundStyle(theme.textSecondary)
-        }
-        .padding(.horizontal, Spacing.lg)
-        .padding(.vertical, Spacing.md)
-        .background(
-            Capsule().fill(theme.surface)
-        )
-        .overlay(Capsule().strokeBorder(theme.separator, lineWidth: 1))
-    }
-
-    private var searchField: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(theme.textSecondary)
-            TextField(L10nString("home.search"), text: $search)
-                .textFieldStyle(.plain)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .foregroundStyle(theme.textPrimary)
-            if !search.isEmpty {
-                Button {
-                    search = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(theme.textSecondary)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, Spacing.lg)
-        .padding(.vertical, Spacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
-                .fill(theme.surfaceElevated)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: CornerRadius.large, style: .continuous)
-                .strokeBorder(theme.separator, lineWidth: 1)
-        )
-    }
-
     // MARK: Sections
 
-    private var favoritesSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            sectionHeader(
-                systemImage: "star.fill",
-                title: L10n("home.favorites"),
-                caption: L10n("home.favorites.caption"),
-                tint: theme.warning
-            )
-            LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                ForEach(favoriteTools, id: \.id) { toolTile($0) }
+    private var statusSection: some View {
+        Section {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: status.connection.symbol)
+                    .foregroundStyle(status.connection.isOnline ? theme.success : theme.danger)
+                Text(L10n(status.connection.labelKey))
+                    .foregroundStyle(theme.textPrimary)
+                if status.isExpensive {
+                    Text(L10n("status.metered"))
+                        .font(AppTypography.caption)
+                        .foregroundStyle(theme.warning)
+                }
+                Spacer()
+                Text("\(ToolRegistry.all.count) \(L10nString("home.toolsCount"))")
+                    .font(AppTypography.footnote)
+                    .foregroundStyle(theme.textSecondary)
             }
+        }
+    }
+
+    private var favoritesSection: some View {
+        Section {
+            ForEach(favoriteTools, id: \.id) { toolRow($0) }
+        } header: {
+            Label(L10nString("home.favorites"), systemImage: "star.fill")
         }
     }
 
     private func categorySection(_ category: ToolCategory) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            sectionHeader(
-                systemImage: category.systemImage,
-                title: category.titleKey,
-                caption: category.captionKey,
-                tint: category.tint,
-                gradient: category.gradient
-            )
-            LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                ForEach(ToolRegistry.tools(in: category), id: \.id) { toolTile($0) }
-            }
+        Section {
+            ForEach(ToolRegistry.tools(in: category), id: \.id) { toolRow($0) }
+        } header: {
+            Text(category.titleKey)
+        } footer: {
+            Text(category.captionKey)
         }
     }
 
-    private var searchResults: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            if searchMatches.isEmpty {
-                ContentUnavailableView {
-                    Label(L10nString("home.noResults"), systemImage: "magnifyingglass")
-                } description: {
-                    Text(L10n("home.noResults.caption"))
+    private var searchSection: some View {
+        Section {
+            ForEach(searchMatches, id: \.id) { toolRow($0) }
+        } header: {
+            Text("\(searchMatches.count) \(L10nString("home.toolsCount"))")
+        }
+    }
+
+    private func smartSection(_ suggestion: (kind: InputClassifier.Kind, tool: any NetworkTool)) -> some View {
+        Section {
+            NavigationLink(value: AppRoute.tool(id: suggestion.tool.id)) {
+                HStack(spacing: Spacing.md) {
+                    iconTile(systemImage: "sparkles", category: suggestion.tool.category)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n(suggestion.kind.messageKey ?? ""))
+                            .font(AppTypography.caption)
+                            .foregroundStyle(theme.textSecondary)
+                        Text(suggestion.tool.titleKey)
+                            .font(AppTypography.headline)
+                            .foregroundStyle(theme.textPrimary)
+                    }
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.top, Spacing.xxl)
-            } else {
-                LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                    ForEach(searchMatches, id: \.id) { toolTile($0) }
-                }
             }
+        } header: {
+            Text(L10n("home.smart.title"))
         }
     }
 
-    private func sectionHeader(
-        systemImage: String,
-        title: LocalizedStringResource,
-        caption: LocalizedStringResource,
-        tint: Color,
-        gradient: LinearGradient? = nil
-    ) -> some View {
-        HStack(spacing: Spacing.md) {
-            Image(systemName: systemImage)
-                .font(.headline)
-                .foregroundStyle(.white)
-                .frame(width: 34, height: 34)
-                .background(
-                    RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous)
-                        .fill(gradient.map { AnyShapeStyle($0) } ?? AnyShapeStyle(tint))
-                )
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title)
-                    .font(AppTypography.title)
-                    .foregroundStyle(theme.textPrimary)
-                Text(caption)
-                    .font(AppTypography.caption)
-                    .foregroundStyle(theme.textSecondary)
-            }
-            Spacer()
-        }
-    }
-
-    // MARK: Tool tile
+    // MARK: Rows
 
     @ViewBuilder
-    private func toolTile(_ tool: any NetworkTool) -> some View {
+    private func toolRow(_ tool: any NetworkTool) -> some View {
         if tool.isAvailable {
             NavigationLink(value: AppRoute.tool(id: tool.id)) {
-                ToolCard(
-                    title: tool.titleKey,
-                    subtitle: tool.subtitleKey,
-                    systemImage: tool.systemImage,
-                    category: tool.category,
-                    isAvailable: true
-                )
+                rowContent(tool)
             }
-            .buttonStyle(.plain)
-            .overlay(alignment: .topTrailing) {
+            .swipeActions(edge: .leading, allowsFullSwipe: true) {
                 Button {
-                    withAnimation(.snappy) { favorites.toggle(tool.id) }
+                    favorites.toggle(tool.id)
                 } label: {
-                    Image(systemName: favorites.isFavorite(tool.id) ? "star.fill" : "star")
-                        .font(.subheadline)
-                        .foregroundStyle(favorites.isFavorite(tool.id) ? theme.warning : theme.textSecondary)
-                        .padding(Spacing.lg)
-                        .contentShape(Rectangle())
+                    Label(
+                        L10nString(favorites.isFavorite(tool.id) ? "home.unfavorite" : "home.favorite"),
+                        systemImage: favorites.isFavorite(tool.id) ? "star.slash.fill" : "star.fill"
+                    )
                 }
-                .buttonStyle(.plain)
+                .tint(theme.warning)
             }
         } else {
-            ToolCard(
-                title: tool.titleKey,
-                subtitle: tool.subtitleKey,
-                systemImage: tool.systemImage,
-                category: tool.category,
-                isAvailable: false
-            )
+            rowContent(tool)
+                .opacity(0.5)
         }
+    }
+
+    private func rowContent(_ tool: any NetworkTool) -> some View {
+        HStack(spacing: Spacing.md) {
+            iconTile(systemImage: tool.systemImage, category: tool.category)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: Spacing.sm) {
+                    Text(tool.titleKey)
+                        .font(AppTypography.body)
+                        .foregroundStyle(theme.textPrimary)
+                    if favorites.isFavorite(tool.id) {
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .foregroundStyle(theme.warning)
+                    }
+                    if !tool.isAvailable {
+                        StatusBadge(kind: .neutral, text: L10n("common.soon"))
+                    }
+                }
+                Text(tool.subtitleKey)
+                    .font(AppTypography.footnote)
+                    .foregroundStyle(theme.textSecondary)
+                    .lineLimit(2)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func iconTile(systemImage: String, category: ToolCategory) -> some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 29, height: 29)
+            .background(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(category.gradient)
+            )
     }
 
     @ViewBuilder

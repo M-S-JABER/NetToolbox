@@ -43,8 +43,7 @@ public struct NetToolboxRootView: View {
             .environment(history)
             .environment(savedHosts)
             .tint(activeTheme.accent)
-            // Dark-first design; both appearances are fully supported.
-            .preferredColorScheme(.dark)
+            // Native iOS look: follow the system Light/Dark appearance.
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])
             .task { status.start() }
     }

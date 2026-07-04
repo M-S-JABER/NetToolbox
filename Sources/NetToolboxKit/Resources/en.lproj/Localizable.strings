@@ -364,6 +364,8 @@
 "common.done" = "Done";
 "home.favorite" = "Favorite";
 "home.favorites" = "Favorites";
+"home.smart.title" = "Smart suggestion";
+"home.unfavorite" = "Unfavorite";
 "home.favorites.caption" = "Your starred tools";
 "home.noResults" = "No tools found";
 "home.noResults.caption" = "Try a different keyword.";
