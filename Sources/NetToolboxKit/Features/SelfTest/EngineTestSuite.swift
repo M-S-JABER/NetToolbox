@@ -58,7 +58,7 @@ struct EngineTestSuite: Sendable {
 
     // MARK: - Test vectors
 
-    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases
+    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases + sshCases
 
     private static let ipv4Cases: [Case] = [
         Case(name: "IPv4 /24 standard network") {
@@ -608,6 +608,35 @@ struct EngineTestSuite: Sendable {
                     expect(nextBytes.contains(0xA1), equals: true, "GETNEXT PDU tag")
                 )
             } catch { return "unexpected error: \(error)" }
+        },
+    ]
+
+    private static let sshCases: [Case] = [
+        Case(name: "SSH wire string + uint32 round-trip") {
+            var data = Data()
+            SSHWire.putUInt32(0x0102_0304, into: &data)
+            SSHWire.putString("hello", into: &data)
+            var reader = SSHWire.Reader(data)
+            return firstFailure(
+                expect(reader.readUInt32() ?? 0, equals: UInt32(0x0102_0304), "uint32"),
+                expect(reader.readStringUTF8() ?? "", equals: "hello", "string")
+            )
+        },
+        Case(name: "SSH name-list round-trip") {
+            var data = Data()
+            SSHWire.putNameList(["ssh-ed25519", "rsa-sha2-256"], into: &data)
+            var reader = SSHWire.Reader(data)
+            return expect(reader.readNameList() ?? [], equals: ["ssh-ed25519", "rsa-sha2-256"], "name-list")
+        },
+        Case(name: "SSH mpint encoding") {
+            var high = Data(); SSHWire.putMPInt(Data([0x80, 0x00]), into: &high)
+            var zero = Data(); SSHWire.putMPInt(Data([0x00, 0x00]), into: &zero)
+            var lead = Data(); SSHWire.putMPInt(Data([0x00, 0x12, 0x34]), into: &lead)
+            return firstFailure(
+                expect([UInt8](high), equals: [0, 0, 0, 3, 0, 0x80, 0x00], "high bit gets a leading zero"),
+                expect([UInt8](zero), equals: [0, 0, 0, 0], "zero encodes empty"),
+                expect([UInt8](lead), equals: [0, 0, 0, 2, 0x12, 0x34], "leading zeros stripped")
+            )
         },
     ]
 }

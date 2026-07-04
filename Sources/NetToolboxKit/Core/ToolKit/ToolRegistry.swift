@@ -46,6 +46,7 @@ enum ToolRegistry {
         WakeOnLANTool(),
         WiFiQRTool(),
         // Phase 3 — professional
+        SSHTool(),
         TelnetTool(),
         FTPTool(),
         MikroTikAPITool(),

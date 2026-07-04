@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.14.1** · Tools: **40** · Localization: **en/ar at parity (577 keys)**
+Latest working tag: **1.15.0** · Tools: **41** · Localization: **en/ar at parity (606 keys)**
 
 ---
 
@@ -33,7 +33,7 @@ Latest working tag: **1.14.1** · Tools: **40** · Localization: **en/ar at pari
 
 **Local Network (6):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN · Wi-Fi QR.
 
-**Professional (4):** Telnet · FTP (passive LIST) · MikroTik RouterOS API · SNMP (GET + Walk, configurable port).
+**Professional (5):** SSH (native SSH-2, curve25519 + AES-256-GCM, password auth, single-command exec) · Telnet · FTP (passive LIST) · MikroTik RouterOS API · SNMP (GET + Walk, configurable port).
 
 **Design/UX:** dashboard home, live network-status pill, global search with smart input detection, favorites, 6 accent themes, unified history + share, colour-coded categories.
 
@@ -43,7 +43,8 @@ Latest working tag: **1.14.1** · Tools: **40** · Localization: **en/ar at pari
 
 | Feature | Why blocked |
 |---|---|
-| **SSH / SFTP** | Needs a crypto/transport lib. External libs break the Playgrounds manifest; CryptoKit lacks SSH cipher modes (no AES-CTR / raw AES). Genuinely impossible here. Use Telnet + MikroTik API instead, or build in Xcode on a Mac with Citadel. |
+| ~~**SSH**~~ | **SHIPPED in 1.15.0.** The trick: negotiate ONLY `aes256-gcm@openssh.com`, which maps directly onto CryptoKit's `AES.GCM`, plus `curve25519-sha256` KEX and ed25519/ecdsa/rsa host-key verification — all native, zero deps. Limits: password auth only, single-command exec (no interactive PTY shell), needs a server offering aes-gcm. See `Features/SSH/`. |
+| **SFTP** | Now feasible as a follow-up — it's a subsystem channel over the SSH transport we now have. Not built yet. |
 | **Wi-Fi RSSI / channel / band / Wi-Fi generation / link speed** | No public API on iOS for any app. |
 | **SSID / BSSID inside the app** | Needs the *Access WiFi Information* entitlement + location; a `.swiftpm` can't declare entitlements. Workaround shipped: the **Shortcuts app** (Get Network Details) — Wi-Fi Info has Run/Create buttons for a shortcut named `NetToolbox WiFi`. |
 | **Default gateway / router MAC / router vendor** | The routing & ARP tables live in `net/route.h` (`rt_msghdr`, `RTF_GATEWAY`, `RTF_LLINFO`, `RTAX_*`, `NET_RT_DUMP`/`NET_RT_FLAGS`, `PF_ROUTE`). Those symbols are **macOS-only** and are not in the iOS Darwin module — they fail to compile ("cannot find in scope"). No iOS API exposes the gateway. |
