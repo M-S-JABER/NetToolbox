@@ -20,7 +20,8 @@ enum SSHError: LocalizedError {
     case authFailed
     case channelFailed
     case protocolError
-    case crypto
+    case encryptFailed
+    case decryptFailed(verified: Bool)
 
     var errorDescription: String? {
         switch self {
@@ -35,7 +36,10 @@ enum SSHError: LocalizedError {
         case .authFailed: return L10nString("ssh.error.auth")
         case .channelFailed: return L10nString("ssh.error.channel")
         case .protocolError: return L10nString("ssh.error.protocol")
-        case .crypto: return L10nString("ssh.error.crypto")
+        case .encryptFailed: return L10nString("ssh.error.encrypt")
+        case .decryptFailed(let verified):
+            return L10nString("ssh.error.decrypt")
+                + " " + L10nString(verified ? "ssh.error.decrypt.hintVerified" : "ssh.error.decrypt.hintUnverified")
         }
     }
 }
@@ -75,6 +79,11 @@ final class SSHClient: @unchecked Sendable {
     private var inbound: [UInt8] = []
     private var encrypt: SSHGCMCipher?
     private var decrypt: SSHGCMCipher?
+    /// Whether the server's host-key signature over the exchange hash checked
+    /// out — surfaced in a decryption failure to tell "wrong exchange hash"
+    /// (unverified) apart from "wrong key derivation" (verified) when
+    /// diagnosing interop issues.
+    private var hostKeyVerified = false
 
     init?(host: String, port: UInt16) {
         guard let connection = TCPConnection(host: host, port: port) else { return nil }
@@ -133,6 +142,7 @@ final class SSHClient: @unchecked Sendable {
             sharedSecretMPInt: kMPInt
         )
         let verified = SSHCrypto.verifyHostKey(blob: hostKey, signature: signature, over: exchangeHash)
+        hostKeyVerified = verified
 
         // 4) Activate keys.
         let sessionID = exchangeHash
@@ -295,7 +305,7 @@ final class SSHClient: @unchecked Sendable {
             var lengthField = Data()
             SSHWire.putUInt32(UInt32(1 + payload.count + pad), into: &lengthField)
             let plaintext = Data([UInt8(pad)]) + payload + randomBytes(pad)
-            guard let sealed = cipher.seal(plaintext: plaintext, lengthField: lengthField) else { throw SSHError.crypto }
+            guard let sealed = cipher.seal(plaintext: plaintext, lengthField: lengthField) else { throw SSHError.encryptFailed }
             encrypt = cipher
             try await writeRaw(lengthField + sealed)
         } else {
@@ -320,7 +330,7 @@ final class SSHClient: @unchecked Sendable {
             let ciphertext = Data(body.prefix(packetLength))
             let tag = Data(body.suffix(16))
             guard let plaintext = cipher.open(ciphertext: ciphertext, tag: tag, lengthField: lengthField) else {
-                throw SSHError.crypto
+                throw SSHError.decryptFailed(verified: hostKeyVerified)
             }
             decrypt = cipher
             return extractPayload(plaintext, packetLength: plaintext.count)

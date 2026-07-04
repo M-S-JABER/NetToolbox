@@ -213,7 +213,10 @@
 "ssh.action.run" = "تشغيل الأمر";
 "ssh.error.auth" = "فشل المصادقة. تحقّق من اسم المستخدم وكلمة المرور.";
 "ssh.error.channel" = "رفض الخادم فتح قناة الجلسة.";
-"ssh.error.crypto" = "خطأ تشفير أثناء الجلسة.";
+"ssh.error.decrypt" = "تعذّر فك تشفير ردّ الخادم بعد تبادل المفاتيح.";
+"ssh.error.decrypt.hintVerified" = "تم التحقّق من مفتاح المضيف بنجاح، فالسبب المرجّح هو اشتقاق مفاتيح الجلسة — أرسل لقطة شاشة من فضلك.";
+"ssh.error.decrypt.hintUnverified" = "لم يُتحقّق من مفتاح المضيف، فالسبب المرجّح هو تجزئة التبادل (exchange hash) — أرسل لقطة شاشة من فضلك.";
+"ssh.error.encrypt" = "فشل تشفير حزمة (خطأ تشفير محلي).";
 "ssh.error.disconnected" = "أُغلق الاتصال بشكل غير متوقّع.";
 "ssh.error.kex" = "فشل تبادل المفاتيح.";
 "ssh.error.noCipher" = "الخادم لا يدعم aes256-gcm@openssh.com، وهي الشيفرة الوحيدة التي يستخدمها هذا العميل. معظم خوادم OpenSSH الحديثة تدعمها — راجع إعداد Ciphers على الخادم.";
@@ -342,19 +345,6 @@
 "wifiqr.security.WPA" = "WPA/WPA2";
 "wifiqr.security.nopass" = "بدون";
 "wifiqr.security.title" = "الحماية";
-
-/* SSH */
-"ssh.input.command" = "الأمر (مثل uname -a)";
-"ssh.input.host" = "المضيف أو IP";
-"ssh.input.password" = "كلمة المرور";
-"ssh.input.title" = "الاتصال";
-"ssh.input.user" = "اسم المستخدم";
-"ssh.noOutput" = "(الأمر لم يُنتج مخرجات)";
-"ssh.note" = "SSH مشفّر عبر مكتبة Citadel. مصادقة بكلمة مرور عبر SSH2؛ كل تنفيذ يفتح اتصالاً جديداً وينفّذ أمراً واحداً ثم يقطع. استخدم حساباً مخصصاً.";
-"ssh.section.command" = "الأمر";
-"ssh.section.output" = "المخرجات";
-"tool.ssh.subtitle" = "تنفيذ أمر على جهاز عبر SSH";
-"tool.ssh.title" = "SSH";
 
 /* Redesign: dashboard, themes, status */
 "category.caption.calculators" = "الشبكات الفرعية و MAC والمنافذ والمحوّلات";

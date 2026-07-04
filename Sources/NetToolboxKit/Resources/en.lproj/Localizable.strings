@@ -213,7 +213,10 @@
 "ssh.action.run" = "Run command";
 "ssh.error.auth" = "Authentication failed. Check the username and password.";
 "ssh.error.channel" = "The server refused to open a session channel.";
-"ssh.error.crypto" = "Encryption error during the session.";
+"ssh.error.decrypt" = "Could not decrypt the server's reply after key exchange.";
+"ssh.error.decrypt.hintVerified" = "The host key verified correctly, so the session-key derivation is the likely cause — please send a screenshot.";
+"ssh.error.decrypt.hintUnverified" = "The host key did not verify, so the exchange hash is the likely cause — please send a screenshot.";
+"ssh.error.encrypt" = "Failed to encrypt a packet (local crypto error).";
 "ssh.error.disconnected" = "The connection closed unexpectedly.";
 "ssh.error.kex" = "Key exchange failed.";
 "ssh.error.noCipher" = "The server does not support aes256-gcm@openssh.com, the only cipher this client can use. Most modern OpenSSH servers do — check the server's Ciphers setting.";
@@ -342,19 +345,6 @@
 "wifiqr.security.WPA" = "WPA/WPA2";
 "wifiqr.security.nopass" = "None";
 "wifiqr.security.title" = "Security";
-
-/* SSH */
-"ssh.input.command" = "Command (e.g. uname -a)";
-"ssh.input.host" = "Host or IP";
-"ssh.input.password" = "Password";
-"ssh.input.title" = "Connection";
-"ssh.input.user" = "Username";
-"ssh.noOutput" = "(command produced no output)";
-"ssh.note" = "Encrypted SSH via the Citadel library. Password auth over SSH2; each run opens a fresh connection, runs one command, and disconnects. Use a dedicated account.";
-"ssh.section.command" = "Command";
-"ssh.section.output" = "Output";
-"tool.ssh.subtitle" = "Run a command on a device over SSH";
-"tool.ssh.title" = "SSH";
 
 /* Redesign: dashboard, themes, status */
 "category.caption.calculators" = "Subnetting, MAC, ports & encoders";
