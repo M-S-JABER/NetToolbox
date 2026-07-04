@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 /// A lightweight assertion suite that runs the engine test vectors
 /// on-device. It mirrors `Tests/NetToolboxKitTests/SubnetEngineTests.swift`
@@ -58,7 +59,18 @@ struct EngineTestSuite: Sendable {
 
     // MARK: - Test vectors
 
-    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases + sshCases
+    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases + sshCases + curve25519Cases
+
+    /// Parses a lowercase hex string into bytes (test helper).
+    private static func hexBytes(_ string: String) -> [UInt8] {
+        var result: [UInt8] = []
+        var index = string.startIndex
+        while index < string.endIndex, let next = string.index(index, offsetBy: 2, limitedBy: string.endIndex) {
+            result.append(UInt8(string[index..<next], radix: 16) ?? 0)
+            index = next
+        }
+        return result
+    }
 
     private static let ipv4Cases: [Case] = [
         Case(name: "IPv4 /24 standard network") {
@@ -637,6 +649,51 @@ struct EngineTestSuite: Sendable {
                 expect([UInt8](zero), equals: [0, 0, 0, 0], "zero encodes empty"),
                 expect([UInt8](lead), equals: [0, 0, 0, 2, 0x12, 0x34], "leading zeros stripped")
             )
+        },
+    ]
+
+    /// Known-answer tests for the X25519 layer SSH key exchange depends on,
+    /// using the RFC 7748 §6.1 vectors. If these pass, CryptoKit's raw
+    /// Curve25519 bytes match the wire format an SSH server expects, so a
+    /// key-exchange interop failure must lie elsewhere (hash assembly / KDF).
+    private static let curve25519Cases: [Case] = [
+        Case(name: "X25519 public key (RFC 7748)") {
+            let priv = Data(hexBytes("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"))
+            guard let key = try? Curve25519.KeyAgreement.PrivateKey(rawRepresentation: priv) else {
+                return "could not build private key"
+            }
+            return expect(
+                [UInt8](key.publicKey.rawRepresentation),
+                equals: hexBytes("8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"),
+                "derived public key"
+            )
+        },
+        Case(name: "X25519 shared secret (RFC 7748)") {
+            let priv = Data(hexBytes("77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"))
+            let peer = Data(hexBytes("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"))
+            guard let key = try? Curve25519.KeyAgreement.PrivateKey(rawRepresentation: priv),
+                  let peerKey = try? Curve25519.KeyAgreement.PublicKey(rawRepresentation: peer),
+                  let shared = try? key.sharedSecretFromKeyAgreement(with: peerKey) else {
+                return "key agreement failed"
+            }
+            return expect(
+                shared.withUnsafeBytes { [UInt8]($0) },
+                equals: hexBytes("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"),
+                "shared secret"
+            )
+        },
+        Case(name: "SSH AES-GCM packet round-trip") {
+            var sender = SSHGCMCipher(key: Data(repeating: 0x42, count: 32), iv: Data(repeating: 0x01, count: 12))
+            var receiver = SSHGCMCipher(key: Data(repeating: 0x42, count: 32), iv: Data(repeating: 0x01, count: 12))
+            let payload = Data("hello ssh world".utf8)
+            var lengthField = Data(); SSHWire.putUInt32(UInt32(payload.count), into: &lengthField)
+            guard let sealed = sender.seal(plaintext: payload, lengthField: lengthField) else { return "seal failed" }
+            let ciphertext = Data(sealed.prefix(payload.count))
+            let tag = Data(sealed.suffix(16))
+            guard let opened = receiver.open(ciphertext: ciphertext, tag: tag, lengthField: lengthField) else {
+                return "open failed"
+            }
+            return expect([UInt8](opened), equals: [UInt8](payload), "gcm round-trip")
         },
     ]
 }
