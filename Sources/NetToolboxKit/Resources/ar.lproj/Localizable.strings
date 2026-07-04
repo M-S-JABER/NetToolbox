@@ -496,3 +496,20 @@
 "tool.nslookup.title" = "nslookup";
 "tool.rbl.subtitle" = "فحص IP مقابل القوائم السوداء (RBL)";
 "tool.rbl.title" = "فحص القوائم السوداء";
+
+/* Wi-Fi info */
+"tool.wifiinfo.subtitle" = "الاتصال وعنوان الجهاز والموجّه";
+"tool.wifiinfo.title" = "معلومات الواي فاي";
+"wifiinfo.deviceIP" = "IP الجهاز";
+"wifiinfo.gateway" = "الموجّه (البوابة)";
+"wifiinfo.metric.band" = "الباند (2.4 / 5 / 6 غيغاهرتز)";
+"wifiinfo.metric.channel" = "القناة";
+"wifiinfo.metric.generation" = "جيل الواي فاي (5 / 6 / 6E)";
+"wifiinfo.metric.linkSpeed" = "سرعة الرابط";
+"wifiinfo.metric.signal" = "قوة الإشارة (RSSI)";
+"wifiinfo.metric.ssid" = "اسم الشبكة (SSID)";
+"wifiinfo.notAvailable" = "غير متاح";
+"wifiinfo.publicIP" = "IP العام";
+"wifiinfo.section.available" = "المتاح";
+"wifiinfo.section.unavailable" = "غير متاح على iOS";
+"wifiinfo.unavailable.intro" = "لا يوفّر iOS واجهة عامة لتفاصيل راديو الواي فاي هذه — فهي محجوبة عن كل التطبيقات، لذا يعرض التطبيق ما يتيحه النظام فقط.";

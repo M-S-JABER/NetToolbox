@@ -86,6 +86,7 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | **IP Info Lookup** | Geo/ISP/ASN for any IP or hostname (not just the device's own) via ipwho.is. |
 | **HTTP Headers** | Fetches a URL and lists status code, final URL and all response headers. |
 | **Network Overview** | Connection type (live), public IP/ISP and all local interface addresses in one dashboard. |
+| **Wi-Fi Info** | Connection type, device IP, **router/gateway address** (parsed from the routing table via `sysctl`), and public IP — with an honest list of the Wi-Fi radio details iOS blocks for all apps (RSSI, channel, band, Wi-Fi generation, link speed, SSID). |
 | **History** | Unified cross-tool run history (Subnet/DNS/WHOIS/IP), persisted, with copy/share/clear. |
 | **IP Range Scanner** | ICMP ping-sweep of a CIDR (≤1024 hosts) to find live hosts + RTT. Local subnet needs Local Network permission. |
 | **Host → IP** | Resolves a hostname to its IPv4/IPv6 addresses via `getaddrinfo`. |

@@ -35,6 +35,7 @@ enum ToolRegistry {
         SelfTestTool(),
         // Phase 2 — local network
         NetworkOverviewTool(),
+        WiFiInfoTool(),
         LANScannerTool(),
         IPRangeScannerTool(),
         WakeOnLANTool(),

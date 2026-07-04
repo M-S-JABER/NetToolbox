@@ -496,3 +496,20 @@
 "tool.nslookup.title" = "nslookup";
 "tool.rbl.subtitle" = "Check an IP against DNS blacklists (RBL)";
 "tool.rbl.title" = "Blacklist Check";
+
+/* Wi-Fi info */
+"tool.wifiinfo.subtitle" = "Connection, device IP and router address";
+"tool.wifiinfo.title" = "Wi-Fi Info";
+"wifiinfo.deviceIP" = "Device IP";
+"wifiinfo.gateway" = "Router (gateway)";
+"wifiinfo.metric.band" = "Band (2.4 / 5 / 6 GHz)";
+"wifiinfo.metric.channel" = "Channel";
+"wifiinfo.metric.generation" = "Wi-Fi generation (5 / 6 / 6E)";
+"wifiinfo.metric.linkSpeed" = "Link speed";
+"wifiinfo.metric.signal" = "Signal strength (RSSI)";
+"wifiinfo.metric.ssid" = "Network name (SSID)";
+"wifiinfo.notAvailable" = "not available";
+"wifiinfo.publicIP" = "Public IP";
+"wifiinfo.section.available" = "Available";
+"wifiinfo.section.unavailable" = "Not available on iOS";
+"wifiinfo.unavailable.intro" = "iOS gives no public API for these Wi-Fi radio details — they're blocked for all apps, so the app shows only what the system exposes.";
