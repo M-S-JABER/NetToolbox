@@ -339,4 +339,25 @@ final class SubnetEngineTests: XCTestCase {
         XCTAssertEqual(slash24.last, "10.0.0.254")
         XCTAssertThrowsError(try IPRangeScanner.hosts(cidr: "10.0.0.0/16"))
     }
+
+    func testEmailValidation() {
+        XCTAssertTrue(EmailValidator.isValidSyntax("a@b.com"))
+        XCTAssertFalse(EmailValidator.isValidSyntax("a@b"))
+        XCTAssertFalse(EmailValidator.isValidSyntax("a b@c.com"))
+        XCTAssertFalse(EmailValidator.isValidSyntax("@c.com"))
+        XCTAssertEqual(EmailValidator.domain(of: "user@example.com"), "example.com")
+    }
+
+    func testRBLQuery() {
+        XCTAssertEqual(RBL.query(ip: "1.2.3.4", zone: "zen.spamhaus.org"), "4.3.2.1.zen.spamhaus.org")
+        XCTAssertNil(RBL.query(ip: "bad", zone: "z"))
+    }
+
+    func testPortListParsing() {
+        XCTAssertEqual(PortList.parse("22,80,443"), [22, 80, 443])
+        XCTAssertEqual(PortList.parse("1-3"), [1, 2, 3])
+        XCTAssertEqual(PortList.parse("80, 100-102"), [80, 100, 101, 102])
+        XCTAssertNil(PortList.parse("70000"))
+        XCTAssertNil(PortList.parse(""))
+    }
 }

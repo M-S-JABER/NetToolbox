@@ -60,8 +60,11 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 |---|---|
 | **Public IP & ISP** | Public IP, country, city, ISP, org, ASN via `ipwho.is` (HTTPS), plus local interface addresses via `getifaddrs`. |
 | **Ping (TCP)** | Repeated TCP-handshake latency to a host/port with min/avg/max + packet loss. iOS blocks raw ICMP, so this is the reliable native equivalent. |
-| **Port Scanner** | Concurrent TCP port probing (`NWConnection`) with common/web/all presets and service names. |
+| **Port Scanner** | Concurrent TCP port probing (`NWConnection`) with common/web/all presets **or a custom range/list** (e.g. `22,80,443,8000-8100`), live progress and service names. |
 | **DNS Lookup** | Custom UDP resolver (pure `DNSMessage` codec) for A, AAAA, CNAME, MX, NS, TXT, SOA, PTR against any server. |
+| **nslookup** | Forward (name→IP) and reverse (IP→PTR) resolution via `getaddrinfo`/`getnameinfo`. |
+| **Email Validator** | RFC-lite syntax check plus a live MX-record deliverability lookup. |
+| **Blacklist (RBL) Check** | Queries public DNSBL zones (Spamhaus, SpamCop, Barracuda…) for an IP. |
 | **WHOIS** | TCP port-43 client with per-TLD server selection. |
 | **SSL/TLS Checker** | TLS handshake inspection: subject, issuer, validity window, days-to-expiry, chain length, system trust. |
 | **Wake-on-LAN** | Broadcast magic packet via a `SO_BROADCAST` UDP socket. |

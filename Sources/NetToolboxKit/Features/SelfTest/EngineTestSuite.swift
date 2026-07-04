@@ -547,5 +547,28 @@ struct EngineTestSuite: Sendable {
                 )
             } catch { return "unexpected error: \(error)" }
         },
+        Case(name: "Email syntax validation") {
+            firstFailure(
+                expect(EmailValidator.isValidSyntax("a@b.com"), equals: true, "valid"),
+                expect(EmailValidator.isValidSyntax("a@b"), equals: false, "no TLD"),
+                expect(EmailValidator.isValidSyntax("a b@c.com"), equals: false, "space"),
+                expect(EmailValidator.isValidSyntax("@c.com"), equals: false, "empty local"),
+                expect(EmailValidator.domain(of: "user@example.com") ?? "", equals: "example.com", "domain")
+            )
+        },
+        Case(name: "RBL query building") {
+            firstFailure(
+                expect(RBL.query(ip: "1.2.3.4", zone: "zen.spamhaus.org") ?? "", equals: "4.3.2.1.zen.spamhaus.org", "reversed query"),
+                expect(RBL.query(ip: "bad", zone: "z") == nil, equals: true, "reject non-IP")
+            )
+        },
+        Case(name: "Port list parsing") {
+            firstFailure(
+                expect(PortList.parse("22,80,443") ?? [], equals: [22, 80, 443], "list"),
+                expect(PortList.parse("1-3") ?? [], equals: [1, 2, 3], "range"),
+                expect(PortList.parse("80, 100-102") ?? [], equals: [80, 100, 101, 102], "mixed"),
+                expect(PortList.parse("70000") == nil, equals: true, "reject out of range")
+            )
+        },
     ]
 }

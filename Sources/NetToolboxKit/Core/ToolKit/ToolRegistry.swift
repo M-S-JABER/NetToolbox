@@ -26,8 +26,11 @@ enum ToolRegistry {
         PortScannerTool(),
         DNSLookupTool(),
         WhoisTool(),
+        NSLookupTool(),
         SSLCheckerTool(),
         HTTPHeadersTool(),
+        EmailValidatorTool(),
+        RBLCheckTool(),
         NTPTool(),
         SelfTestTool(),
         // Phase 2 — local network
