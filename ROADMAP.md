@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.18.0** · Tools: **41** · Localization: **en/ar at parity (606 keys)**
+Latest working tag: **1.19.1** · Tools: **41** · Localization: **en/ar at parity (608 keys)**
 
 ---
 
