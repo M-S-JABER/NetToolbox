@@ -40,7 +40,13 @@ final class SSHViewModel {
         do {
             result = try await client.run(username: user, password: password, command: command, timeout: 12)
         } catch {
-            errorMessage = error.localizedDescription
+            var message = error.localizedDescription
+            if !client.diagnostics.isEmpty {
+                message += "\n\(client.diagnostics) · stage=\(client.stage)"
+            } else {
+                message += "\n(stage=\(client.stage))"
+            }
+            errorMessage = message
         }
         isRunning = false
     }

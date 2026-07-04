@@ -85,6 +85,12 @@ final class SSHClient: @unchecked Sendable {
     /// diagnosing interop issues.
     private var hostKeyVerified = false
 
+    /// A one-line diagnostic (host-key type, verified flag, fingerprint,
+    /// stage) filled in as the handshake proceeds, so a single screenshot of
+    /// a failure is enough to pinpoint the cause.
+    private(set) var diagnostics = ""
+    private(set) var stage = "connect"
+
     init?(host: String, port: UInt16) {
         guard let connection = TCPConnection(host: host, port: port) else { return nil }
         self.connection = connection
@@ -144,7 +150,14 @@ final class SSHClient: @unchecked Sendable {
         let verified = SSHCrypto.verifyHostKey(blob: hostKey, signature: signature, over: exchangeHash)
         hostKeyVerified = verified
 
+        var keyTypeReader = SSHWire.Reader(hostKey)
+        let hostKeyType = keyTypeReader.readStringUTF8() ?? "?"
+        let fingerprint = "SHA256:" + Data(SHA256.hash(data: hostKey)).base64EncodedString()
+            .trimmingCharacters(in: CharacterSet(charactersIn: "="))
+        diagnostics = "SSHv2 · host=\(hostKeyType) · verified=\(verified) · \(fingerprint)"
+
         // 4) Activate keys.
+        stage = "newkeys"
         let sessionID = exchangeHash
         let ivC2S = SSHCrypto.deriveKey(letter: 0x41, length: 12, sharedSecretMPInt: kMPInt, exchangeHash: exchangeHash, sessionID: sessionID)
         let ivS2C = SSHCrypto.deriveKey(letter: 0x42, length: 12, sharedSecretMPInt: kMPInt, exchangeHash: exchangeHash, sessionID: sessionID)
@@ -157,10 +170,12 @@ final class SSHClient: @unchecked Sendable {
         decrypt = SSHGCMCipher(key: keyS2C, iv: ivS2C)
 
         // 5) Authenticate with a password.
+        stage = "service-request"
         var serviceRequest = Data([Msg.serviceRequest])
         SSHWire.putString("ssh-userauth", into: &serviceRequest)
         try await sendPacket(serviceRequest)
         _ = try await expect(Msg.serviceAccept)
+        stage = "userauth"
 
         var authRequest = Data([Msg.userauthRequest])
         SSHWire.putString(username, into: &authRequest)
@@ -181,6 +196,7 @@ final class SSHClient: @unchecked Sendable {
         }
 
         // 6) Open a session channel and exec the command.
+        stage = "channel"
         let localChannel: UInt32 = 0
         var open = Data([Msg.channelOpen])
         SSHWire.putString("session", into: &open)
@@ -203,6 +219,7 @@ final class SSHClient: @unchecked Sendable {
         try await sendPacket(exec)
 
         // 7) Collect output until the channel closes.
+        stage = "exec"
         var output = Data()
         var exitStatus: Int?
         var sinceAdjust = 0
@@ -250,15 +267,10 @@ final class SSHClient: @unchecked Sendable {
             }
         }
 
-        let digest = SHA256.hash(data: hostKey)
-        let fingerprint = "SHA256:" + Data(digest).base64EncodedString()
-            .trimmingCharacters(in: CharacterSet(charactersIn: "="))
-        var keyTypeReader = SSHWire.Reader(hostKey)
-
         return SSHRunResult(
             output: String(decoding: output, as: UTF8.self),
             fingerprint: fingerprint,
-            hostKeyType: keyTypeReader.readStringUTF8() ?? "?",
+            hostKeyType: hostKeyType,
             hostKeyVerified: verified,
             exitStatus: exitStatus
         )
@@ -284,14 +296,17 @@ final class SSHClient: @unchecked Sendable {
         return payload
     }
 
-    /// Confirms the server offers our GCM cipher in both directions.
+    /// Confirms the server offers curve25519 key exchange and our GCM cipher
+    /// in both directions — the only combination this client implements.
     private func requireCiphers(in kexInit: Data) throws {
         var reader = SSHWire.Reader(kexInit)
         _ = reader.readByte()
         for _ in 0..<16 { _ = reader.readByte() }         // cookie
-        _ = reader.readNameList()                          // kex
+        guard let kex = reader.readNameList() else { throw SSHError.kexFailed }
         _ = reader.readNameList()                          // host keys
         guard let c2s = reader.readNameList(), let s2c = reader.readNameList() else { throw SSHError.kexFailed }
+        let curve = kex.contains("curve25519-sha256") || kex.contains("curve25519-sha256@libssh.org")
+        guard curve else { throw SSHError.noCipher }
         let ours = "aes256-gcm@openssh.com"
         guard c2s.contains(ours), s2c.contains(ours) else { throw SSHError.noCipher }
     }
