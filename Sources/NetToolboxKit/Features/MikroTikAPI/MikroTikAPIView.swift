@@ -88,10 +88,17 @@ final class MikroTikViewModel {
     var password = ""
     var command = "/system/resource/print"
 
-    private(set) var isConnected = false
+    private(set) var isConnected = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isConnected else { return }
+            if isConnected { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var statusMessage: String?
     private(set) var transcript: [MikroTikLine] = []
     private(set) var isBusy = false
+    var activity: ActivityCenter?
+    var toolID = ""
 
     private var client: MikroTikClient?
     private var lineCounter = 0
@@ -225,7 +232,17 @@ struct MikroTikAPITool: NetworkTool {
 
 struct MikroTikAPIView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = MikroTikViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: MikroTikViewModel {
+        sessions.session("mikrotik-api") {
+            let model = MikroTikViewModel()
+            model.activity = activity
+            model.toolID = "mikrotik-api"
+            return model
+        }
+    }
 
     private let quickCommands = [
         "/system/resource/print",
@@ -258,11 +275,11 @@ struct MikroTikAPIView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.mikrotik.title")))
         .navigationBarTitleDisplayMode(.large)
-        .onDisappear { viewModel.disconnect() }
     }
 
     private var connectionSection: some View {
-        SectionCard(title: L10n("mikrotik.input.title"), systemImage: "network") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("mikrotik.input.title"), systemImage: "network") {
             HStack(spacing: Spacing.md) {
                 TextField(L10nString("mikrotik.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)
@@ -416,7 +433,8 @@ struct MikroTikAPIView: View {
     }
 
     private var commandBar: some View {
-        SectionCard(title: L10n("mikrotik.section.command"), systemImage: "chevron.left.forwardslash.chevron.right") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("mikrotik.section.command"), systemImage: "chevron.left.forwardslash.chevron.right") {
             HStack(spacing: Spacing.sm) {
                 TextField(L10nString("mikrotik.input.command"), text: $viewModel.command)
                     .textFieldStyle(.roundedBorder)

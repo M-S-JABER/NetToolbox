@@ -20,9 +20,16 @@ final class SSHViewModel {
     private(set) var errorMessage: String?
 
     // Interactive shell state.
-    private(set) var shellConnected = false
+    private(set) var shellConnected = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != shellConnected else { return }
+            if shellConnected { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var shellTranscript = ""
     var shellInput = ""
+    var activity: ActivityCenter?
+    var toolID = ""
     private var shellClient: SSHClient?
     private var readTask: Task<Void, Never>?
 
@@ -128,7 +135,17 @@ struct SSHTool: NetworkTool {
 
 struct SSHView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = SSHViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: SSHViewModel {
+        sessions.session("ssh") {
+            let model = SSHViewModel()
+            model.activity = activity
+            model.toolID = "ssh"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -158,11 +175,11 @@ struct SSHView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.ssh.title")))
         .navigationBarTitleDisplayMode(.large)
-        .onDisappear { viewModel.disconnectShell() }
     }
 
     private var connectionSection: some View {
-        SectionCard(title: L10n("ssh.input.title"), systemImage: "network") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("ssh.input.title"), systemImage: "network") {
             HStack(spacing: Spacing.md) {
                 TextField(L10nString("ssh.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)
@@ -218,7 +235,8 @@ struct SSHView: View {
     }
 
     private var modeSection: some View {
-        Picker(L10nString("ssh.mode.title"), selection: $viewModel.mode) {
+        @Bindable var viewModel = viewModel
+        return Picker(L10nString("ssh.mode.title"), selection: $viewModel.mode) {
             Text(L10n("ssh.mode.command")).tag(SSHViewModel.Mode.command)
             Text(L10n("ssh.mode.shell")).tag(SSHViewModel.Mode.shell)
         }
@@ -250,6 +268,7 @@ struct SSHView: View {
 
     @ViewBuilder
     private var shellSection: some View {
+        @Bindable var viewModel = viewModel
         SectionCard(title: L10n("ssh.mode.shell"), systemImage: "terminal") {
             if viewModel.shellConnected {
                 terminalText(viewModel.shellTranscript.isEmpty ? " " : viewModel.shellTranscript)
@@ -304,7 +323,8 @@ struct SSHView: View {
 private extension SSHView {
     // Command run button lives under the mode picker in command mode.
     var runBar: some View {
-        HStack(spacing: Spacing.sm) {
+        @Bindable var viewModel = viewModel
+        return HStack(spacing: Spacing.sm) {
             TextField(L10nString("ssh.input.command"), text: $viewModel.command)
                 .textFieldStyle(.roundedBorder)
                 .font(AppTypography.monoBody)

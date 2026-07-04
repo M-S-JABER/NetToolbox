@@ -8,8 +8,15 @@ final class TelnetViewModel {
     var portText = "23"
     var command = ""
     private(set) var transcript = ""
-    private(set) var isConnected = false
+    private(set) var isConnected = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isConnected else { return }
+            if isConnected { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var statusMessage: String?
+    var activity: ActivityCenter?
+    var toolID = ""
 
     private var connection: TCPConnection?
     private var readTask: Task<Void, Never>?
@@ -86,7 +93,17 @@ struct TelnetTool: NetworkTool {
 
 struct TelnetView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = TelnetViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: TelnetViewModel {
+        sessions.session("telnet") {
+            let model = TelnetViewModel()
+            model.activity = activity
+            model.toolID = "telnet"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -106,11 +123,11 @@ struct TelnetView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.telnet.title")))
         .navigationBarTitleDisplayMode(.large)
-        .onDisappear { viewModel.disconnect() }
     }
 
     private var connectionSection: some View {
-        SectionCard(title: L10n("telnet.input.title"), systemImage: "network") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("telnet.input.title"), systemImage: "network") {
             HStack(spacing: Spacing.md) {
                 TextField(L10nString("telnet.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)
@@ -153,7 +170,8 @@ struct TelnetView: View {
     }
 
     private var terminalSection: some View {
-        SectionCard(title: L10n("telnet.section.terminal"), systemImage: "terminal") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("telnet.section.terminal"), systemImage: "terminal") {
             Text(viewModel.transcript.isEmpty ? " " : viewModel.transcript)
                 .font(AppTypography.monoCaption)
                 .foregroundStyle(theme.success)
