@@ -626,6 +626,8 @@
 "range.section.progress" = "التقدّم";
 "speed.action.restart" = "اختبر مجدداً";
 "speed.action.start" = "ابدأ الاختبار";
+"speed.history.clear" = "مسح السجل";
+"speed.history.title" = "السجل";
 "speed.metric.download" = "التنزيل";
 "speed.metric.jitter" = "التذبذب";
 "speed.metric.ping" = "زمن الاستجابة";

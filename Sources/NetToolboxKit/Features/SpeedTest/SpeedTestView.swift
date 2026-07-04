@@ -15,6 +15,7 @@ final class SpeedTestViewModel {
 
     var activity: ActivityCenter?
     var toolID = ""
+    var history: SpeedHistoryStore?
 
     private let engine = CloudflareSpeedEngine()
 
@@ -42,6 +43,9 @@ final class SpeedTestViewModel {
                 phase = .failed(error.localizedDescription)
                 errorMessage = error.localizedDescription
             }
+        }
+        if phase == .finished, download > 0 || upload > 0 {
+            history?.add(download: download, upload: upload, latency: latency, jitter: jitter)
         }
         activity?.stop(toolID)
     }
@@ -92,12 +96,14 @@ struct SpeedTestView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions
     @Environment(ActivityCenter.self) private var activity
+    @Environment(SpeedHistoryStore.self) private var history
 
     private var viewModel: SpeedTestViewModel {
         sessions.session("speed-test") {
             let model = SpeedTestViewModel()
             model.activity = activity
             model.toolID = "speed-test"
+            model.history = history
             return model
         }
     }
@@ -109,6 +115,9 @@ struct SpeedTestView: View {
                 metricsCard
                 if let server = viewModel.server, !server.isp.isEmpty || !server.ip.isEmpty {
                     serverCard(server)
+                }
+                if !history.records.isEmpty {
+                    historyCard
                 }
                 Text(L10n("speed.note"))
                     .font(AppTypography.caption)
@@ -247,6 +256,50 @@ struct SpeedTestView: View {
             RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous)
                 .fill(theme.surfaceElevated)
         )
+    }
+
+    // MARK: - History
+
+    private var historyCard: some View {
+        SectionCard(title: L10n("speed.history.title"), systemImage: "clock.arrow.circlepath") {
+            let chronological = history.records.reversed().map { $0.download }
+            if chronological.count > 1 {
+                Sparkline(values: Array(chronological), height: 56)
+                    .environment(\.layoutDirection, .leftToRight)
+            }
+            ForEach(history.records.prefix(8)) { record in
+                HStack(spacing: Spacing.md) {
+                    Text(record.date.formatted(date: .abbreviated, time: .shortened))
+                        .font(AppTypography.caption)
+                        .foregroundStyle(theme.textSecondary)
+                        .lineLimit(1)
+                    Spacer()
+                    historyValue("arrow.down", record.download, theme.accent)
+                    historyValue("arrow.up", record.upload, theme.mono)
+                    historyValue("timer", record.latency, theme.success)
+                }
+                if record.id != history.records.prefix(8).last?.id {
+                    Divider().overlay(theme.separator)
+                }
+            }
+            Button(role: .destructive) {
+                history.clear()
+            } label: {
+                Label(L10nString("speed.history.clear"), systemImage: "trash")
+                    .font(AppTypography.footnote)
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+
+    private func historyValue(_ icon: String, _ value: Double, _ tint: Color) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: icon).font(.caption2).foregroundStyle(tint)
+            Text(String(format: "%.0f", value))
+                .font(AppTypography.monoCaption)
+                .foregroundStyle(theme.textPrimary)
+                .environment(\.layoutDirection, .leftToRight)
+        }
     }
 
     // MARK: - Server

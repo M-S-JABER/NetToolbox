@@ -25,6 +25,7 @@ public struct NetToolboxRootView: View {
     @State private var savedHosts = SavedHostsStore()
     @State private var sshProfiles = SSHProfilesStore()
     @State private var cameras = CameraStore()
+    @State private var speedHistory = SpeedHistoryStore()
     @State private var activity = ActivityCenter()
     private let toolSessions = ToolSessions()
 
@@ -48,6 +49,7 @@ public struct NetToolboxRootView: View {
             .environment(savedHosts)
             .environment(sshProfiles)
             .environment(cameras)
+            .environment(speedHistory)
             .environment(activity)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)

@@ -626,6 +626,8 @@
 "range.section.progress" = "Progress";
 "speed.action.restart" = "Test again";
 "speed.action.start" = "Start test";
+"speed.history.clear" = "Clear history";
+"speed.history.title" = "History";
 "speed.metric.download" = "Download";
 "speed.metric.jitter" = "Jitter";
 "speed.metric.ping" = "Ping";
