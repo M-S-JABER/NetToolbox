@@ -1,0 +1,80 @@
+# NetToolbox — Status & Roadmap / الحالة وخارطة الطريق
+
+> Living document. Read this first next session. / وثيقة حيّة — اقرأها أولاً في الجلسة القادمة.
+
+Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
+Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
+Latest working tag: **1.12.0** · Tools: **35** · Localization: **en/ar at parity (516 keys)**
+
+---
+
+## 1) How it's built / كيف بُني
+
+- Root is a **Swift package** with library `NetToolboxKit` (iOS 17). The app uses `NetToolboxRootView()`.
+- **Zero external dependencies** — mandatory: Swift Playgrounds on iPad **cannot evaluate a `Package.swift` with remote dependencies** (fails with `Could not decode ContextModel`, breaking the whole package). Everything is native (Network.framework / POSIX / CryptoKit-free / CoreImage / MapKit).
+- **Tool Registry pattern**: add a tool = one type conforming to `NetworkTool` + one line in `ToolRegistry.all`. The home screen builds itself.
+- **Architecture**: light MVVM — `View` + `@Observable` ViewModel + Service/Engine behind a protocol. Pure logic (codecs/engines) is separated and unit-tested.
+- **Localization**: every UI string via `L10n`/`L10nString` pinned to `Bundle.module`; en + ar `.lproj` tables must stay at parity.
+- **Releases**: tags are cut by the `Tag release` GitHub Action (Actions → Run workflow → version), because the sandbox can't push tags. Bump a new tag per change.
+- **Tests**: pure engines covered twice — on-device `EngineTestSuite` (Diagnostics → Engine Self-Tests) and `Tests/NetToolboxKitTests` (`swift test` on macOS).
+
+### Repo checks before every release / فحوص قبل كل إصدار
+- Brace balance across all `.swift`.
+- Localization coverage + en/ar parity (no missing keys, equal counts).
+- No `try!` / `print(` / force-unwrap; unique tool IDs.
+
+---
+
+## 2) What's done / ما أُنجز (35 tools)
+
+**Calculators (8):** Subnet Calculator · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator.
+
+**Diagnostics (17):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test · History · Ping (TCP) · Traceroute (ICMP) · Port Scanner (custom range/list + live progress) · DNS Lookup · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests.
+
+**Local Network (6):** Network Overview · Wi-Fi Info (+ gateway via sysctl + Shortcut buttons) · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN · Wi-Fi QR.
+
+**Professional (4):** Telnet · FTP (passive LIST) · MikroTik RouterOS API · SNMP (GET + Walk, configurable port).
+
+**Design/UX:** dashboard home, live network-status pill, global search with smart input detection, favorites, 6 accent themes, unified history + share, colour-coded categories.
+
+---
+
+## 3) Impossible on iOS — do NOT retry / مستحيل على iOS (لا تُعِد المحاولة)
+
+| Feature | Why blocked |
+|---|---|
+| **SSH / SFTP** | Needs a crypto/transport lib. External libs break the Playgrounds manifest; CryptoKit lacks SSH cipher modes (no AES-CTR / raw AES). Genuinely impossible here. Use Telnet + MikroTik API instead, or build in Xcode on a Mac with Citadel. |
+| **Wi-Fi RSSI / channel / band / Wi-Fi generation / link speed** | No public API on iOS for any app. |
+| **SSID / BSSID inside the app** | Needs the *Access WiFi Information* entitlement + location; a `.swiftpm` can't declare entitlements. Workaround shipped: the **Shortcuts app** (Get Network Details) — Wi-Fi Info has Run/Create buttons for a shortcut named `NetToolbox WiFi`. |
+| **Nearby Wi-Fi scan / packet capture** | Not possible on iOS. |
+| **LAN scan without permission** | Bonjour + ICMP sweep need the Local Network permission; degrade to empty without it. |
+
+---
+
+## 4) Suggested next / اقتراحات الدفعة القادمة (feasible, native)
+
+Ranked by value × low risk:
+
+1. **Saved Hosts** — a store + manager, and a picker to reuse hosts in Ping/Traceroute/Port Scan/SSH-less tools. (Store like `FavoritesStore`.)
+2. **Ping graph** — continuous ping with a simple latency sparkline over time.
+3. **Subnet membership / IP-in-range** — "is 10.0.0.5 inside 10.0.0.0/24?" + CIDR↔range converter (extends `SubnetEngine`).
+4. **mDNS/Bonjour details** — resolve a discovered service to host + port + TXT records (extends LAN Scanner).
+5. **DNS-over-HTTPS (DoH)** — DNS via `https://cloudflare-dns.com/dns-query` as an alternative resolver.
+6. **HTTP request builder** — method/headers/body, show response (like a mini Postman).
+7. **Certificate details+** — full chain, SANs, signature algorithm (extend SSL Checker).
+8. **Export/import settings & history** — a JSON file via ShareLink / file importer.
+9. **MAC vendor from gateway** — read ARP table (sysctl) + OUI lookup to name the router vendor.
+10. **Whois parsing** — extract registrar/created/expires into fields instead of raw text.
+
+---
+
+## 5) Release checklist / قائمة الإصدار
+
+1. Add feature files under `Sources/NetToolboxKit/Features/<Name>/`.
+2. Register in `ToolRegistry.all`.
+3. Add en + ar keys (keep parity).
+4. Add self-tests for any pure logic (both `EngineTestSuite` and XCTest).
+5. Run the repo checks (braces / localization parity / no forbidden patterns / unique IDs).
+6. Commit (Conventional Commits), push the branch.
+7. Actions → **Tag release** → run with the next version → verify the tag exists.
+8. Tell the user the tag + what to test; ask for a screenshot on any build error.

@@ -16,6 +16,7 @@ enum ToolRegistry {
         PasswordGeneratorTool(),
         QRGeneratorTool(),
         // Phase 2 — diagnostics
+        GuideTool(),
         PublicIPTool(),
         IPInfoTool(),
         HostToIPTool(),
