@@ -152,7 +152,13 @@
 "error.wol.invalidMAC" = "Invalid MAC address";
 "error.wol.send" = "Failed to send magic packet";
 "error.wol.socket" = "Could not open UDP socket";
-"mikrotik.done" = "Command completed.";
+"mikrotik.clear" = "Clear";
+"mikrotik.connected" = "Connected:";
+"mikrotik.done" = "done";
+"mikrotik.quick" = "Quick commands";
+"mikrotik.record" = "Record";
+"mikrotik.records" = "records";
+"mikrotik.section.terminal" = "Terminal";
 "mikrotik.input.command" = "Command (e.g. /system/resource/print)";
 "mikrotik.input.host" = "Host or IP";
 "mikrotik.input.password" = "Password";

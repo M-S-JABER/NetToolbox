@@ -152,7 +152,13 @@
 "error.wol.invalidMAC" = "عنوان MAC غير صالح";
 "error.wol.send" = "فشل إرسال الحزمة السحرية";
 "error.wol.socket" = "تعذّر فتح مقبس UDP";
-"mikrotik.done" = "اكتمل الأمر.";
+"mikrotik.clear" = "مسح";
+"mikrotik.connected" = "متصل:";
+"mikrotik.done" = "تم";
+"mikrotik.quick" = "أوامر سريعة";
+"mikrotik.record" = "سجل";
+"mikrotik.records" = "سجلات";
+"mikrotik.section.terminal" = "الطرفية";
 "mikrotik.input.command" = "الأمر (مثل /system/resource/print)";
 "mikrotik.input.host" = "المضيف أو IP";
 "mikrotik.input.password" = "كلمة المرور";
