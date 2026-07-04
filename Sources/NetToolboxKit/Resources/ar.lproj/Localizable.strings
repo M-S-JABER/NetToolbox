@@ -603,15 +603,30 @@
 "range.note" = "يرسل ICMP لكل عنوان في النطاق (بحد 1024). مسح الشبكة المحلية يتطلب إذن الشبكة المحلية في iOS.";
 "range.section.hosts" = "الأجهزة الحيّة";
 "range.section.progress" = "التقدّم";
+"speed.action.restart" = "اختبر مجدداً";
 "speed.action.start" = "ابدأ الاختبار";
-"speed.note" = "ينزّل عيّنة 10 ميغابايت من خادم Cloudflare ويقيس السرعة. تتغيّر النتائج حسب حِمل الخادم والإشارة.";
-"speed.running" = "جارٍ قياس سرعة التنزيل…";
-"speed.section.download" = "التنزيل";
+"speed.metric.download" = "التنزيل";
+"speed.metric.jitter" = "التذبذب";
+"speed.metric.ping" = "زمن الاستجابة";
+"speed.metric.upload" = "الرفع";
+"speed.note" = "يقيس زمن الاستجابة والتذبذب وسرعتَي التنزيل والرفع عبر نقاط Cloudflare المفتوحة — نفس بنية speed.cloudflare.com. يستهلك قدراً كبيراً من البيانات مؤقتاً؛ وتتغيّر النتائج حسب حِمل الخادم والإشارة.";
+"speed.phase.download" = "جارٍ قياس التنزيل…";
+"speed.phase.finished" = "اكتمل الاختبار";
+"speed.phase.latency" = "جارٍ قياس زمن الاستجابة…";
+"speed.phase.upload" = "جارٍ قياس الرفع…";
+"speed.section.results" = "النتائج";
+"speed.server.ip" = "عنوانك IP";
+"speed.server.isp" = "مزوّد الخدمة";
+"speed.server.location" = "الموقع";
+"speed.server.node" = "عقدة الحافة";
+"speed.server.title" = "الخادم والاتصال";
+"speed.unit.mbps" = "ميغابت/ث";
+"speed.unit.ms" = "مللي ثانية";
 "tool.host.subtitle" = "حلّ اسم مضيف إلى عناوين IP";
 "tool.host.title" = "المضيف ← IP";
 "tool.range.subtitle" = "مسح نطاق CIDR لاكتشاف الأجهزة الحيّة";
 "tool.range.title" = "ماسح نطاق IP";
-"tool.speed.subtitle" = "قياس سرعة التنزيل لديك";
+"tool.speed.subtitle" = "تنزيل ورفع وزمن استجابة وتذبذب";
 "tool.speed.title" = "اختبار السرعة";
 
 /* nslookup, email, RBL, port scan pro */

@@ -603,15 +603,30 @@
 "range.note" = "Sends ICMP echo to each address in the CIDR (max 1024). Scanning the local subnet needs the iOS Local Network permission.";
 "range.section.hosts" = "Live hosts";
 "range.section.progress" = "Progress";
+"speed.action.restart" = "Test again";
 "speed.action.start" = "Start test";
-"speed.note" = "Downloads a 10 MB sample from Cloudflare's speed endpoint and measures throughput. Results vary with server load and signal.";
-"speed.running" = "Testing download speed…";
-"speed.section.download" = "Download";
+"speed.metric.download" = "Download";
+"speed.metric.jitter" = "Jitter";
+"speed.metric.ping" = "Ping";
+"speed.metric.upload" = "Upload";
+"speed.note" = "Measures latency, jitter, download and upload against Cloudflare's open speed endpoints — the same infrastructure as speed.cloudflare.com. It briefly uses a lot of bandwidth; results vary with server load and signal.";
+"speed.phase.download" = "Measuring download…";
+"speed.phase.finished" = "Test complete";
+"speed.phase.latency" = "Measuring latency…";
+"speed.phase.upload" = "Measuring upload…";
+"speed.section.results" = "Results";
+"speed.server.ip" = "Your IP";
+"speed.server.isp" = "ISP";
+"speed.server.location" = "Location";
+"speed.server.node" = "Edge node";
+"speed.server.title" = "Server & connection";
+"speed.unit.mbps" = "Mbps";
+"speed.unit.ms" = "ms";
 "tool.host.subtitle" = "Resolve a hostname to its IP addresses";
 "tool.host.title" = "Host → IP";
 "tool.range.subtitle" = "Ping-sweep a CIDR for live hosts";
 "tool.range.title" = "IP Range Scanner";
-"tool.speed.subtitle" = "Measure your download throughput";
+"tool.speed.subtitle" = "Download, upload, ping & jitter";
 "tool.speed.title" = "Speed Test";
 
 /* nslookup, email, RBL, port scan pro */
