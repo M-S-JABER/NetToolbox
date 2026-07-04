@@ -10,6 +10,8 @@ struct PublicIPInfo: Equatable, Sendable {
     let organization: String?
     let asn: Int?
     let timezone: String?
+    var latitude: Double? = nil
+    var longitude: Double? = nil
 }
 
 /// Abstraction so the geo-IP provider can be swapped or mocked in tests.
@@ -39,6 +41,8 @@ struct IpwhoisService: PublicIPProviding {
         let country: String?
         let country_code: String?
         let city: String?
+        let latitude: Double?
+        let longitude: Double?
         let connection: Connection?
         let timezone: Timezone?
     }
@@ -60,7 +64,9 @@ struct IpwhoisService: PublicIPProviding {
             isp: decoded.connection?.isp,
             organization: decoded.connection?.org,
             asn: decoded.connection?.asn,
-            timezone: decoded.timezone?.id
+            timezone: decoded.timezone?.id,
+            latitude: decoded.latitude,
+            longitude: decoded.longitude
         )
     }
 }

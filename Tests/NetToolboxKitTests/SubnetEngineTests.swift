@@ -330,4 +330,13 @@ final class SubnetEngineTests: XCTestCase {
         XCTAssertEqual(InputClassifier.classify("apple.com"), .domain)
         XCTAssertEqual(InputClassifier.classify("hello"), .none)
     }
+
+    func testIPRangeEnumeration() throws {
+        XCTAssertEqual(try IPRangeScanner.hosts(cidr: "192.168.1.0/30"), ["192.168.1.1", "192.168.1.2"])
+        let slash24 = try IPRangeScanner.hosts(cidr: "10.0.0.0/24")
+        XCTAssertEqual(slash24.count, 254)
+        XCTAssertEqual(slash24.first, "10.0.0.1")
+        XCTAssertEqual(slash24.last, "10.0.0.254")
+        XCTAssertThrowsError(try IPRangeScanner.hosts(cidr: "10.0.0.0/16"))
+    }
 }

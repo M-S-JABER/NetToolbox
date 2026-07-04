@@ -84,6 +84,10 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | **HTTP Headers** | Fetches a URL and lists status code, final URL and all response headers. |
 | **Network Overview** | Connection type (live), public IP/ISP and all local interface addresses in one dashboard. |
 | **History** | Unified cross-tool run history (Subnet/DNS/WHOIS/IP), persisted, with copy/share/clear. |
+| **IP Range Scanner** | ICMP ping-sweep of a CIDR (≤1024 hosts) to find live hosts + RTT. Local subnet needs Local Network permission. |
+| **Host → IP** | Resolves a hostname to its IPv4/IPv6 addresses via `getaddrinfo`. |
+| **Speed Test** | Download throughput via Cloudflare's speed endpoint. |
+| **IP Info Lookup** | Now shows the geo-location on a MapKit map with coordinates. |
 | **NTP Time** | SNTP query (pure `NTP` codec) reporting server time and this device's clock offset. |
 | **Text Converter** | Offline Base64 / Hex / URL encode & decode (pure `TextConverter`). |
 | **Wi-Fi QR Code** | Generates a `WIFI:` QR (pure payload builder + CoreImage) to share network access. |

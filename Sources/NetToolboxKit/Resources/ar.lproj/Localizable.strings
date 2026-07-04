@@ -432,3 +432,30 @@
 "tool.history.title" = "السجل";
 "tool.overview.subtitle" = "اتصالك وعناوينك العامة والمحلية بلمحة";
 "tool.overview.title" = "نظرة عامة على الشبكة";
+
+/* Range scanner, host->ip, speed test, coordinates */
+"error.range.invalid" = "نطاق غير صالح";
+"error.range.tooLarge" = "النطاق كبير جداً";
+"host.action.resolve" = "حلّ";
+"host.empty.description" = "أدخل اسم مضيف لرؤية عناوين IPv4 و IPv6.";
+"host.empty.title" = "حلّ اسم مضيف";
+"host.input.placeholder" = "مثل apple.com";
+"host.input.title" = "اسم المضيف";
+"host.notFound" = "تعذّر تحليل اسم المضيف.";
+"host.section.addresses" = "العناوين";
+"ipinfo.coordinates" = "الإحداثيات";
+"range.action.scan" = "امسح النطاق";
+"range.input.title" = "النطاق";
+"range.note" = "يرسل ICMP لكل عنوان في النطاق (بحد 1024). مسح الشبكة المحلية يتطلب إذن الشبكة المحلية في iOS.";
+"range.section.hosts" = "الأجهزة الحيّة";
+"range.section.progress" = "التقدّم";
+"speed.action.start" = "ابدأ الاختبار";
+"speed.note" = "ينزّل عيّنة 10 ميغابايت من خادم Cloudflare ويقيس السرعة. تتغيّر النتائج حسب حِمل الخادم والإشارة.";
+"speed.running" = "جارٍ قياس سرعة التنزيل…";
+"speed.section.download" = "التنزيل";
+"tool.host.subtitle" = "حلّ اسم مضيف إلى عناوين IP";
+"tool.host.title" = "المضيف ← IP";
+"tool.range.subtitle" = "مسح نطاق CIDR لاكتشاف الأجهزة الحيّة";
+"tool.range.title" = "ماسح نطاق IP";
+"tool.speed.subtitle" = "قياس سرعة التنزيل لديك";
+"tool.speed.title" = "اختبار السرعة";

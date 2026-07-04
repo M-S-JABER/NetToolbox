@@ -535,5 +535,17 @@ struct EngineTestSuite: Sendable {
                 expect(InputClassifier.classify("hello"), equals: .none, "plain text")
             )
         },
+        Case(name: "IP range enumeration") {
+            do {
+                let slash30 = try IPRangeScanner.hosts(cidr: "192.168.1.0/30")
+                let slash24 = try IPRangeScanner.hosts(cidr: "10.0.0.0/24")
+                return firstFailure(
+                    expect(slash30, equals: ["192.168.1.1", "192.168.1.2"], "/30 usable hosts"),
+                    expect(slash24.count, equals: 254, "/24 host count"),
+                    expect(slash24.first ?? "", equals: "10.0.0.1", "first host"),
+                    expect(slash24.last ?? "", equals: "10.0.0.254", "last host")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
     ]
 }

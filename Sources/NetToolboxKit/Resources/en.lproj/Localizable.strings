@@ -432,3 +432,30 @@
 "tool.history.title" = "History";
 "tool.overview.subtitle" = "Your connection, public and local IPs at a glance";
 "tool.overview.title" = "Network Overview";
+
+/* Range scanner, host->ip, speed test, coordinates */
+"error.range.invalid" = "Invalid range";
+"error.range.tooLarge" = "Range is too large";
+"host.action.resolve" = "Resolve";
+"host.empty.description" = "Enter a hostname to see its IPv4 and IPv6 addresses.";
+"host.empty.title" = "Resolve a hostname";
+"host.input.placeholder" = "e.g. apple.com";
+"host.input.title" = "Hostname";
+"host.notFound" = "Could not resolve this hostname.";
+"host.section.addresses" = "Addresses";
+"ipinfo.coordinates" = "Coordinates";
+"range.action.scan" = "Scan range";
+"range.input.title" = "Range";
+"range.note" = "Sends ICMP echo to each address in the CIDR (max 1024). Scanning the local subnet needs the iOS Local Network permission.";
+"range.section.hosts" = "Live hosts";
+"range.section.progress" = "Progress";
+"speed.action.start" = "Start test";
+"speed.note" = "Downloads a 10 MB sample from Cloudflare's speed endpoint and measures throughput. Results vary with server load and signal.";
+"speed.running" = "Testing download speed…";
+"speed.section.download" = "Download";
+"tool.host.subtitle" = "Resolve a hostname to its IP addresses";
+"tool.host.title" = "Host → IP";
+"tool.range.subtitle" = "Ping-sweep a CIDR for live hosts";
+"tool.range.title" = "IP Range Scanner";
+"tool.speed.subtitle" = "Measure your download throughput";
+"tool.speed.title" = "Speed Test";

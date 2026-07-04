@@ -1,5 +1,7 @@
 import SwiftUI
 import Observation
+import MapKit
+import CoreLocation
 
 /// Looks up geo/ISP details for an arbitrary IP or hostname (not just the
 /// device's own public IP). Backed by ipwho.is behind a swappable protocol.
@@ -29,6 +31,8 @@ struct IpwhoisLookupService: IPInfoProviding {
         let country: String?
         let country_code: String?
         let city: String?
+        let latitude: Double?
+        let longitude: Double?
         let connection: Connection?
         let timezone: Timezone?
     }
@@ -55,7 +59,9 @@ struct IpwhoisLookupService: IPInfoProviding {
             isp: decoded.connection?.isp,
             organization: decoded.connection?.org,
             asn: decoded.connection?.asn,
-            timezone: decoded.timezone?.id
+            timezone: decoded.timezone?.id,
+            latitude: decoded.latitude,
+            longitude: decoded.longitude
         )
     }
 }
@@ -198,9 +204,27 @@ struct IPInfoView: View {
                 if let timezone = info.timezone {
                     ResultRow(label: L10n("publicip.result.timezone"), value: timezone, isMonospaced: false)
                 }
+                if let latitude = info.latitude, let longitude = info.longitude {
+                    ResultRow(label: L10n("ipinfo.coordinates"), value: String(format: "%.4f, %.4f", latitude, longitude))
+                    locationMap(latitude: latitude, longitude: longitude, label: info.city ?? info.ip)
+                }
                 HStack { Spacer(); ShareButton(text: shareText(info)) }
             }
         }
+    }
+
+    private func locationMap(latitude: Double, longitude: Double, label: String) -> some View {
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        return Map(initialPosition: .region(MKCoordinateRegion(
+            center: coordinate,
+            latitudinalMeters: 40_000,
+            longitudinalMeters: 40_000
+        ))) {
+            Marker(label, coordinate: coordinate)
+        }
+        .frame(height: 200)
+        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous))
+        .allowsHitTesting(false)
     }
 
     private func shareText(_ info: PublicIPInfo) -> String {
