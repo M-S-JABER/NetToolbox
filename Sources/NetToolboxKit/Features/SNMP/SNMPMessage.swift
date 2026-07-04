@@ -105,6 +105,15 @@ enum SNMPMessage {
 
     /// Builds a full SNMP v2c GET request PDU.
     static func encodeGet(oid: String, community: String, requestID: Int) throws -> Data {
+        try encodeRequest(pduTag: 0xA0, oid: oid, community: community, requestID: requestID)
+    }
+
+    /// Builds a GetNextRequest PDU — the basis for SNMP walks.
+    static func encodeGetNext(oid: String, community: String, requestID: Int) throws -> Data {
+        try encodeRequest(pduTag: 0xA1, oid: oid, community: community, requestID: requestID)
+    }
+
+    private static func encodeRequest(pduTag: UInt8, oid: String, community: String, requestID: Int) throws -> Data {
         let oidBytes = try encodeOID(oid)
         let nullValue: [UInt8] = [0x05, 0x00]
         let varbind = encodeTLV(tag: 0x30, content: oidBytes + nullValue)
@@ -114,7 +123,7 @@ enum SNMPMessage {
             + encodeInteger(0)             // error-status
             + encodeInteger(0)             // error-index
             + varbindList
-        let pdu = encodeTLV(tag: 0xA0, content: pduBody)   // GetRequest PDU
+        let pdu = encodeTLV(tag: pduTag, content: pduBody)
 
         let message = encodeInteger(1)     // version = 1 (v2c)
             + encodeOctetString(community)

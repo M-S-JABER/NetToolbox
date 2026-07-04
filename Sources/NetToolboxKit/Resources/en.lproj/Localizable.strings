@@ -514,3 +514,24 @@
 "wifiinfo.section.unavailable" = "Not available on iOS";
 "wifiinfo.unavailable.intro" = "iOS gives no public API for these Wi-Fi radio details — they're blocked for all apps, so the app shows only what the system exposes.";
 "wifiinfo.shortcutHint" = "Tip: to read the SSID and BSSID, use the iOS Shortcuts app — its \"Get Network Details\" action can access them (apps can't). See the Shortcut recipe shared with you.";
+
+/* SNMP walk + FTP */
+"error.ftp.connection" = "Could not connect to the FTP server";
+"error.ftp.login" = "Login failed";
+"error.ftp.passive" = "Passive-mode data connection failed";
+"ftp.action.list" = "List directory";
+"ftp.empty" = "(empty directory)";
+"ftp.input.host" = "Host or IP";
+"ftp.input.password" = "Password";
+"ftp.input.path" = "Path (optional)";
+"ftp.input.title" = "Server";
+"ftp.input.user" = "Username";
+"ftp.note" = "Plaintext FTP over passive mode (PASV). Credentials are sent unencrypted — use only on trusted networks. SFTP needs SSH and isn't available here.";
+"ftp.section.listing" = "Directory";
+"snmp.action.walk" = "Walk subtree";
+"snmp.mode.get" = "GET";
+"snmp.mode.title" = "Mode";
+"snmp.mode.walk" = "Walk";
+"snmp.section.walk" = "Walk results";
+"tool.ftp.subtitle" = "Connect and list a directory (passive mode)";
+"tool.ftp.title" = "FTP";

@@ -360,4 +360,19 @@ final class SubnetEngineTests: XCTestCase {
         XCTAssertNil(PortList.parse("70000"))
         XCTAssertNil(PortList.parse(""))
     }
+
+    func testFTPPasvParsing() {
+        let endpoint = FTP.parsePASV("227 Entering Passive Mode (192,168,1,10,195,80).")
+        XCTAssertEqual(endpoint?.host, "192.168.1.10")
+        XCTAssertEqual(endpoint?.port, 195 * 256 + 80)
+        XCTAssertNil(FTP.parsePASV("500 error"))
+    }
+
+    func testSNMPGetNextEncoding() throws {
+        let get = [UInt8](try SNMPMessage.encodeGet(oid: "1.3.6.1", community: "public", requestID: 1))
+        let next = [UInt8](try SNMPMessage.encodeGetNext(oid: "1.3.6.1", community: "public", requestID: 1))
+        XCTAssertEqual(get.count, next.count)
+        XCTAssertTrue(get.contains(0xA0))
+        XCTAssertTrue(next.contains(0xA1))
+    }
 }

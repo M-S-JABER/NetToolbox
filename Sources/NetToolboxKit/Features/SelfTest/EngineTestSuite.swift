@@ -570,5 +570,27 @@ struct EngineTestSuite: Sendable {
                 expect(PortList.parse("70000") == nil, equals: true, "reject out of range")
             )
         },
+        Case(name: "FTP PASV parsing") {
+            let endpoint = FTP.parsePASV("227 Entering Passive Mode (192,168,1,10,195,80).")
+            return firstFailure(
+                expect(endpoint?.host ?? "", equals: "192.168.1.10", "data host"),
+                expect(endpoint?.port ?? 0, equals: 195 * 256 + 80, "data port"),
+                expect(FTP.parsePASV("500 error") == nil, equals: true, "reject non-PASV")
+            )
+        },
+        Case(name: "SNMP GETNEXT encoding") {
+            do {
+                let getRequest = try SNMPMessage.encodeGet(oid: "1.3.6.1", community: "public", requestID: 1)
+                let nextRequest = try SNMPMessage.encodeGetNext(oid: "1.3.6.1", community: "public", requestID: 1)
+                let getBytes = [UInt8](getRequest)
+                let nextBytes = [UInt8](nextRequest)
+                // Same length; only the PDU tag differs (0xA0 GET vs 0xA1 GETNEXT).
+                return firstFailure(
+                    expect(getBytes.count, equals: nextBytes.count, "same length"),
+                    expect(getBytes.contains(0xA0), equals: true, "GET PDU tag"),
+                    expect(nextBytes.contains(0xA1), equals: true, "GETNEXT PDU tag")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
     ]
 }

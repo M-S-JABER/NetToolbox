@@ -42,6 +42,7 @@ enum ToolRegistry {
         WiFiQRTool(),
         // Phase 3 — professional
         TelnetTool(),
+        FTPTool(),
         MikroTikAPITool(),
         SNMPTool(),
     ]

@@ -75,8 +75,9 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | Tool | Highlights |
 |---|---|
 | **Telnet** | Interactive plaintext TCP terminal with RFC 854 option negotiation (pure `TelnetProtocol`). |
+| **FTP** | Connects, logs in and lists a directory over passive mode (PASV) — plaintext only; SFTP needs SSH. |
 | **MikroTik API** | RouterOS API client (port 8728) — variable-length word framing, plain login (6.43+), send any command and read `!re`/`!done`/`!trap` replies. |
-| **SNMP GET** | SNMP v2c GET over UDP with a hand-rolled BER codec (`SNMPMessage`) and common `sysX` OID presets. |
+| **SNMP** | v2c **GET and Walk** (GETNEXT) over UDP with a hand-rolled BER codec (`SNMPMessage`), configurable port and common OID presets/subtrees. |
 
 **Native utilities**
 
