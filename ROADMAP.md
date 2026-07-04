@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.35.0** · Tools: **47** · Localization: **en/ar at parity (777 keys)**
+Latest working tag: **1.36.0** · Tools: **48** · Localization: **en/ar at parity (794 keys)**
 
 ---
 
@@ -25,11 +25,11 @@ Latest working tag: **1.35.0** · Tools: **47** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (47 tools)
+## 2) What's done / ما أُنجز (48 tools)
 
 **Calculators (9):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator.
 
-**Diagnostics (21):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare) · HTTP Request · History · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
+**Diagnostics (22):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare, history sparkline) · HTTP Request · History · Backup & Restore (export/import all data as JSON) · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
 
 **Local Network (9):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ + grid + recording) · Wi-Fi QR · **WireGuard QR** (Curve25519 keygen + scannable tunnel config).
 

@@ -1,6 +1,21 @@
 /* NetToolbox — ar UI strings. Generated from the former Localizable.xcstrings. */
 
 "app.title" = "عدة الشبكات";
+"backup.action.export" = "إنشاء نسخة احتياطية";
+"backup.action.import" = "الاستعادة من ملف";
+"backup.error.export" = "تعذّر إنشاء ملف النسخة الاحتياطية.";
+"backup.error.import" = "هذا الملف ليس نسخة احتياطية صالحة لـ NetToolbox.";
+"backup.import.done" = "تمت استعادة النسخة الاحتياطية.";
+"backup.import.warning" = "الاستعادة تستبدل مضيفيك المحفوظين وملفات SSH والكاميرات وسجل السرعة الحاليّة.";
+"backup.item.cameras" = "الكاميرات";
+"backup.item.hosts" = "المضيفون المحفوظون";
+"backup.item.speed" = "سجل اختبار السرعة";
+"backup.item.ssh" = "ملفات SSH";
+"backup.note" = "النسخ الاحتياطية ملفات JSON عادية مخزّنة على جهازك. تتضمّن بيانات دخول SSH والكاميرات بنص واضح — احتفظ بالملف في مكان آمن.";
+"backup.section.contents" = "المحتويات";
+"backup.section.done" = "تم";
+"backup.section.export" = "تصدير";
+"backup.section.import" = "استيراد";
 "camera.action.add" = "إضافة كاميرا";
 "camera.action.grid" = "عرض شبكي";
 "camera.action.scan" = "مسح الشبكة";
@@ -362,6 +377,8 @@
 "telnet.input.title" = "الاتصال";
 "telnet.note" = "Telnet غير مشفّر. استخدمه فقط على شبكات محلية موثوقة، وفضّل SSH لأي شيء حسّاس.";
 "telnet.section.terminal" = "الطرفية";
+"tool.backup.subtitle" = "تصدير واستعادة بياناتك كـ JSON";
+"tool.backup.title" = "النسخ والاستعادة";
 "tool.camera.subtitle" = "عرض مباشر وتحكم بكاميرات الـ IP (RTSP/ONVIF)";
 "tool.camera.title" = "كاميرات IP";
 "tool.dns.subtitle" = "استعلام A و AAAA و MX و TXT وغيرها";

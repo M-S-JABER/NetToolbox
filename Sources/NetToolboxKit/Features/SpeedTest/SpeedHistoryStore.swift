@@ -46,6 +46,12 @@ final class SpeedHistoryStore {
         save()
     }
 
+    /// Replaces all records (used when restoring a backup).
+    func replaceAll(_ records: [Record]) {
+        self.records = records
+        save()
+    }
+
     private func save() {
         if let data = try? JSONEncoder().encode(records) {
             UserDefaults.standard.set(data, forKey: key)

@@ -49,6 +49,12 @@ final class SSHProfilesStore {
         persist()
     }
 
+    /// Replaces all profiles (used when restoring a backup).
+    func replaceAll(_ profiles: [Profile]) {
+        self.profiles = profiles
+        persist()
+    }
+
     private func persist() {
         if let data = try? JSONEncoder().encode(profiles) {
             UserDefaults.standard.set(data, forKey: key)

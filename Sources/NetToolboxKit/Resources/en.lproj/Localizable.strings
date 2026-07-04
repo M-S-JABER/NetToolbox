@@ -1,6 +1,21 @@
 /* NetToolbox — en UI strings. Generated from the former Localizable.xcstrings. */
 
 "app.title" = "NetToolbox";
+"backup.action.export" = "Create backup";
+"backup.action.import" = "Restore from file";
+"backup.error.export" = "Could not create the backup file.";
+"backup.error.import" = "That file isn't a valid NetToolbox backup.";
+"backup.import.done" = "Backup restored.";
+"backup.import.warning" = "Restoring replaces your current saved hosts, SSH profiles, cameras and speed history.";
+"backup.item.cameras" = "Cameras";
+"backup.item.hosts" = "Saved hosts";
+"backup.item.speed" = "Speed-test history";
+"backup.item.ssh" = "SSH profiles";
+"backup.note" = "Backups are plain JSON stored on your device. They include SSH and camera credentials in clear text — keep the file somewhere safe.";
+"backup.section.contents" = "Contents";
+"backup.section.done" = "Done";
+"backup.section.export" = "Export";
+"backup.section.import" = "Import";
 "camera.action.add" = "Add camera";
 "camera.action.grid" = "Grid view";
 "camera.action.scan" = "Scan network";
@@ -362,6 +377,8 @@
 "telnet.input.title" = "Connection";
 "telnet.note" = "Telnet is unencrypted. Use only on trusted local networks; prefer SSH for anything sensitive.";
 "telnet.section.terminal" = "Terminal";
+"tool.backup.subtitle" = "Export & restore your data as JSON";
+"tool.backup.title" = "Backup & Restore";
 "tool.camera.subtitle" = "Live view & control of IP cameras (RTSP/ONVIF)";
 "tool.camera.title" = "IP Cameras";
 "tool.dns.subtitle" = "Resolve A, AAAA, MX, TXT and more";

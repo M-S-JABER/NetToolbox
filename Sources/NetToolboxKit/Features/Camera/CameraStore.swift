@@ -69,6 +69,12 @@ final class CameraStore {
         persist()
     }
 
+    /// Replaces all cameras (used when restoring a backup).
+    func replaceAll(_ cameras: [Camera]) {
+        self.cameras = cameras
+        persist()
+    }
+
     private func persist() {
         if let data = try? JSONEncoder().encode(cameras) {
             UserDefaults.standard.set(data, forKey: key)

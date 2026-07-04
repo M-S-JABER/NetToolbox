@@ -39,6 +39,12 @@ final class SavedHostsStore {
         save()
     }
 
+    /// Replaces all hosts (used when restoring a backup).
+    func replaceAll(_ hosts: [Host]) {
+        self.hosts = hosts
+        save()
+    }
+
     private func save() {
         if let data = try? JSONEncoder().encode(hosts) {
             UserDefaults.standard.set(data, forKey: key)

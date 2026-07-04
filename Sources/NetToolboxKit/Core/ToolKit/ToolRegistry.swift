@@ -24,6 +24,7 @@ enum ToolRegistry {
         SpeedTestTool(),
         HTTPRequestTool(),
         HistoryTool(),
+        BackupTool(),
         PingTool(),
         WorldPingTool(),
         TracerouteTool(),
