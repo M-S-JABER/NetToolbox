@@ -113,8 +113,16 @@ final class IPRangeScannerViewModel {
     private(set) var results: [HostResult] = []
     private(set) var scanned = 0
     private(set) var total = 0
-    private(set) var isScanning = false
+    private(set) var isScanning = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isScanning else { return }
+            if isScanning { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var errorMessage: String?
+    private(set) var history: [String] = []
+    var activity: ActivityCenter?
+    var toolID = ""
 
     func scan() async {
         errorMessage = nil
@@ -153,6 +161,8 @@ final class IPRangeScannerViewModel {
             }
         }
         isScanning = false
+        history.insert("\(cidr) — \(results.count) up / \(total)", at: 0)
+        if history.count > 10 { history.removeLast() }
     }
 
     func stop() { isScanning = false }
@@ -174,7 +184,17 @@ struct IPRangeScannerTool: NetworkTool {
 
 struct IPRangeScannerView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = IPRangeScannerViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: IPRangeScannerViewModel {
+        sessions.session("ip-range-scanner") {
+            let model = IPRangeScannerViewModel()
+            model.activity = activity
+            model.toolID = "ip-range-scanner"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -185,6 +205,9 @@ struct IPRangeScannerView: View {
                 }
                 if !viewModel.results.isEmpty {
                     resultsSection
+                }
+                if !viewModel.history.isEmpty {
+                    ToolHistorySection(entries: viewModel.history)
                 }
                 Text(L10n("range.note"))
                     .font(AppTypography.caption)
@@ -200,7 +223,8 @@ struct IPRangeScannerView: View {
     }
 
     private var inputSection: some View {
-        SectionCard(title: L10n("range.input.title"), systemImage: "number") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("range.input.title"), systemImage: "number") {
             TextField("192.168.1.0/24", text: $viewModel.cidr)
                 .textFieldStyle(.roundedBorder)
                 .font(AppTypography.monoBody)

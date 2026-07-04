@@ -126,8 +126,16 @@ final class TracerouteViewModel {
     var host = ""
     var maxHopsText = "20"
     private(set) var hops: [TracerouteHop] = []
-    private(set) var isRunning = false
+    private(set) var isRunning = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isRunning else { return }
+            if isRunning { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var errorMessage: String?
+    private(set) var history: [String] = []
+    var activity: ActivityCenter?
+    var toolID = ""
 
     private let prober: any TracerouteProbing
 
@@ -162,10 +170,12 @@ final class TracerouteViewModel {
         }
 
         isRunning = false
-        if hops.contains(where: { $0.reached }) == false,
-           hops.allSatisfy({ $0.address == nil }) {
+        let reached = hops.contains { $0.reached }
+        if !reached, hops.allSatisfy({ $0.address == nil }) {
             errorMessage = L10nString("traceroute.error.noResponse")
         }
+        history.insert("\(target) — \(hops.count) hops\(reached ? " ✓" : "")", at: 0)
+        if history.count > 10 { history.removeLast() }
     }
 
     /// Rebuilds the ordered hop list from whatever has come back so far,
@@ -194,7 +204,17 @@ struct TracerouteTool: NetworkTool {
 
 struct TracerouteView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = TracerouteViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: TracerouteViewModel {
+        sessions.session("traceroute") {
+            let model = TracerouteViewModel()
+            model.activity = activity
+            model.toolID = "traceroute"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -202,6 +222,9 @@ struct TracerouteView: View {
                 inputSection
                 if !viewModel.hops.isEmpty {
                     hopsSection
+                }
+                if !viewModel.history.isEmpty {
+                    ToolHistorySection(entries: viewModel.history)
                 }
                 Text(L10n("traceroute.note"))
                     .font(AppTypography.caption)
@@ -217,7 +240,8 @@ struct TracerouteView: View {
     }
 
     private var inputSection: some View {
-        SectionCard(title: L10n("traceroute.input.title"), systemImage: "target") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("traceroute.input.title"), systemImage: "target") {
             HStack(spacing: Spacing.md) {
                 TextField(L10nString("traceroute.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)

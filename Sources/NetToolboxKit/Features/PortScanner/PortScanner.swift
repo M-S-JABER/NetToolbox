@@ -102,10 +102,18 @@ final class PortScannerViewModel {
     var preset: Preset = .common
     var customPorts = "1-1024"
     private(set) var results: [PortScanResult] = []
-    private(set) var isScanning = false
+    private(set) var isScanning = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isScanning else { return }
+            if isScanning { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var scannedCount = 0
     private(set) var totalCount = 0
     private(set) var errorMessage: String?
+    private(set) var history: [String] = []
+    var activity: ActivityCenter?
+    var toolID = ""
 
     var openPorts: [PortScanResult] { results }
 
@@ -159,6 +167,8 @@ final class PortScannerViewModel {
             }
         }
         isScanning = false
+        history.insert("\(target) — \(results.count) open / \(totalCount)", at: 0)
+        if history.count > 10 { history.removeLast() }
     }
 
     func stop() { isScanning = false }
@@ -176,7 +186,17 @@ struct PortScannerTool: NetworkTool {
 
 struct PortScannerView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = PortScannerViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: PortScannerViewModel {
+        sessions.session("port-scanner") {
+            let model = PortScannerViewModel()
+            model.activity = activity
+            model.toolID = "port-scanner"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -187,6 +207,9 @@ struct PortScannerView: View {
                 }
                 if !viewModel.results.isEmpty {
                     resultsSection
+                }
+                if !viewModel.history.isEmpty {
+                    ToolHistorySection(entries: viewModel.history)
                 }
                 Text(L10n("portscan.note"))
                     .font(AppTypography.caption)
@@ -202,7 +225,8 @@ struct PortScannerView: View {
     }
 
     private var inputSection: some View {
-        SectionCard(title: L10n("portscan.input.title"), systemImage: "target") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("portscan.input.title"), systemImage: "target") {
             HStack(spacing: Spacing.sm) {
                 TextField(L10nString("portscan.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)

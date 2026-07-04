@@ -45,7 +45,15 @@ struct DiscoveredService: Identifiable, Equatable, Sendable {
 @Observable
 final class LANScannerViewModel {
     private(set) var services: [DiscoveredService] = []
-    private(set) var isScanning = false
+    private(set) var isScanning = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isScanning else { return }
+            if isScanning { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
+    private(set) var history: [String] = []
+    var activity: ActivityCenter?
+    var toolID = ""
 
     private var browsers: [NWBrowser] = []
     private let queue = DispatchQueue(label: "net.lan.browse")
@@ -82,9 +90,14 @@ final class LANScannerViewModel {
     }
 
     func stop() {
+        let wasScanning = isScanning
         browsers.forEach { $0.cancel() }
         browsers = []
         isScanning = false
+        if wasScanning {
+            history.insert("\(services.count) services", at: 0)
+            if history.count > 10 { history.removeLast() }
+        }
     }
 
     private func merge(_ found: [DiscoveredService]) {
@@ -177,7 +190,17 @@ struct LANScannerTool: NetworkTool {
 struct LANScannerView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts
-    @State private var viewModel = LANScannerViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    private var viewModel: LANScannerViewModel {
+        sessions.session("lan-scanner") {
+            let model = LANScannerViewModel()
+            model.activity = activity
+            model.toolID = "lan-scanner"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -187,6 +210,9 @@ struct LANScannerView: View {
                     resultsSection
                 } else if !viewModel.isScanning {
                     emptyHint
+                }
+                if !viewModel.history.isEmpty {
+                    ToolHistorySection(entries: viewModel.history)
                 }
                 Text(L10n("lan.note"))
                     .font(AppTypography.caption)
@@ -199,7 +225,6 @@ struct LANScannerView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.lan.title")))
         .navigationBarTitleDisplayMode(.large)
-        .onDisappear { viewModel.stop() }
     }
 
     private var controlSection: some View {
