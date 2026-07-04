@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.14.0** · Tools: **40** · Localization: **en/ar at parity (577 keys)**
+Latest working tag: **1.14.1** · Tools: **40** · Localization: **en/ar at parity (577 keys)**
 
 ---
 
@@ -31,7 +31,7 @@ Latest working tag: **1.14.0** · Tools: **40** · Localization: **en/ar at pari
 
 **Diagnostics (17):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test · History · Ping (TCP) · Traceroute (ICMP) · Port Scanner (custom range/list + live progress) · DNS Lookup · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests.
 
-**Local Network (6):** Network Overview · Wi-Fi Info (+ gateway via sysctl + Shortcut buttons) · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN · Wi-Fi QR.
+**Local Network (6):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN · Wi-Fi QR.
 
 **Professional (4):** Telnet · FTP (passive LIST) · MikroTik RouterOS API · SNMP (GET + Walk, configurable port).
 
@@ -46,6 +46,7 @@ Latest working tag: **1.14.0** · Tools: **40** · Localization: **en/ar at pari
 | **SSH / SFTP** | Needs a crypto/transport lib. External libs break the Playgrounds manifest; CryptoKit lacks SSH cipher modes (no AES-CTR / raw AES). Genuinely impossible here. Use Telnet + MikroTik API instead, or build in Xcode on a Mac with Citadel. |
 | **Wi-Fi RSSI / channel / band / Wi-Fi generation / link speed** | No public API on iOS for any app. |
 | **SSID / BSSID inside the app** | Needs the *Access WiFi Information* entitlement + location; a `.swiftpm` can't declare entitlements. Workaround shipped: the **Shortcuts app** (Get Network Details) — Wi-Fi Info has Run/Create buttons for a shortcut named `NetToolbox WiFi`. |
+| **Default gateway / router MAC / router vendor** | The routing & ARP tables live in `net/route.h` (`rt_msghdr`, `RTF_GATEWAY`, `RTF_LLINFO`, `RTAX_*`, `NET_RT_DUMP`/`NET_RT_FLAGS`, `PF_ROUTE`). Those symbols are **macOS-only** and are not in the iOS Darwin module — they fail to compile ("cannot find in scope"). No iOS API exposes the gateway. |
 | **Nearby Wi-Fi scan / packet capture** | Not possible on iOS. |
 | **LAN scan without permission** | Bonjour + ICMP sweep need the Local Network permission; degrade to empty without it. |
 
@@ -53,7 +54,7 @@ Latest working tag: **1.14.0** · Tools: **40** · Localization: **en/ar at pari
 
 ## 4) Shipped from the previous suggestion list (1.14.0)
 
-Subnet Membership · WHOIS field parsing · Saved Hosts · HTTP Request builder · DNS-over-HTTPS · Ping sparkline · History JSON export/import · SSL SANs · Bonjour TXT · Router vendor (ARP+OUI). Next ideas below.
+Subnet Membership · WHOIS field parsing · Saved Hosts · HTTP Request builder · DNS-over-HTTPS · Ping sparkline · History JSON export/import · SSL SANs · Bonjour TXT. (Router vendor via ARP was attempted but removed — the routing/ARP tables are macOS-only; see section 3.) Next ideas below.
 
 ## 4b) Suggested next / اقتراحات الدفعة القادمة (feasible, native)
 
