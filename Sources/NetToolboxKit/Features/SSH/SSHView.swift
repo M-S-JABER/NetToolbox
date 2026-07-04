@@ -4,51 +4,115 @@ import Observation
 @MainActor
 @Observable
 final class SSHViewModel {
+    enum Mode: Hashable { case command, shell }
+
     var host = ""
     var portText = "22"
     var username = ""
     var password = ""
+    var privateKey = ""
+    var useKey = false
     var command = "uname -a"
+    var mode: Mode = .command
 
     private(set) var isRunning = false
     private(set) var result: SSHRunResult?
     private(set) var errorMessage: String?
 
-    func run() async {
-        let target = host.trimmingCharacters(in: .whitespaces)
-        guard !target.isEmpty else { return }
-        guard let port = UInt16(portText.trimmingCharacters(in: .whitespaces)) else {
-            errorMessage = L10nString("error.probe.invalidPort")
-            return
-        }
-        let user = username.trimmingCharacters(in: .whitespaces)
-        guard !user.isEmpty else {
-            errorMessage = L10nString("ssh.error.noUser")
-            return
-        }
-        guard let client = SSHClient(host: target, port: port) else {
-            errorMessage = L10nString("error.probe.invalidHost")
-            return
-        }
+    // Interactive shell state.
+    private(set) var shellConnected = false
+    private(set) var shellTranscript = ""
+    var shellInput = ""
+    private var shellClient: SSHClient?
+    private var readTask: Task<Void, Never>?
 
-        isRunning = true
+    private func makeAuth() -> SSHAuth? {
+        if useKey {
+            guard let key = SSHPrivateKey(pem: privateKey) else { return nil }
+            return .key(key)
+        }
+        return .password(password)
+    }
+
+    private func makeClient() -> (SSHClient, SSHAuth)? {
+        let target = host.trimmingCharacters(in: .whitespaces)
+        guard !target.isEmpty else { errorMessage = L10nString("error.probe.invalidHost"); return nil }
+        guard let port = UInt16(portText.trimmingCharacters(in: .whitespaces)) else {
+            errorMessage = L10nString("error.probe.invalidPort"); return nil
+        }
+        guard !username.trimmingCharacters(in: .whitespaces).isEmpty else {
+            errorMessage = L10nString("ssh.error.noUser"); return nil
+        }
+        guard let auth = makeAuth() else { errorMessage = L10nString("sftp.error.key"); return nil }
+        guard let client = SSHClient(host: target, port: port) else {
+            errorMessage = L10nString("error.probe.invalidHost"); return nil
+        }
+        return (client, auth)
+    }
+
+    // MARK: Command mode
+
+    func run() async {
         errorMessage = nil
         result = nil
-        let password = self.password
+        guard let (client, auth) = makeClient() else { return }
+        isRunning = true
+        let user = username.trimmingCharacters(in: .whitespaces)
         let command = self.command
-
         do {
-            result = try await client.run(username: user, password: password, command: command, timeout: 12)
+            result = try await client.run(username: user, auth: auth, command: command, timeout: 12)
         } catch {
-            var message = error.localizedDescription
-            if !client.diagnostics.isEmpty {
-                message += "\n\(client.diagnostics) · stage=\(client.stage)"
-            } else {
-                message += "\n(stage=\(client.stage))"
-            }
-            errorMessage = message
+            errorMessage = error.localizedDescription + "\n\(client.diagnostics) · stage=\(client.stage)"
         }
         isRunning = false
+    }
+
+    // MARK: Shell mode
+
+    func connectShell() async {
+        errorMessage = nil
+        shellTranscript = ""
+        guard let (client, auth) = makeClient() else { return }
+        isRunning = true
+        let user = username.trimmingCharacters(in: .whitespaces)
+        do {
+            try await client.openShell(username: user, auth: auth, timeout: 12)
+            shellClient = client
+            shellConnected = true
+            startReading(client)
+        } catch {
+            errorMessage = error.localizedDescription + "\n\(client.diagnostics) · stage=\(client.stage)"
+        }
+        isRunning = false
+    }
+
+    private func startReading(_ client: SSHClient) {
+        readTask = Task { [weak self] in
+            while !Task.isCancelled {
+                do {
+                    guard let chunk = try await client.readShellChunk() else { break }
+                    await MainActor.run { self?.shellTranscript.append(chunk) }
+                } catch {
+                    break
+                }
+            }
+            await MainActor.run { self?.shellConnected = false }
+        }
+    }
+
+    func sendShell() async {
+        guard let client = shellClient else { return }
+        let line = shellInput + "\n"
+        shellInput = ""
+        try? await client.sendShell(line)
+    }
+
+    func disconnectShell() {
+        readTask?.cancel()
+        readTask = nil
+        shellClient?.close()
+        shellClient = nil
+        shellConnected = false
     }
 }
 
@@ -70,9 +134,18 @@ struct SSHView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 connectionSection
-                if let result = viewModel.result {
-                    hostKeySection(result)
-                    outputSection(result)
+                modeSection
+                if viewModel.mode == .command {
+                    SectionCard(title: L10n("ssh.section.command"), systemImage: "chevron.left.forwardslash.chevron.right") {
+                        runBar
+                        if viewModel.isRunning { ProgressView() }
+                    }
+                    if let result = viewModel.result {
+                        hostKeySection(result)
+                        outputSection(result)
+                    }
+                } else {
+                    shellSection
                 }
                 Text(L10n("ssh.note"))
                     .font(AppTypography.caption)
@@ -85,6 +158,7 @@ struct SSHView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.ssh.title")))
         .navigationBarTitleDisplayMode(.large)
+        .onDisappear { viewModel.disconnectShell() }
     }
 
     private var connectionSection: some View {
@@ -102,7 +176,7 @@ struct SSHView: View {
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)
                     .keyboardType(.numberPad)
-                    .frame(maxWidth: 72)
+                    .frame(maxWidth: 64)
                     .environment(\.layoutDirection, .leftToRight)
             }
 
@@ -113,35 +187,42 @@ struct SSHView: View {
                 .textInputAutocapitalization(.never)
                 .environment(\.layoutDirection, .leftToRight)
 
-            SecureField(L10nString("ssh.input.password"), text: $viewModel.password)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .environment(\.layoutDirection, .leftToRight)
+            Picker(L10nString("ssh.auth.mode"), selection: $viewModel.useKey) {
+                Text(L10n("ssh.auth.password")).tag(false)
+                Text(L10n("ssh.auth.key")).tag(true)
+            }
+            .pickerStyle(.segmented)
 
-            TextField(L10nString("ssh.input.command"), text: $viewModel.command)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .environment(\.layoutDirection, .leftToRight)
-
-            HStack {
-                Button {
-                    Task { await viewModel.run() }
-                } label: {
-                    Label(L10nString("ssh.action.run"), systemImage: "play.fill")
-                        .font(AppTypography.headline)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(viewModel.isRunning)
-
-                if viewModel.isRunning { ProgressView() }
+            if viewModel.useKey {
+                TextEditor(text: $viewModel.privateKey)
+                    .font(AppTypography.monoCaption)
+                    .frame(minHeight: 90)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: CornerRadius.small).strokeBorder(theme.separator)
+                    )
+                Text(L10n("ssh.key.hint"))
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+            } else {
+                SecureField(L10nString("ssh.input.password"), text: $viewModel.password)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .environment(\.layoutDirection, .leftToRight)
             }
 
             if let message = viewModel.errorMessage {
                 Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)
             }
         }
+    }
+
+    private var modeSection: some View {
+        Picker(L10nString("ssh.mode.title"), selection: $viewModel.mode) {
+            Text(L10n("ssh.mode.command")).tag(SSHViewModel.Mode.command)
+            Text(L10n("ssh.mode.shell")).tag(SSHViewModel.Mode.shell)
+        }
+        .pickerStyle(.segmented)
     }
 
     private func hostKeySection(_ result: SSHRunResult) -> some View {
@@ -163,17 +244,81 @@ struct SSHView: View {
             if let status = result.exitStatus {
                 ResultRow(label: L10n("ssh.exitStatus"), value: String(status))
             }
-            Text(result.output.isEmpty ? " " : result.output)
-                .font(AppTypography.monoCaption)
-                .foregroundStyle(theme.success)
-                .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
-                .textSelection(.enabled)
+            terminalText(result.output.isEmpty ? " " : result.output)
+        }
+    }
+
+    @ViewBuilder
+    private var shellSection: some View {
+        SectionCard(title: L10n("ssh.mode.shell"), systemImage: "terminal") {
+            if viewModel.shellConnected {
+                terminalText(viewModel.shellTranscript.isEmpty ? " " : viewModel.shellTranscript)
+                HStack(spacing: Spacing.sm) {
+                    TextField(L10nString("ssh.shell.input"), text: $viewModel.shellInput)
+                        .textFieldStyle(.roundedBorder)
+                        .font(AppTypography.monoBody)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .environment(\.layoutDirection, .leftToRight)
+                        .onSubmit { Task { await viewModel.sendShell() } }
+                    Button {
+                        Task { await viewModel.sendShell() }
+                    } label: {
+                        Image(systemName: "return")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                Button(L10nString("ssh.shell.disconnect"), role: .destructive) {
+                    viewModel.disconnectShell()
+                }
+                .buttonStyle(.bordered)
+            } else {
+                Button {
+                    Task { await viewModel.connectShell() }
+                } label: {
+                    Label(L10nString("ssh.shell.connect"), systemImage: "play.fill")
+                        .font(AppTypography.headline)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(viewModel.isRunning)
+                if viewModel.isRunning { ProgressView() }
+            }
+        }
+    }
+
+    private func terminalText(_ text: String) -> some View {
+        Text(text)
+            .font(AppTypography.monoCaption)
+            .foregroundStyle(theme.success)
+            .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
+            .textSelection(.enabled)
+            .environment(\.layoutDirection, .leftToRight)
+            .padding(Spacing.sm)
+            .background(
+                RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous)
+                    .fill(theme.background)
+            )
+    }
+}
+
+private extension SSHView {
+    // Command run button lives under the mode picker in command mode.
+    var runBar: some View {
+        HStack(spacing: Spacing.sm) {
+            TextField(L10nString("ssh.input.command"), text: $viewModel.command)
+                .textFieldStyle(.roundedBorder)
+                .font(AppTypography.monoBody)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
                 .environment(\.layoutDirection, .leftToRight)
-                .padding(Spacing.sm)
-                .background(
-                    RoundedRectangle(cornerRadius: CornerRadius.small)
-                        .fill(theme.background)
-                )
+                .onSubmit { Task { await viewModel.run() } }
+            Button {
+                Task { await viewModel.run() }
+            } label: {
+                Label(L10nString("ssh.action.run"), systemImage: "play.fill")
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(viewModel.isRunning)
         }
     }
 }

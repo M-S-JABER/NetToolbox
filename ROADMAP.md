@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.19.1** · Tools: **41** · Localization: **en/ar at parity (608 keys)**
+Latest working tag: **1.20.0** · Tools: **42** · Localization: **en/ar at parity (629 keys)**
 
 ---
 
@@ -33,7 +33,7 @@ Latest working tag: **1.19.1** · Tools: **41** · Localization: **en/ar at pari
 
 **Local Network (6):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN · Wi-Fi QR.
 
-**Professional (5):** SSH (native SSH-2, curve25519 + AES-256-GCM, password auth, single-command exec) · Telnet · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port).
+**Professional (6):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**) · SFTP (browse + download over the SSH transport) · Telnet · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port).
 
 **Design/UX (persistent sidebar, 1.17.0):** the home is a `NavigationSplitView` — a `.sidebar` tool list that stays open beside the detail pane on iPad and collapses to a phone-style push on iPhone. Sidebar rows are deliberately plain: a hollow SF Symbol + the tool's short name only (no boxes, tiles, or subtitles). Selecting a tool fills the detail column; swipe a row to favorite. Earlier native-iOS work (1.16.0): the previous inset-grouped `List` (Settings-app idiom) with system search, Settings-style colored icon tiles, a Favorites section, swipe-to-favorite, and a live network-status row. All surfaces use the system grouped-background / label colors (`ColorTokens` → `systemGroupedBackground` etc.), so every screen matches iOS and follows the system Light/Dark automatically (no more forced dark). 6 accent themes still tint controls; global search keeps smart input detection; unified history + share.
 

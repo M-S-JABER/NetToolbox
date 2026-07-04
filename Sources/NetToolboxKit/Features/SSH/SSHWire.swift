@@ -67,6 +67,13 @@ enum SSHWire {
             return slice.reduce(UInt32(0)) { ($0 << 8) | UInt32($1) }
         }
 
+        mutating func readUInt64() -> UInt64? {
+            guard index + 8 <= data.endIndex else { return nil }
+            let slice = data[index..<index + 8]
+            index += 8
+            return slice.reduce(UInt64(0)) { ($0 << 8) | UInt64($1) }
+        }
+
         mutating func readString() -> Data? {
             guard let length = readUInt32() else { return nil }
             let count = Int(length)

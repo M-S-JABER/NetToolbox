@@ -10,6 +10,12 @@ struct SSHRunResult: Sendable {
     var exitStatus: Int?
 }
 
+/// How to authenticate an SSH session.
+enum SSHAuth: Sendable {
+    case password(String)
+    case key(SSHPrivateKey)
+}
+
 enum SSHError: LocalizedError {
     case transport(String)
     case disconnected
@@ -44,10 +50,10 @@ enum SSHError: LocalizedError {
     }
 }
 
-/// A minimal SSH-2 client that opens a session, runs one command, and
-/// returns its output. Key exchange `curve25519-sha256`, cipher
-/// `aes256-gcm@openssh.com`, password auth — all on CryptoKit/Security so
-/// the package keeps zero external dependencies.
+/// A minimal SSH-2 client (curve25519-sha256 + aes256-gcm@openssh.com,
+/// password or ed25519 public-key auth), built entirely on CryptoKit/Security
+/// so the package keeps zero external dependencies. Supports one-shot exec,
+/// SFTP directory listing / download, and a line-oriented interactive shell.
 final class SSHClient: @unchecked Sendable {
     private enum Msg {
         static let disconnect: UInt8 = 1
@@ -73,37 +79,43 @@ final class SSHClient: @unchecked Sendable {
         static let channelEOF: UInt8 = 96
         static let channelClose: UInt8 = 97
         static let channelRequest: UInt8 = 98
+        static let channelSuccess: UInt8 = 99
+        static let channelFailure: UInt8 = 100
     }
 
     private let connection: TCPConnection
     private var inbound: [UInt8] = []
     private var encrypt: SSHGCMCipher?
     private var decrypt: SSHGCMCipher?
-    /// Whether the server's host-key signature over the exchange hash checked
-    /// out — surfaced in a decryption failure to tell "wrong exchange hash"
-    /// (unverified) apart from "wrong key derivation" (verified) when
-    /// diagnosing interop issues.
     private var hostKeyVerified = false
 
-    /// A one-line diagnostic (host-key type, verified flag, fingerprint,
-    /// stage) filled in as the handshake proceeds, so a single screenshot of
-    /// a failure is enough to pinpoint the cause.
     private(set) var diagnostics = ""
     private(set) var stage = "connect"
+    private(set) var fingerprint = ""
+    private(set) var hostKeyTypeName = "?"
+    private var sessionID = Data()
+    /// Buffer for reassembling SFTP packets carried inside channel data.
+    private var sftpBuffer: [UInt8] = []
+    private var shellChannel: UInt32?
 
     init?(host: String, port: UInt16) {
         guard let connection = TCPConnection(host: host, port: port) else { return nil }
         self.connection = connection
     }
 
-    func run(username: String, password: String, command: String, timeout: Double) async throws -> SSHRunResult {
+    func close() { connection.cancel() }
+
+    // MARK: - Handshake (shared by exec, SFTP and shell)
+
+    /// Runs the full transport handshake and user authentication, leaving the
+    /// GCM ciphers active and the session ready for channel operations. Does
+    /// NOT close the connection — callers own the lifecycle.
+    private func establish(username: String, auth: SSHAuth, timeout: Double) async throws {
         switch await connection.open(timeout: timeout) {
         case .success: break
         case .failure(let error): throw SSHError.transport(error.localizedDescription)
         }
-        defer { connection.cancel() }
 
-        // 1) Version exchange.
         let clientVersion = "SSH-2.0-NetToolbox_1.0"
         try await writeRaw(Data((clientVersion + "\r\n").utf8))
         var serverVersion = ""
@@ -115,13 +127,11 @@ final class SSHClient: @unchecked Sendable {
             throw SSHError.unsupportedServer(serverVersion)
         }
 
-        // 2) Algorithm negotiation.
         let clientKexInit = buildKexInit()
         try await sendPacket(clientKexInit)
         let serverKexInit = try await expect(Msg.kexInit)
         try requireCiphers(in: serverKexInit)
 
-        // 3) Curve25519 ECDH.
         let priv = Curve25519.KeyAgreement.PrivateKey()
         let qc = priv.publicKey.rawRepresentation
         var initPayload = Data([Msg.kexECDHInit])
@@ -147,21 +157,19 @@ final class SSHClient: @unchecked Sendable {
             hostKey: hostKey, clientEphemeral: qc, serverEphemeral: qs,
             sharedSecretMPInt: kMPInt
         )
-        let verified = SSHCrypto.verifyHostKey(blob: hostKey, signature: signature, over: exchangeHash)
-        hostKeyVerified = verified
+        hostKeyVerified = SSHCrypto.verifyHostKey(blob: hostKey, signature: signature, over: exchangeHash)
 
         var keyTypeReader = SSHWire.Reader(hostKey)
-        let hostKeyType = keyTypeReader.readStringUTF8() ?? "?"
-        let fingerprint = "SHA256:" + Data(SHA256.hash(data: hostKey)).base64EncodedString()
+        hostKeyTypeName = keyTypeReader.readStringUTF8() ?? "?"
+        fingerprint = "SHA256:" + Data(SHA256.hash(data: hostKey)).base64EncodedString()
             .trimmingCharacters(in: CharacterSet(charactersIn: "="))
         let hHex = exchangeHash.prefix(6).map { String(format: "%02x", $0) }.joined()
-        diagnostics = "SSHv2 host=\(hostKeyType) verified=\(verified) vs=[\(serverVersion)] "
+        diagnostics = "SSHv2 host=\(hostKeyTypeName) verified=\(hostKeyVerified) vs=[\(serverVersion)] "
             + "ic=\(clientKexInit.count) is=\(serverKexInit.count) ks=\(hostKey.count) "
             + "qc=\(qc.count) qs=\(qs.count) K=\(sharedBytes.count) H=\(hHex)"
 
-        // 4) Activate keys.
         stage = "newkeys"
-        let sessionID = exchangeHash
+        sessionID = exchangeHash
         let ivC2S = SSHCrypto.deriveKey(letter: 0x41, length: 12, sharedSecretMPInt: kMPInt, exchangeHash: exchangeHash, sessionID: sessionID)
         let ivS2C = SSHCrypto.deriveKey(letter: 0x42, length: 12, sharedSecretMPInt: kMPInt, exchangeHash: exchangeHash, sessionID: sessionID)
         let keyC2S = SSHCrypto.deriveKey(letter: 0x43, length: 32, sharedSecretMPInt: kMPInt, exchangeHash: exchangeHash, sessionID: sessionID)
@@ -172,47 +180,77 @@ final class SSHClient: @unchecked Sendable {
         encrypt = SSHGCMCipher(key: keyC2S, iv: ivC2S)
         decrypt = SSHGCMCipher(key: keyS2C, iv: ivS2C)
 
-        // 5) Authenticate with a password.
         stage = "service-request"
         var serviceRequest = Data([Msg.serviceRequest])
         SSHWire.putString("ssh-userauth", into: &serviceRequest)
         try await sendPacket(serviceRequest)
         _ = try await expect(Msg.serviceAccept)
         stage = "userauth"
+        try await authenticate(username: username, auth: auth)
+    }
 
-        var authRequest = Data([Msg.userauthRequest])
-        SSHWire.putString(username, into: &authRequest)
-        SSHWire.putString("ssh-connection", into: &authRequest)
-        SSHWire.putString("password", into: &authRequest)
-        authRequest.append(0)                          // FALSE: not changing the password
-        SSHWire.putString(password, into: &authRequest)
-        try await sendPacket(authRequest)
+    /// Password or ed25519 public-key user authentication.
+    private func authenticate(username: String, auth: SSHAuth) async throws {
+        var request = Data([Msg.userauthRequest])
+        SSHWire.putString(username, into: &request)
+        SSHWire.putString("ssh-connection", into: &request)
+        switch auth {
+        case .password(let password):
+            SSHWire.putString("password", into: &request)
+            request.append(0)                          // not changing the password
+            SSHWire.putString(password, into: &request)
+        case .key(let key):
+            SSHWire.putString("publickey", into: &request)
+            request.append(1)                          // with signature
+            SSHWire.putString("ssh-ed25519", into: &request)
+            SSHWire.putString(key.publicKeyBlob, into: &request)
+            // Sign string(session_id) || (the request built so far).
+            var signed = Data()
+            SSHWire.putString(sessionID, into: &signed)
+            signed.append(request)
+            let signature = try key.sign(signed)
+            var signatureBlob = Data()
+            SSHWire.putString("ssh-ed25519", into: &signatureBlob)
+            SSHWire.putString(signature, into: &signatureBlob)
+            SSHWire.putString(signatureBlob, into: &request)
+        }
+        try await sendPacket(request)
 
-        authLoop: while true {
+        while true {
             let payload = try await nextPayload()
             switch payload.first {
-            case Msg.userauthSuccess: break authLoop
+            case Msg.userauthSuccess: return
             case Msg.userauthBanner: continue
             case Msg.userauthFailure: throw SSHError.authFailed
             default: throw SSHError.protocolError
             }
         }
+    }
 
-        // 6) Open a session channel and exec the command.
+    /// Opens a "session" channel and returns the server's channel id.
+    private func openSessionChannel() async throws -> UInt32 {
         stage = "channel"
-        let localChannel: UInt32 = 0
         var open = Data([Msg.channelOpen])
         SSHWire.putString("session", into: &open)
-        SSHWire.putUInt32(localChannel, into: &open)
+        SSHWire.putUInt32(0, into: &open)              // our channel
         SSHWire.putUInt32(1_048_576, into: &open)      // initial window
         SSHWire.putUInt32(32_768, into: &open)         // max packet
         try await sendPacket(open)
 
         let confirm = try await expect(Msg.channelOpenConfirm)
-        var confirmReader = SSHWire.Reader(confirm)
-        _ = confirmReader.readByte()
-        _ = confirmReader.readUInt32()                 // our channel
-        guard let remoteChannel = confirmReader.readUInt32() else { throw SSHError.channelFailed }
+        var reader = SSHWire.Reader(confirm)
+        _ = reader.readByte()
+        _ = reader.readUInt32()                        // our channel
+        guard let remote = reader.readUInt32() else { throw SSHError.channelFailed }
+        return remote
+    }
+
+    // MARK: - Exec
+
+    func run(username: String, auth: SSHAuth, command: String, timeout: Double) async throws -> SSHRunResult {
+        defer { connection.cancel() }
+        try await establish(username: username, auth: auth, timeout: timeout)
+        let remoteChannel = try await openSessionChannel()
 
         var exec = Data([Msg.channelRequest])
         SSHWire.putUInt32(remoteChannel, into: &exec)
@@ -221,7 +259,6 @@ final class SSHClient: @unchecked Sendable {
         SSHWire.putString(command, into: &exec)
         try await sendPacket(exec)
 
-        // 7) Collect output until the channel closes.
         stage = "exec"
         var output = Data()
         var exitStatus: Int?
@@ -260,12 +297,8 @@ final class SSHClient: @unchecked Sendable {
                 break
             }
 
-            // Replenish the flow-control window for long output.
             if sinceAdjust >= 524_288 {
-                var adjust = Data([Msg.channelWindowAdjust])
-                SSHWire.putUInt32(remoteChannel, into: &adjust)
-                SSHWire.putUInt32(UInt32(sinceAdjust), into: &adjust)
-                try await sendPacket(adjust)
+                try await sendWindowAdjust(remoteChannel, UInt32(sinceAdjust))
                 sinceAdjust = 0
             }
         }
@@ -273,10 +306,200 @@ final class SSHClient: @unchecked Sendable {
         return SSHRunResult(
             output: String(decoding: output, as: UTF8.self),
             fingerprint: fingerprint,
-            hostKeyType: hostKeyType,
-            hostKeyVerified: verified,
+            hostKeyType: hostKeyTypeName,
+            hostKeyVerified: hostKeyVerified,
             exitStatus: exitStatus
         )
+    }
+
+    // MARK: - SFTP
+
+    /// Lists a remote directory over the SFTP subsystem (fresh connection).
+    func listDirectory(username: String, auth: SSHAuth, path: String, timeout: Double) async throws -> [SFTPEntry] {
+        defer { connection.cancel() }
+        let channel = try await startSFTP(username: username, auth: auth, timeout: timeout)
+
+        try await sftpSend(channel, SFTPProtocol.openDir(id: 1, path: path))
+        let handleReply = try await sftpRead(channel)
+        guard let handle = SFTPProtocol.parseHandle(handleReply) else { throw SSHError.channelFailed }
+
+        var entries: [SFTPEntry] = []
+        var requestID: UInt32 = 2
+        while true {
+            try await sftpSend(channel, SFTPProtocol.readDir(id: requestID, handle: handle))
+            requestID += 1
+            let reply = try await sftpRead(channel)
+            guard reply.first == SFTPProtocol.name else { break }   // FXP_STATUS (EOF) ends it
+            entries.append(contentsOf: SFTPProtocol.parseName(reply))
+        }
+        try await sftpSend(channel, SFTPProtocol.close(id: requestID, handle: handle))
+
+        return entries
+            .filter { $0.name != "." && $0.name != ".." }
+            .sorted { ($0.isDirectory ? 0 : 1, $0.name.lowercased()) < ($1.isDirectory ? 0 : 1, $1.name.lowercased()) }
+    }
+
+    /// Downloads a remote file over SFTP (fresh connection, capped at ~8 MB).
+    func downloadFile(username: String, auth: SSHAuth, path: String, timeout: Double) async throws -> Data {
+        defer { connection.cancel() }
+        let channel = try await startSFTP(username: username, auth: auth, timeout: timeout)
+
+        try await sftpSend(channel, SFTPProtocol.openFile(id: 1, path: path))
+        let handleReply = try await sftpRead(channel)
+        guard let handle = SFTPProtocol.parseHandle(handleReply) else { throw SSHError.channelFailed }
+
+        var data = Data()
+        var offset: UInt64 = 0
+        var requestID: UInt32 = 2
+        while data.count < 8_000_000 {
+            try await sftpSend(channel, SFTPProtocol.readFile(id: requestID, handle: handle, offset: offset, length: 32_768))
+            requestID += 1
+            let reply = try await sftpRead(channel)
+            guard reply.first == SFTPProtocol.data, let chunk = SFTPProtocol.parseData(reply), !chunk.isEmpty else { break }
+            data.append(chunk)
+            offset += UInt64(chunk.count)
+            if chunk.count < 32_768 { break }
+        }
+        try await sftpSend(channel, SFTPProtocol.close(id: requestID, handle: handle))
+        return data
+    }
+
+    /// Establishes the session, opens a channel, starts the SFTP subsystem and
+    /// completes the SFTP version handshake. Returns the channel id.
+    private func startSFTP(username: String, auth: SSHAuth, timeout: Double) async throws -> UInt32 {
+        try await establish(username: username, auth: auth, timeout: timeout)
+        let channel = try await openSessionChannel()
+        try await requestSubsystem(channel, name: "sftp")
+        stage = "sftp"
+        try await sftpSend(channel, SFTPProtocol.initPacket(version: 3))
+        _ = try await sftpRead(channel)                // FXP_VERSION
+        return channel
+    }
+
+    private func requestSubsystem(_ channel: UInt32, name: String) async throws {
+        var request = Data([Msg.channelRequest])
+        SSHWire.putUInt32(channel, into: &request)
+        SSHWire.putString("subsystem", into: &request)
+        request.append(1)                              // want_reply
+        SSHWire.putString(name, into: &request)
+        try await sendPacket(request)
+
+        while true {
+            let payload = try await nextPayload()
+            switch payload.first {
+            case Msg.channelSuccess: return
+            case Msg.channelFailure: throw SSHError.channelFailed
+            default: continue                          // window adjust etc.
+            }
+        }
+    }
+
+    /// Wraps an SFTP packet in a CHANNEL_DATA message.
+    private func sftpSend(_ channel: UInt32, _ packet: Data) async throws {
+        var data = Data([Msg.channelData])
+        SSHWire.putUInt32(channel, into: &data)
+        SSHWire.putString(packet, into: &data)
+        try await sendPacket(data)
+    }
+
+    /// Reads one complete SFTP packet (its 4-byte length stripped) from the
+    /// stream of channel-data messages.
+    private func sftpRead(_ channel: UInt32) async throws -> Data {
+        while true {
+            if sftpBuffer.count >= 4 {
+                let length = (Int(sftpBuffer[0]) << 24) | (Int(sftpBuffer[1]) << 16)
+                    | (Int(sftpBuffer[2]) << 8) | Int(sftpBuffer[3])
+                if length >= 0, sftpBuffer.count >= 4 + length {
+                    let packet = Data(sftpBuffer[4..<4 + length])
+                    sftpBuffer.removeFirst(4 + length)
+                    return packet
+                }
+            }
+            let payload = try await nextPayload()
+            guard let code = payload.first else { continue }
+            var reader = SSHWire.Reader(payload)
+            _ = reader.readByte()
+            switch code {
+            case Msg.channelData:
+                _ = reader.readUInt32()
+                if let chunk = reader.readString() {
+                    sftpBuffer.append(contentsOf: chunk)
+                    try await sendWindowAdjust(channel, UInt32(chunk.count))
+                }
+            case Msg.channelClose, Msg.channelEOF:
+                throw SSHError.channelFailed
+            default:
+                break
+            }
+        }
+    }
+
+    // MARK: - Interactive shell (line oriented)
+
+    /// Opens a pty + shell channel and leaves the session running. Drive it
+    /// with `readShellChunk()` (a background reader) and `sendShell(_:)`.
+    func openShell(username: String, auth: SSHAuth, timeout: Double) async throws {
+        try await establish(username: username, auth: auth, timeout: timeout)
+        let channel = try await openSessionChannel()
+        shellChannel = channel
+
+        var pty = Data([Msg.channelRequest])
+        SSHWire.putUInt32(channel, into: &pty)
+        SSHWire.putString("pty-req", into: &pty)
+        pty.append(0)                                  // want_reply = false
+        SSHWire.putString("xterm", into: &pty)
+        SSHWire.putUInt32(80, into: &pty)              // columns
+        SSHWire.putUInt32(24, into: &pty)              // rows
+        SSHWire.putUInt32(0, into: &pty)               // width px
+        SSHWire.putUInt32(0, into: &pty)               // height px
+        SSHWire.putString(Data([0]), into: &pty)       // empty terminal modes (TTY_OP_END)
+        try await sendPacket(pty)
+
+        var shell = Data([Msg.channelRequest])
+        SSHWire.putUInt32(channel, into: &shell)
+        SSHWire.putString("shell", into: &shell)
+        shell.append(0)                                // want_reply = false
+        try await sendPacket(shell)
+        stage = "shell"
+    }
+
+    /// Blocks until the next chunk of shell output arrives; returns nil when
+    /// the channel closes. Called only from a single background reader task.
+    func readShellChunk() async throws -> String? {
+        guard shellChannel != nil else { return nil }
+        while true {
+            let payload = try await nextPayload()
+            guard let code = payload.first else { continue }
+            var reader = SSHWire.Reader(payload)
+            _ = reader.readByte()
+            switch code {
+            case Msg.channelData, Msg.channelExtData:
+                if code == Msg.channelExtData { _ = reader.readUInt32() }
+                _ = reader.readUInt32()
+                if let chunk = reader.readString() { return String(decoding: chunk, as: UTF8.self) }
+            case Msg.channelClose, Msg.channelEOF:
+                return nil
+            default:
+                continue
+            }
+        }
+    }
+
+    /// Sends user input to the shell. Called only from the UI task, never
+    /// concurrently with another send.
+    func sendShell(_ text: String) async throws {
+        guard let channel = shellChannel else { return }
+        var data = Data([Msg.channelData])
+        SSHWire.putUInt32(channel, into: &data)
+        SSHWire.putString(Data(text.utf8), into: &data)
+        try await sendPacket(data)
+    }
+
+    private func sendWindowAdjust(_ channel: UInt32, _ bytes: UInt32) async throws {
+        var adjust = Data([Msg.channelWindowAdjust])
+        SSHWire.putUInt32(channel, into: &adjust)
+        SSHWire.putUInt32(bytes, into: &adjust)
+        try await sendPacket(adjust)
     }
 
     // MARK: - KEXINIT
