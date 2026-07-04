@@ -245,6 +245,13 @@
 "dns.input.type" = "نوع السجل";
 "dns.noRecords" = "لم تُرجع أي سجلات من هذا النوع.";
 "dns.section.answers" = "الإجابات";
+"dnscompare.action.run" = "قارن المخدّمات";
+"dnscompare.agree" = "كل المخدّمات متطابقة";
+"dnscompare.disagree" = "المخدّمات مختلفة — قد يكون تأخّر انتشار أو ترشيح";
+"dnscompare.empty" = "لا سجلات";
+"dnscompare.input.title" = "الاستعلام";
+"dnscompare.note" = "يستعلم من Cloudflare وGoogle وQuad9 وAdGuard عبر DNS-over-HTTPS ويقارن إجاباتها. الاختلاف قد يعني تأخّر انتشار DNS أو إجابات جغرافية أو ترشيح/تسميم.";
+"dnscompare.section.results" = "حسب المخدّم";
 "error.dns.emptyName" = "أدخل اسم نطاق";
 "error.dns.malformed" = "رد DNS غير صحيح";
 "error.dns.truncated" = "رد DNS مبتور";
@@ -827,6 +834,8 @@
 "httpreq.body" = "المحتوى";
 "httpreq.send" = "أرسل";
 "httpreq.section.body" = "محتوى الاستجابة";
+"tool.dnscompare.subtitle" = "قارن الإجابات عبر مخدّمات عامة";
+"tool.dnscompare.title" = "مقارنة DNS";
 "tool.doh.title" = "DNS عبر HTTPS";
 "tool.doh.subtitle" = "تحليل DNS مشفّر (DoH)";
 "doh.empty.title" = "استعلم عبر HTTPS";

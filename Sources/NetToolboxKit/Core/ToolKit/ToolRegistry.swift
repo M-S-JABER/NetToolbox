@@ -32,6 +32,7 @@ enum ToolRegistry {
         PortScannerTool(),
         DNSLookupTool(),
         DoHTool(),
+        DNSCompareTool(),
         WhoisTool(),
         NSLookupTool(),
         SSLCheckerTool(),

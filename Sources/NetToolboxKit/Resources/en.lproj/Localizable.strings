@@ -245,6 +245,13 @@
 "dns.input.type" = "Record type";
 "dns.noRecords" = "No records of this type were returned.";
 "dns.section.answers" = "Answers";
+"dnscompare.action.run" = "Compare resolvers";
+"dnscompare.agree" = "All resolvers agree";
+"dnscompare.disagree" = "Resolvers disagree — possible propagation lag or filtering";
+"dnscompare.empty" = "No records";
+"dnscompare.input.title" = "Query";
+"dnscompare.note" = "Queries Cloudflare, Google, Quad9 and AdGuard over DNS-over-HTTPS and compares their answers. Divergence can mean DNS propagation lag, geo-based answers, or filtering/poisoning.";
+"dnscompare.section.results" = "By resolver";
 "error.dns.emptyName" = "Enter a domain name";
 "error.dns.malformed" = "Malformed DNS response";
 "error.dns.truncated" = "Truncated DNS response";
@@ -401,6 +408,8 @@
 "tool.crypto.title" = "Hash & JWT";
 "tool.dns.subtitle" = "Resolve A, AAAA, MX, TXT and more";
 "tool.dns.title" = "DNS Lookup";
+"tool.dnscompare.subtitle" = "Compare answers across public resolvers";
+"tool.dnscompare.title" = "DNS Compare";
 "tool.mikrotik.subtitle" = "Run RouterOS API commands over the network";
 "tool.mikrotik.title" = "MikroTik API";
 "tool.ping.subtitle" = "Measure reachability and latency to a host";

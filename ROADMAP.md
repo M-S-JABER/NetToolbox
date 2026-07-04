@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.37.0** · Tools: **49** · Localization: **en/ar at parity (812 keys)**
+Latest working tag: **1.38.0** · Tools: **50** · Localization: **en/ar at parity (821 keys)**
 
 ---
 
@@ -25,11 +25,11 @@ Latest working tag: **1.37.0** · Tools: **49** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (49 tools)
+## 2) What's done / ما أُنجز (50 tools)
 
 **Calculators (10):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator · Hash & JWT (MD5/SHA + JWT decode, CryptoKit).
 
-**Diagnostics (22):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare, history sparkline) · HTTP Request · History · Backup & Restore (export/import all data as JSON) · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
+**Diagnostics (23):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare, history sparkline) · HTTP Request · History · Backup & Restore (export/import all data as JSON) · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · DNS Compare (4 public resolvers, agreement check) · WHOIS · nslookup · SSL/TLS Checker (SANs) · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
 
 **Local Network (9):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ + grid + recording) · Wi-Fi QR · **WireGuard QR** (Curve25519 keygen + scannable tunnel config).
 
