@@ -23,6 +23,8 @@ public struct NetToolboxRootView: View {
     @State private var favorites = FavoritesStore()
     @State private var history = HistoryStore()
     @State private var savedHosts = SavedHostsStore()
+    @State private var activity = ActivityCenter()
+    private let toolSessions = ToolSessions()
 
     /// - Parameter theme: pass a custom `Theme` to force one look and hide
     ///   the built-in theme picker's effect; omit to let the user choose.
@@ -42,6 +44,8 @@ public struct NetToolboxRootView: View {
             .environment(favorites)
             .environment(history)
             .environment(savedHosts)
+            .environment(activity)
+            .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)
             // Native iOS look: follow the system Light/Dark appearance.
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])

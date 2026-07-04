@@ -11,8 +11,20 @@ final class PingViewModel {
 
     private(set) var attempts: [PingAttempt] = []
     private(set) var summary: PingSummary?
-    private(set) var isRunning = false
+    private(set) var isRunning = false {
+        didSet {
+            guard !toolID.isEmpty, oldValue != isRunning else { return }
+            if isRunning { activity?.start(toolID) } else { activity?.stop(toolID) }
+        }
+    }
     private(set) var errorMessage: String?
+    /// This tool's own recent-runs log (newest first), kept while the app runs.
+    private(set) var history: [String] = []
+
+    /// Set once by the view so a running operation can flag itself in the
+    /// sidebar even after you navigate away.
+    var activity: ActivityCenter?
+    var toolID = ""
 
     private let service: any PingProviding
 
@@ -44,6 +56,12 @@ final class PingViewModel {
             summary = TCPPingService.summarize(collected)
         }
         isRunning = false
+
+        if let summary {
+            let average = summary.avgMs.map { String(format: " · %.0f ms", $0) } ?? ""
+            history.insert("\(target) — \(summary.received)/\(summary.sent)\(average)", at: 0)
+            if history.count > 10 { history.removeLast() }
+        }
     }
 
     func stop() {

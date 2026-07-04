@@ -8,6 +8,7 @@ struct RootView: View {
     @Environment(\.theme) private var theme
     @Environment(NetworkStatusMonitor.self) private var status
     @Environment(FavoritesStore.self) private var favorites
+    @Environment(ActivityCenter.self) private var activity
 
     @Binding var themeSelection: String
     @State private var search = ""
@@ -144,15 +145,25 @@ struct RootView: View {
         }
     }
 
-    /// One plain sidebar row: a hollow symbol + the tool's short name only.
+    /// One plain sidebar row: a hollow symbol + the tool's short name, plus a
+    /// live-activity dot when the tool has a running operation.
     @ViewBuilder
     private func row(_ tool: any NetworkTool) -> some View {
-        Label {
-            Text(tool.titleKey)
-                .foregroundStyle(theme.textPrimary)
-        } icon: {
-            Image(systemName: tool.systemImage)
-                .foregroundStyle(theme.accent)
+        HStack {
+            Label {
+                Text(tool.titleKey)
+                    .foregroundStyle(theme.textPrimary)
+            } icon: {
+                Image(systemName: tool.systemImage)
+                    .foregroundStyle(theme.accent)
+            }
+            if activity.running.contains(tool.id) {
+                Spacer()
+                Circle()
+                    .fill(theme.success)
+                    .frame(width: 8, height: 8)
+                    .accessibilityLabel(Text(L10n("activity.running")))
+            }
         }
         .tag(tool.id)
         .swipeActions(edge: .leading, allowsFullSwipe: true) {

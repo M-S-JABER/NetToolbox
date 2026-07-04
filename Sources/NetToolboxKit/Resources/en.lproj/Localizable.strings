@@ -634,6 +634,8 @@
 "hosts.empty.title" = "No saved hosts";
 "hosts.empty.description" = "Add hosts you use often to reuse them across tools.";
 "hosts.saveCurrent" = "Save this host";
+"activity.running" = "Running";
+"history.recent" = "Recent";
 "hosts.saved.pick" = "Saved hosts";
 "tool.httpreq.title" = "HTTP Request";
 "tool.httpreq.subtitle" = "Send a custom HTTP request (mini client)";

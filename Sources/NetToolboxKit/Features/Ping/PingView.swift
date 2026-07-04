@@ -15,7 +15,19 @@ struct PingTool: NetworkTool {
 /// TCP-ping screen: repeated handshake latency measurements to a host/port.
 struct PingView: View {
     @Environment(\.theme) private var theme
-    @State private var viewModel = PingViewModel()
+    @Environment(\.toolSessions) private var sessions
+    @Environment(ActivityCenter.self) private var activity
+
+    /// Retained across navigation so a running ping keeps going when you
+    /// switch tools; its history lives here too.
+    private var viewModel: PingViewModel {
+        sessions.session("ping") {
+            let model = PingViewModel()
+            model.activity = activity
+            model.toolID = "ping"
+            return model
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -26,6 +38,9 @@ struct PingView: View {
                 }
                 if !viewModel.attempts.isEmpty {
                     attemptsSection
+                }
+                if !viewModel.history.isEmpty {
+                    historySection
                 }
                 noteSection
             }
@@ -39,7 +54,8 @@ struct PingView: View {
     }
 
     private var inputSection: some View {
-        SectionCard(title: L10n("ping.input.title"), systemImage: "target") {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("ping.input.title"), systemImage: "target") {
             HStack(spacing: Spacing.sm) {
                 TextField(L10nString("ping.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)
@@ -147,6 +163,19 @@ struct PingView: View {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private var historySection: some View {
+        SectionCard(title: L10n("history.recent"), systemImage: "clock.arrow.circlepath") {
+            ForEach(Array(viewModel.history.enumerated()), id: \.offset) { _, line in
+                Text(line)
+                    .font(AppTypography.monoCaption)
+                    .foregroundStyle(theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+                    .environment(\.layoutDirection, .leftToRight)
             }
         }
     }
