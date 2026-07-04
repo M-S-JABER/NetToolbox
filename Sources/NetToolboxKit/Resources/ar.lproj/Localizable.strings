@@ -513,7 +513,7 @@
 "wifiinfo.section.available" = "المتاح";
 "wifiinfo.section.unavailable" = "غير متاح على iOS";
 "wifiinfo.unavailable.intro" = "لا يوفّر iOS واجهة عامة لتفاصيل راديو الواي فاي هذه — فهي محجوبة عن كل التطبيقات، لذا يعرض التطبيق ما يتيحه النظام فقط.";
-"wifiinfo.shortcutHint" = "نصيحة: لقراءة SSID و BSSID استخدم تطبيق \"الاختصارات\" — إجراء \"الحصول على تفاصيل الشبكة\" يستطيع الوصول إليها (والتطبيقات لا تستطيع). راجع وصفة الاختصار المرسلة إليك.";
+"wifiinfo.shortcutHint" = "يمنع iOS التطبيقات من قراءة SSID/BSSID ومن إنشاء الاختصارات. أنشئ اختصاراً مرة واحدة (تطبيق الاختصارات ← الحصول على تفاصيل الشبكة) بنفس الاسم أدناه — ثم يشغّله هذا الزر. اضغط \"أنشئه\" لفتح اختصار جديد.";
 
 /* SNMP walk + FTP */
 "error.ftp.connection" = "تعذّر الاتصال بخادم FTP";
@@ -535,3 +535,6 @@
 "snmp.section.walk" = "نتائج الـ Walk";
 "tool.ftp.subtitle" = "اتصل واعرض مجلداً (الوضع السلبي)";
 "tool.ftp.title" = "FTP";
+"wifiinfo.section.shortcut" = "اختصار الواي فاي";
+"wifiinfo.runShortcut" = "شغّل اختصار الواي فاي";
+"wifiinfo.createShortcut" = "أنشئه";

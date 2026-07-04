@@ -513,7 +513,7 @@
 "wifiinfo.section.available" = "Available";
 "wifiinfo.section.unavailable" = "Not available on iOS";
 "wifiinfo.unavailable.intro" = "iOS gives no public API for these Wi-Fi radio details — they're blocked for all apps, so the app shows only what the system exposes.";
-"wifiinfo.shortcutHint" = "Tip: to read the SSID and BSSID, use the iOS Shortcuts app — its \"Get Network Details\" action can access them (apps can't). See the Shortcut recipe shared with you.";
+"wifiinfo.shortcutHint" = "iOS blocks apps from reading the SSID/BSSID and building Shortcuts. Create a Shortcut once (Shortcuts app → Get Network Details) named exactly as below — then this button runs it. Tap \"Create it\" to open a new Shortcut.";
 
 /* SNMP walk + FTP */
 "error.ftp.connection" = "Could not connect to the FTP server";
@@ -535,3 +535,6 @@
 "snmp.section.walk" = "Walk results";
 "tool.ftp.subtitle" = "Connect and list a directory (passive mode)";
 "tool.ftp.title" = "FTP";
+"wifiinfo.section.shortcut" = "Wi-Fi Shortcut";
+"wifiinfo.runShortcut" = "Run Wi-Fi Shortcut";
+"wifiinfo.createShortcut" = "Create it";

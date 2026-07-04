@@ -1,6 +1,10 @@
 import SwiftUI
 import Observation
 
+/// The exact name the user should give their Wi-Fi shortcut so the in-app
+/// button can launch it via the `shortcuts://` URL scheme.
+let wifiShortcutName = "NetToolbox WiFi"
+
 @MainActor
 @Observable
 final class WiFiInfoViewModel {
@@ -53,6 +57,7 @@ struct WiFiInfoTool: NetworkTool {
 
 struct WiFiInfoView: View {
     @Environment(\.theme) private var theme
+    @Environment(\.openURL) private var openURL
     @Environment(NetworkStatusMonitor.self) private var status
     @State private var viewModel = WiFiInfoViewModel()
 
@@ -60,6 +65,7 @@ struct WiFiInfoView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 availableCard
+                shortcutCard
                 limitationsCard
             }
             .padding(Spacing.xl)
@@ -112,6 +118,50 @@ struct WiFiInfoView: View {
         }
     }
 
+    private var shortcutCard: some View {
+        SectionCard(title: L10n("wifiinfo.section.shortcut"), systemImage: "wand.and.stars") {
+            Text(L10n("wifiinfo.shortcutHint"))
+                .font(AppTypography.footnote)
+                .foregroundStyle(theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(spacing: Spacing.md) {
+                Button {
+                    runShortcut()
+                } label: {
+                    Label(L10nString("wifiinfo.runShortcut"), systemImage: "play.circle.fill")
+                        .font(AppTypography.headline)
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button {
+                    openShortcutEditor()
+                } label: {
+                    Label(L10nString("wifiinfo.createShortcut"), systemImage: "plus.square.on.square")
+                }
+                .buttonStyle(.bordered)
+            }
+
+            Text(verbatim: "\"\(wifiShortcutName)\"")
+                .font(AppTypography.monoCaption)
+                .foregroundStyle(theme.mono)
+                .environment(\.layoutDirection, .leftToRight)
+        }
+    }
+
+    private func runShortcut() {
+        let encoded = wifiShortcutName.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? wifiShortcutName
+        if let url = URL(string: "shortcuts://run-shortcut?name=\(encoded)") {
+            openURL(url)
+        }
+    }
+
+    private func openShortcutEditor() {
+        if let url = URL(string: "shortcuts://create-shortcut") {
+            openURL(url)
+        }
+    }
+
     private var limitationsCard: some View {
         SectionCard(title: L10n("wifiinfo.section.unavailable"), systemImage: "lock.slash") {
             Text(L10n("wifiinfo.unavailable.intro"))
@@ -125,16 +175,6 @@ struct WiFiInfoView: View {
                 unavailableRow("wifiinfo.metric.generation")
                 unavailableRow("wifiinfo.metric.linkSpeed")
                 unavailableRow("wifiinfo.metric.ssid")
-            }
-            Divider().overlay(theme.separator)
-            HStack(alignment: .top, spacing: Spacing.sm) {
-                Image(systemName: "lightbulb")
-                    .font(.footnote)
-                    .foregroundStyle(theme.accent)
-                Text(L10n("wifiinfo.shortcutHint"))
-                    .font(AppTypography.footnote)
-                    .foregroundStyle(theme.textSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
