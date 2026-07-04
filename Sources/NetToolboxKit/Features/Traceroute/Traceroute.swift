@@ -125,6 +125,8 @@ struct ICMPTraceroute: TracerouteProbing {
 final class TracerouteViewModel {
     var host = ""
     var maxHopsText = "20"
+    var timeoutText = "2"    // per-hop timeout (s)
+    var retryText = "1"      // probes per hop
     private(set) var hops: [TracerouteHop] = []
     private(set) var isRunning = false {
         didSet {
@@ -146,7 +148,9 @@ final class TracerouteViewModel {
     func run() async {
         let target = host.trimmingCharacters(in: .whitespaces)
         guard !target.isEmpty else { return }
-        let maxHops = max(1, min(30, Int(maxHopsText) ?? 20))
+        let maxHops = max(1, min(64, Int(maxHopsText) ?? 20))
+        let timeout = max(0.3, Double(timeoutText) ?? 2)
+        let retries = max(1, min(5, Int(retryText) ?? 1))
         let prober = self.prober
 
         isRunning = true
@@ -157,10 +161,18 @@ final class TracerouteViewModel {
         // sequential walk stalls the whole trace on each silent router (up
         // to `timeout` per hop). Fanning out keeps the total time close to a
         // single hop's timeout, and results stream in as routers answer.
+        // Each hop is retried up to `retries` times until a router answers.
         var collected: [Int: TracerouteHop] = [:]
         await withTaskGroup(of: TracerouteHop.self) { group in
             for ttl in 1...maxHops {
-                group.addTask { await prober.probe(host: target, ttl: ttl, timeout: 2) }
+                group.addTask {
+                    var last = TracerouteHop(ttl: ttl, address: nil, rttMs: nil, reached: false)
+                    for _ in 0..<retries {
+                        last = await prober.probe(host: target, ttl: ttl, timeout: timeout)
+                        if last.address != nil { break }
+                    }
+                    return last
+                }
             }
             for await hop in group {
                 collected[hop.ttl] = hop
@@ -220,6 +232,7 @@ struct TracerouteView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 inputSection
+                optionsSection
                 if !viewModel.hops.isEmpty {
                     hopsSection
                 }
@@ -251,12 +264,6 @@ struct TracerouteView: View {
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
                 SavedHostMenu(host: $viewModel.host)
-                TextField("20", text: $viewModel.maxHopsText)
-                    .textFieldStyle(.roundedBorder)
-                    .font(AppTypography.monoBody)
-                    .keyboardType(.numberPad)
-                    .frame(maxWidth: 70)
-                    .environment(\.layoutDirection, .leftToRight)
             }
 
             HStack {
@@ -279,6 +286,32 @@ struct TracerouteView: View {
             if let message = viewModel.errorMessage {
                 Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)
             }
+        }
+    }
+
+    private var optionsSection: some View {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("ping.section.options"), systemImage: "slider.horizontal.3") {
+            optionRow(L10n("traceroute.opt.timeout"), text: $viewModel.timeoutText)
+            optionRow(L10n("traceroute.opt.retry"), text: $viewModel.retryText)
+            optionRow(L10n("traceroute.opt.maxHops"), text: $viewModel.maxHopsText)
+        }
+    }
+
+    private func optionRow(_ label: LocalizedStringResource, text: Binding<String>) -> some View {
+        HStack {
+            Text(label)
+                .font(AppTypography.body)
+                .foregroundStyle(theme.textPrimary)
+            Spacer()
+            TextField("", text: text)
+                .textFieldStyle(.roundedBorder)
+                .font(AppTypography.monoBody)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 90)
+                .environment(\.layoutDirection, .leftToRight)
+                .disabled(viewModel.isRunning)
         }
     }
 

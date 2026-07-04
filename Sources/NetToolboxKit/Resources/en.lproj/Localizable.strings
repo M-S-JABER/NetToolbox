@@ -386,6 +386,9 @@
 "tool.wifiqr.subtitle" = "Generate a QR code to join a Wi-Fi network";
 "tool.wifiqr.title" = "Wi-Fi QR Code";
 "traceroute.action.start" = "Trace";
+"traceroute.opt.timeout" = "Ping Timeout (s)";
+"traceroute.opt.retry" = "Ping Retry";
+"traceroute.opt.maxHops" = "Maximum Hops";
 "traceroute.error.noResponse" = "No hops replied. This network likely blocks ICMP, or the host is unreachable. Try a different host (e.g. 1.1.1.1) or another Wi-Fi network.";
 "traceroute.input.host" = "Host or IP";
 "traceroute.input.title" = "Target";

@@ -386,6 +386,9 @@
 "tool.wifiqr.subtitle" = "توليد رمز QR للانضمام لشبكة واي فاي";
 "tool.wifiqr.title" = "رمز QR للواي فاي";
 "traceroute.action.start" = "تتبّع";
+"traceroute.opt.timeout" = "مهلة النبض (ث)";
+"traceroute.opt.retry" = "إعادة المحاولة";
+"traceroute.opt.maxHops" = "أقصى عدد قفزات";
 "traceroute.error.noResponse" = "لم تردّ أي قفزة. غالباً تحجب هذه الشبكة بروتوكول ICMP، أو أن المضيف غير قابل للوصول. جرّب مضيفاً آخر (مثل 1.1.1.1) أو شبكة واي فاي أخرى.";
 "traceroute.input.host" = "المضيف أو IP";
 "traceroute.input.title" = "الهدف";
