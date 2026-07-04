@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.28.0** · Tools: **45** · Localization: **en/ar at parity (684 keys)**
+Latest working tag: **1.29.0** · Tools: **46** · Localization: **en/ar at parity (709 keys)**
 
 ---
 
@@ -73,6 +73,22 @@ Ranked by value × low risk:
 10. **Whois parsing** — extract registrar/created/expires into fields instead of raw text.
 
 ---
+
+## 4c) IP Cameras — multi-phase / كاميرات IP (على مراحل)
+
+Native, zero-dep camera stack (no VLCKit/ffmpeg — AVPlayer can't do RTSP).
+- **Phase 1 — Live view (1.29.0, DONE):** `Features/Camera/*`. RTSP-over-TCP
+  client (`RTSPClient`, interleaved RTP, Basic/Digest auth via CryptoKit MD5),
+  `VideoDepacketizer` (H.264 RFC 6184 + H.265 RFC 7798 → access units),
+  `SampleBufferBuilder` (CoreMedia format desc + `CMSampleBuffer`) rendered by
+  `AVSampleBufferDisplayLayer`. `CameraStore` bank, `CameraSession` persists the
+  stream across navigation, fullscreen. Tested on real hardware — expect
+  per-vendor RTP quirks to iterate on.
+- **Phase 2 — ONVIF (next):** SOAP/XML over URLSession + WS-UsernameToken —
+  `GetStreamUri` (auto-fill RTSP path), `GetDeviceInformation`, `GetProfiles`,
+  `GetSnapshotUri`; unicast subnet camera scan (WS-Discovery multicast is
+  blocked without the entitlement, so scan 554/80/8000 instead).
+- **Phase 3 — PTZ:** ONVIF `ContinuousMove`/`Stop`/`GotoPreset` + on-screen pad.
 
 ## 5) Release checklist / قائمة الإصدار
 

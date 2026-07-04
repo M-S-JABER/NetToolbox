@@ -45,6 +45,7 @@ enum ToolRegistry {
         LANScannerTool(),
         IPRangeScannerTool(),
         WakeOnLANTool(),
+        CameraTool(),
         WiFiQRTool(),
         // Phase 3 — professional
         SSHTool(),

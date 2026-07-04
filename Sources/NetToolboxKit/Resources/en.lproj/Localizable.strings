@@ -1,6 +1,25 @@
 /* NetToolbox — en UI strings. Generated from the former Localizable.xcstrings. */
 
 "app.title" = "NetToolbox";
+"camera.action.add" = "Add camera";
+"camera.badge.idle" = "Idle";
+"camera.badge.live" = "LIVE";
+"camera.empty" = "No cameras saved yet. Add one to start a live view.";
+"camera.form.credentials" = "Credentials";
+"camera.form.host" = "Host or IP";
+"camera.form.hint" = "The RTSP path varies by model — e.g. /stream1, /h264, /Streaming/Channels/101, /cam/realmonitor?channel=1&subtype=0. Leave the path as / to use the camera's default. ONVIF (next update) can fill this automatically.";
+"camera.form.identity" = "Identity";
+"camera.form.name" = "Name";
+"camera.form.onvifPort" = "ONVIF port";
+"camera.form.password" = "Password";
+"camera.form.path" = "RTSP stream path";
+"camera.form.rtspPort" = "RTSP port";
+"camera.form.stream" = "Stream";
+"camera.form.title" = "Camera";
+"camera.form.username" = "Username";
+"camera.note" = "Live view speaks RTSP over TCP and decodes H.264/H.265 in hardware — no external player. Streams keep running while you use other tools. Works on cameras you are authorized to access.";
+"camera.section.saved" = "Cameras";
+"camera.status.connecting" = "Connecting…";
 "category.calculators" = "Calculators";
 "category.diagnostics" = "Diagnostics";
 "category.localNetwork" = "Local Network";
@@ -30,6 +49,10 @@
 "common.clear" = "Clear";
 "common.copied" = "Copied";
 "common.copy" = "Copy";
+"common.cancel" = "Cancel";
+"common.delete" = "Delete";
+"common.edit" = "Edit";
+"common.save" = "Save";
 "common.error" = "Error";
 "common.history" = "Recent";
 "common.invalidInput" = "Invalid input";
@@ -304,6 +327,8 @@
 "telnet.input.title" = "Connection";
 "telnet.note" = "Telnet is unencrypted. Use only on trusted local networks; prefer SSH for anything sensitive.";
 "telnet.section.terminal" = "Terminal";
+"tool.camera.subtitle" = "Live view & control of IP cameras (RTSP/ONVIF)";
+"tool.camera.title" = "IP Cameras";
 "tool.dns.subtitle" = "Resolve A, AAAA, MX, TXT and more";
 "tool.dns.title" = "DNS Lookup";
 "tool.mikrotik.subtitle" = "Run RouterOS API commands over the network";

@@ -1,6 +1,25 @@
 /* NetToolbox — ar UI strings. Generated from the former Localizable.xcstrings. */
 
 "app.title" = "عدة الشبكات";
+"camera.action.add" = "إضافة كاميرا";
+"camera.badge.idle" = "متوقف";
+"camera.badge.live" = "مباشر";
+"camera.empty" = "لا توجد كاميرات محفوظة بعد. أضف واحدة لبدء العرض المباشر.";
+"camera.form.credentials" = "بيانات الدخول";
+"camera.form.host" = "المضيف أو الـ IP";
+"camera.form.hint" = "يختلف مسار RTSP حسب الموديل — مثل ‎/stream1‎ أو ‎/h264‎ أو ‎/Streaming/Channels/101‎ أو ‎/cam/realmonitor?channel=1&subtype=0‎. اترك المسار ‎/‎ لاستخدام الافتراضي. يمكن لـ ONVIF (التحديث القادم) تعبئته تلقائياً.";
+"camera.form.identity" = "الهوية";
+"camera.form.name" = "الاسم";
+"camera.form.onvifPort" = "منفذ ONVIF";
+"camera.form.password" = "كلمة المرور";
+"camera.form.path" = "مسار بث RTSP";
+"camera.form.rtspPort" = "منفذ RTSP";
+"camera.form.stream" = "البث";
+"camera.form.title" = "الكاميرا";
+"camera.form.username" = "اسم المستخدم";
+"camera.note" = "العرض المباشر يتحدث RTSP عبر TCP ويفكّ ترميز H.264/H.265 عبر العتاد — دون مشغّل خارجي. يستمر البث أثناء استخدامك لأدوات أخرى. يعمل على الكاميرات المصرّح لك بالوصول إليها.";
+"camera.section.saved" = "الكاميرات";
+"camera.status.connecting" = "جارٍ الاتصال…";
 "category.calculators" = "حاسبات";
 "category.diagnostics" = "تشخيص";
 "category.localNetwork" = "الشبكة المحلية";
@@ -30,6 +49,10 @@
 "common.clear" = "مسح";
 "common.copied" = "تم النسخ";
 "common.copy" = "نسخ";
+"common.cancel" = "إلغاء";
+"common.delete" = "حذف";
+"common.edit" = "تعديل";
+"common.save" = "حفظ";
 "common.error" = "خطأ";
 "common.history" = "السجل الأخير";
 "common.invalidInput" = "إدخال غير صالح";
@@ -304,6 +327,8 @@
 "telnet.input.title" = "الاتصال";
 "telnet.note" = "Telnet غير مشفّر. استخدمه فقط على شبكات محلية موثوقة، وفضّل SSH لأي شيء حسّاس.";
 "telnet.section.terminal" = "الطرفية";
+"tool.camera.subtitle" = "عرض مباشر وتحكم بكاميرات الـ IP (RTSP/ONVIF)";
+"tool.camera.title" = "كاميرات IP";
 "tool.dns.subtitle" = "استعلام A و AAAA و MX و TXT وغيرها";
 "tool.dns.title" = "استعلام DNS";
 "tool.mikrotik.subtitle" = "تنفيذ أوامر RouterOS عبر الشبكة";
