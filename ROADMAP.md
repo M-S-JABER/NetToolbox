@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.33.0** · Tools: **46** · Localization: **en/ar at parity (759 keys)**
+Latest working tag: **1.34.0** · Tools: **47** · Localization: **en/ar at parity (775 keys)**
 
 ---
 
@@ -25,13 +25,13 @@ Latest working tag: **1.33.0** · Tools: **46** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (46 tools)
+## 2) What's done / ما أُنجز (47 tools)
 
 **Calculators (9):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator.
 
 **Diagnostics (21):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare) · HTTP Request · History · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
 
-**Local Network (8):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ) · Wi-Fi QR.
+**Local Network (9):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ + grid + recording) · Wi-Fi QR · **WireGuard QR** (Curve25519 keygen + scannable tunnel config).
 
 **Professional (6):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**, saved profiles) · SFTP (browse + download over the SSH transport) · Telnet (saved addresses) · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port).
 

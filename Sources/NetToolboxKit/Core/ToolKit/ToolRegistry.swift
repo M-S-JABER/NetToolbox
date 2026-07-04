@@ -47,6 +47,7 @@ enum ToolRegistry {
         WakeOnLANTool(),
         CameraTool(),
         WiFiQRTool(),
+        WireGuardQRTool(),
         // Phase 3 — professional
         SSHTool(),
         SFTPTool(),
