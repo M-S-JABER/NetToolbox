@@ -56,6 +56,7 @@ enum ToolRegistry {
         SFTPTool(),
         TelnetTool(),
         FTPTool(),
+        WebSocketTool(),
         MikroTikAPITool(),
         SNMPTool(),
         // BGP / global routing (RIPEstat)

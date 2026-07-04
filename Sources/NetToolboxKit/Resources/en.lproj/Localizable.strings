@@ -428,6 +428,8 @@
 "tool.telnet.title" = "Telnet";
 "tool.whois.subtitle" = "Domain registration and ownership records";
 "tool.whois.title" = "WHOIS";
+"tool.websocket.subtitle" = "Connect and exchange WebSocket frames";
+"tool.websocket.title" = "WebSocket";
 "tool.wireguard.subtitle" = "Generate a scannable WireGuard tunnel config";
 "tool.wireguard.title" = "WireGuard QR";
 "tool.wol.subtitle" = "Send a magic packet to wake a device";
@@ -440,6 +442,17 @@
 "whois.input.title" = "Domain";
 "whois.noData" = "No WHOIS data returned.";
 "whois.section.result" = "WHOIS record";
+"websocket.action.connect" = "Connect";
+"websocket.action.disconnect" = "Disconnect";
+"websocket.error.url" = "Enter a ws:// or wss:// URL.";
+"websocket.input.message" = "Message";
+"websocket.input.title" = "Connection";
+"websocket.input.url" = "WebSocket URL (wss://…)";
+"websocket.note" = "Opens a WebSocket with URLSessionWebSocketTask (native). Send text frames and watch replies live. Default host is a public echo server; the connection keeps running while you use other tools.";
+"websocket.section.transcript" = "Messages";
+"websocket.status.closed" = "Connection closed";
+"websocket.status.connected" = "Connected";
+"websocket.status.connecting" = "Connecting…";
 "wireguard.action.generate" = "Generate keypair";
 "wireguard.field.address" = "Address (interface IP/CIDR)";
 "wireguard.field.allowedIPs" = "Allowed IPs";

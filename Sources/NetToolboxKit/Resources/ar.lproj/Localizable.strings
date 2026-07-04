@@ -426,6 +426,8 @@
 "tool.telnet.title" = "Telnet";
 "tool.whois.subtitle" = "سجلات تسجيل النطاق وملكيته";
 "tool.whois.title" = "WHOIS";
+"tool.websocket.subtitle" = "اتصل وتبادل إطارات WebSocket";
+"tool.websocket.title" = "WebSocket";
 "tool.wireguard.subtitle" = "توليد إعداد نفق WireGuard قابل للمسح";
 "tool.wireguard.title" = "WireGuard QR";
 "tool.wol.subtitle" = "إرسال حزمة سحرية لإيقاظ جهاز";
@@ -438,6 +440,17 @@
 "whois.input.title" = "النطاق";
 "whois.noData" = "لم تُرجع بيانات WHOIS.";
 "whois.section.result" = "سجل WHOIS";
+"websocket.action.connect" = "اتصال";
+"websocket.action.disconnect" = "قطع الاتصال";
+"websocket.error.url" = "أدخل عنوان ws:// أو wss://.";
+"websocket.input.message" = "الرسالة";
+"websocket.input.title" = "الاتصال";
+"websocket.input.url" = "عنوان WebSocket (‎wss://…‎)";
+"websocket.note" = "يفتح WebSocket عبر URLSessionWebSocketTask (أصلي). أرسل إطارات نصية وشاهد الردود مباشرة. المضيف الافتراضي خادم صدى عام؛ ويستمر الاتصال أثناء استخدامك لأدوات أخرى.";
+"websocket.section.transcript" = "الرسائل";
+"websocket.status.closed" = "أُغلق الاتصال";
+"websocket.status.connected" = "متصل";
+"websocket.status.connecting" = "جارٍ الاتصال…";
 "wireguard.action.generate" = "توليد زوج مفاتيح";
 "wireguard.field.address" = "العنوان (IP/CIDR للواجهة)";
 "wireguard.field.allowedIPs" = "العناوين المسموحة";
