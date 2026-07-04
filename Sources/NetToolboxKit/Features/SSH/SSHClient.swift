@@ -431,11 +431,15 @@ final class SSHClient: @unchecked Sendable {
     private func readLine() async throws -> String {
         while true {
             if let newline = inbound.firstIndex(of: 0x0A) {
-                let line = Array(inbound[0...newline])
+                var line = Array(inbound[0...newline])
                 inbound.removeFirst(newline + 1)
-                var text = String(decoding: line, as: UTF8.self)
-                while text.hasSuffix("\n") || text.hasSuffix("\r") { text.removeLast() }
-                return text
+                // Trim trailing CR / LF at the BYTE level. Doing it on the
+                // decoded String is wrong: Swift fuses "\r\n" into one grapheme
+                // cluster, so `hasSuffix("\n")`/`hasSuffix("\r")` both miss it
+                // and the CRLF survives — which corrupted V_S in the exchange
+                // hash and broke key exchange against every \r\n server.
+                while line.last == 0x0A || line.last == 0x0D { line.removeLast() }
+                return String(decoding: line, as: UTF8.self)
             }
             try await fill()
         }
