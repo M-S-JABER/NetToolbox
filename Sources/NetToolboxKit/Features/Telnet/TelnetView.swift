@@ -119,6 +119,7 @@ struct TelnetView: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
                 TextField("23", text: $viewModel.portText)
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)

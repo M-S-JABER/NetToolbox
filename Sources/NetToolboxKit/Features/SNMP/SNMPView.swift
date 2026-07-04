@@ -142,6 +142,7 @@ struct SNMPView: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
                 TextField("161", text: $viewModel.portText)
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)

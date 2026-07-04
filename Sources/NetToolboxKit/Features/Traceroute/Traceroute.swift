@@ -226,6 +226,7 @@ struct TracerouteView: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
                 TextField("20", text: $viewModel.maxHopsText)
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)

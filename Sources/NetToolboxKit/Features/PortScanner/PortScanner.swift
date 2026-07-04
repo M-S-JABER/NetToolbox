@@ -203,13 +203,16 @@ struct PortScannerView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("portscan.input.title"), systemImage: "target") {
-            TextField(L10nString("portscan.input.host"), text: $viewModel.host)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("portscan.input.host"), text: $viewModel.host)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
+            }
 
             Picker(L10nString("portscan.preset.title"), selection: $viewModel.preset) {
                 ForEach(PortScannerViewModel.Preset.allCases) { preset in

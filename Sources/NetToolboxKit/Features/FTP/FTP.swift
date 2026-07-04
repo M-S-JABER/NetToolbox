@@ -174,6 +174,7 @@ struct FTPView: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
                 TextField("21", text: $viewModel.portText)
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)

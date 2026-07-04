@@ -271,6 +271,7 @@ struct MikroTikAPIView: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
                 TextField("8728", text: $viewModel.portText)
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)

@@ -97,6 +97,7 @@ struct SSHView: View {
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
                 TextField("22", text: $viewModel.portText)
                     .textFieldStyle(.roundedBorder)
                     .font(AppTypography.monoBody)

@@ -612,6 +612,8 @@
 "hosts.section.saved" = "المحفوظة";
 "hosts.empty.title" = "لا مضيفات محفوظة";
 "hosts.empty.description" = "أضِف المضيفات التي تستخدمها كثيراً لإعادة استخدامها.";
+"hosts.saveCurrent" = "احفظ هذا المضيف";
+"hosts.saved.pick" = "المضيفون المحفوظون";
 "tool.httpreq.title" = "طلب HTTP";
 "tool.httpreq.subtitle" = "أرسل طلب HTTP مخصّصاً (عميل مصغّر)";
 "httpreq.section.request" = "الطلب";

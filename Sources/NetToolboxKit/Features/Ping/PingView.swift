@@ -40,13 +40,16 @@ struct PingView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("ping.input.title"), systemImage: "target") {
-            TextField(L10nString("ping.input.host"), text: $viewModel.host)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("ping.input.host"), text: $viewModel.host)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
+            }
 
             HStack(spacing: Spacing.md) {
                 labeledField(L10n("ping.input.port"), text: $viewModel.portText)
