@@ -16,6 +16,7 @@ enum ToolRegistry {
         TextConverterTool(),
         PasswordGeneratorTool(),
         QRGeneratorTool(),
+        CryptoToolboxTool(),
         // Phase 2 — diagnostics
         GuideTool(),
         PublicIPTool(),

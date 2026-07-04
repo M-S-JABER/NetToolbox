@@ -59,7 +59,7 @@ struct EngineTestSuite: Sendable {
 
     // MARK: - Test vectors
 
-    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases + sshCases + curve25519Cases
+    static let allCases: [Case] = ipv4Cases + ipv6Cases + macCases + codecCases + sshCases + curve25519Cases + cryptoCases + featureCases
 
     /// Parses a lowercase hex string into bytes (test helper).
     private static func hexBytes(_ string: String) -> [UInt8] {
@@ -621,6 +621,86 @@ struct EngineTestSuite: Sendable {
                     expect(nextBytes.contains(0xA1), equals: true, "GETNEXT PDU tag")
                 )
             } catch { return "unexpected error: \(error)" }
+        },
+    ]
+
+    private static let cryptoCases: [Case] = [
+        Case(name: "Hash known-answer vectors") {
+            let hashes = CryptoTools.hashes(of: "abc")
+            return firstFailure(
+                expect(hashes.md5, equals: "900150983cd24fb0d6963f7d28e17f72", "MD5(abc)"),
+                expect(hashes.sha1, equals: "a9993e364706816aba3e25717850c26c9cd0d89d", "SHA1(abc)"),
+                expect(hashes.sha256, equals: "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "SHA256(abc)")
+            )
+        },
+        Case(name: "JWT decode (header + payload)") {
+            let token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.sig"
+            guard let jwt = CryptoTools.decodeJWT(token) else { return "JWT did not decode" }
+            return firstFailure(
+                expect(jwt.algorithm, equals: "HS256", "alg"),
+                expect(jwt.payload.contains("John Doe"), equals: true, "payload claim")
+            )
+        },
+        Case(name: "Base64url decoding") {
+            let data = CryptoTools.base64urlDecode("SGVsbG8t"[...]) ?? Data()
+            return expect(String(decoding: data, as: UTF8.self), equals: "Hello-", "base64url")
+        },
+    ]
+
+    private static let featureCases: [Case] = [
+        Case(name: "WireGuard config assembly") {
+            let config = WireGuardQR.config(
+                privateKey: "PRIV", address: "10.0.0.2/32", dns: "1.1.1.1",
+                peerPublicKey: "PUB", presharedKey: "", endpoint: "vpn:51820",
+                allowedIPs: "0.0.0.0/0", keepalive: "25"
+            )
+            let expected = "[Interface]\nPrivateKey = PRIV\nAddress = 10.0.0.2/32\nDNS = 1.1.1.1\n\n[Peer]\nPublicKey = PUB\nEndpoint = vpn:51820\nAllowedIPs = 0.0.0.0/0\nPersistentKeepalive = 25"
+            return firstFailure(
+                expect(config, equals: expected, "config text (empty PSK omitted)"),
+                expect(config.contains("PresharedKey"), equals: false, "no empty PSK line")
+            )
+        },
+        Case(name: "WireGuard Curve25519 key derivation") {
+            let pair = WireGuardQR.generateKeypair()
+            let derived = WireGuardQR.publicKey(for: pair.privateKey) ?? ""
+            return expect(derived, equals: pair.publicKey, "public key matches private")
+        },
+        Case(name: "SDP video parse (H.264)") {
+            let sdp = "v=0\r\nm=video 0 RTP/AVP 96\r\na=rtpmap:96 H264/90000\r\na=fmtp:96 sprop-parameter-sets=Z0IACpZTBYmI,aMljiA==\r\na=control:trackID=1\r\n"
+            guard let media = SDPParser.parseVideo(sdp) else { return "no video media parsed" }
+            return firstFailure(
+                expect(media.codec, equals: .h264, "codec"),
+                expect(media.payloadType, equals: 96, "payload type"),
+                expect(media.control, equals: "trackID=1", "control"),
+                expect(media.parameterSets.count, equals: 2, "SPS+PPS")
+            )
+        },
+        Case(name: "ONVIF profiles parse") {
+            let xml = "<Profiles token=\"P1\"><Name>main</Name><VideoEncoderConfiguration><Resolution><Width>1920</Width><Height>1080</Height></Resolution><Encoding>H264</Encoding></VideoEncoderConfiguration></Profiles>"
+            let parser = ONVIFProfilesParser()
+            parser.run(xml)
+            guard let first = parser.profiles.first else { return "no profile parsed" }
+            return firstFailure(
+                expect(parser.profiles.count, equals: 1, "profile count"),
+                expect(first.token, equals: "P1", "token"),
+                expect(first.name, equals: "main", "name"),
+                expect(first.width ?? 0, equals: 1920, "width"),
+                expect(first.height ?? 0, equals: 1080, "height")
+            )
+        },
+        Case(name: "Backup JSON round-trip") {
+            var backup = AppBackup()
+            backup.hosts = [SavedHostsStore.Host(name: "h", address: "1.2.3.4", notes: "")]
+            backup.cameras = [CameraStore.Camera(name: "cam", host: "10.0.0.9")]
+            guard let data = try? JSONEncoder().encode(backup),
+                  let decoded = try? JSONDecoder().decode(AppBackup.self, from: data) else {
+                return "encode/decode failed"
+            }
+            return firstFailure(
+                expect(decoded.hosts.count, equals: 1, "hosts"),
+                expect(decoded.hosts.first?.address ?? "", equals: "1.2.3.4", "host address"),
+                expect(decoded.cameras.first?.host ?? "", equals: "10.0.0.9", "camera host")
+            )
         },
     ]
 
