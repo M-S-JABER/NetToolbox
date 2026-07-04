@@ -186,7 +186,7 @@ final class SubnetEngineTests: XCTestCase {
     }
 
     func testDNSCompressionPointer() throws {
-        let bytes: [UInt8] = [0x01, 0x61, 0x00, 0xC0, 0x01]
+        let bytes: [UInt8] = [0x01, 0x61, 0x00, 0xC0, 0x00]
         let (name, next) = try DNSMessage.readName(bytes, at: 3)
         XCTAssertEqual(name, "a")
         XCTAssertEqual(next, 5)

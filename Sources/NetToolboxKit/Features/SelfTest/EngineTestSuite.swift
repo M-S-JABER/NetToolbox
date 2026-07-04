@@ -362,8 +362,9 @@ struct EngineTestSuite: Sendable {
             return expect(encoded, equals: [1, 0x61, 2, 0x62, 0x63, 0], "encoded labels")
         },
         Case(name: "DNS name compression pointer") {
-            // "a" at offset 1, then a pointer to it at offset 3.
-            let bytes: [UInt8] = [0x01, 0x61, 0x00, 0xC0, 0x01]
+            // Label "a" at offset 0 (len 0x01, 'a', root 0x00), then a
+            // pointer to it (0xC0 0x00) at offset 3.
+            let bytes: [UInt8] = [0x01, 0x61, 0x00, 0xC0, 0x00]
             do {
                 let (name, next) = try DNSMessage.readName(bytes, at: 3)
                 return firstFailure(
