@@ -33,6 +33,7 @@ struct PingView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 inputSection
+                optionsSection
                 if let summary = viewModel.summary {
                     summarySection(summary)
                 }
@@ -67,9 +68,12 @@ struct PingView: View {
                 SavedHostMenu(host: $viewModel.host)
             }
 
-            HStack(spacing: Spacing.md) {
-                labeledField(L10n("ping.input.port"), text: $viewModel.portText)
-                labeledField(L10n("ping.input.count"), text: $viewModel.countText)
+            if let ip = viewModel.resolvedIP {
+                Text(ip)
+                    .font(AppTypography.monoCaption)
+                    .foregroundStyle(theme.mono)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .environment(\.layoutDirection, .leftToRight)
             }
 
             HStack {
@@ -97,18 +101,37 @@ struct PingView: View {
         }
     }
 
-    private func labeledField(_ label: LocalizedStringResource, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+    private var optionsSection: some View {
+        @Bindable var viewModel = viewModel
+        return SectionCard(title: L10n("ping.section.options"), systemImage: "slider.horizontal.3") {
+            Toggle(L10nString("ping.opt.continuous"), isOn: $viewModel.continuous)
+                .disabled(viewModel.isRunning)
+            optionRow(L10n("ping.opt.count"), text: $viewModel.countText, disabled: viewModel.continuous)
+            optionRow(L10n("ping.opt.period"), text: $viewModel.intervalText)
+            optionRow(L10n("ping.opt.timeout"), text: $viewModel.timeoutText)
+            optionRow(L10n("ping.opt.payload"), text: $viewModel.payloadText)
+            optionRow(L10n("ping.opt.ttl"), text: $viewModel.ttlText)
+            Toggle(L10nString("ping.opt.ipv6"), isOn: $viewModel.preferIPv6)
+                .disabled(viewModel.isRunning)
+        }
+    }
+
+    private func optionRow(_ label: LocalizedStringResource, text: Binding<String>, disabled: Bool = false) -> some View {
+        HStack {
             Text(label)
-                .font(AppTypography.caption)
-                .foregroundStyle(theme.textSecondary)
+                .font(AppTypography.body)
+                .foregroundStyle(theme.textPrimary)
+            Spacer()
             TextField("", text: text)
                 .textFieldStyle(.roundedBorder)
                 .font(AppTypography.monoBody)
-                .keyboardType(.numberPad)
-                .frame(maxWidth: 120)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 90)
                 .environment(\.layoutDirection, .leftToRight)
+                .disabled(disabled || viewModel.isRunning)
         }
+        .opacity(disabled ? 0.5 : 1)
     }
 
     private func summarySection(_ summary: PingSummary) -> some View {
