@@ -37,6 +37,8 @@ struct CameraView: View {
     @State private var snapshotCamera: CameraStore.Camera?
     @State private var isScanning = false
     @State private var isFullscreen = false
+    @State private var isGridPresented = false
+    @State private var recordingShare: ShareableFile?
 
     private var viewModel: CameraViewModel {
         sessions.session("camera") {
@@ -88,6 +90,13 @@ struct CameraView: View {
                     } label: {
                         Label(L10nString("camera.action.scan"), systemImage: "dot.radiowaves.left.and.right")
                     }
+                    if !store.cameras.isEmpty {
+                        Button {
+                            isGridPresented = true
+                        } label: {
+                            Label(L10nString("camera.action.grid"), systemImage: "square.grid.2x2")
+                        }
+                    }
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -111,6 +120,15 @@ struct CameraView: View {
         .fullScreenCover(isPresented: $isFullscreen) {
             fullscreenPlayer
         }
+        .fullScreenCover(isPresented: $isGridPresented) {
+            CameraGridView()
+        }
+        .sheet(item: $recordingShare) { item in
+            RecordingShareSheet(url: item.url)
+        }
+        .onChange(of: viewModel.session.lastRecordingURL) { _, url in
+            if let url { recordingShare = ShareableFile(url: url) }
+        }
     }
 
     // MARK: - Player
@@ -125,6 +143,13 @@ struct CameraView: View {
             HStack(spacing: Spacing.md) {
                 phaseBadge
                 Spacer()
+                Button {
+                    viewModel.session.toggleRecording()
+                } label: {
+                    Image(systemName: viewModel.session.isRecording ? "stop.circle.fill" : "record.circle")
+                        .foregroundStyle(viewModel.session.isRecording ? Color.red : theme.accent)
+                }
+                .disabled(!viewModel.session.isActive)
                 if selectedCamera?.snapshotURI?.isEmpty == false {
                     Button {
                         snapshotCamera = selectedCamera
@@ -168,6 +193,19 @@ struct CameraView: View {
             Color.black
             CameraPlayerView(session: viewModel.session)
             phaseOverlay
+            if viewModel.session.isRecording {
+                HStack(spacing: Spacing.xs) {
+                    Circle().fill(Color.red).frame(width: 10, height: 10)
+                    Text(L10n("camera.badge.rec"))
+                        .font(AppTypography.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, Spacing.sm)
+                .padding(.vertical, Spacing.xs)
+                .background(Capsule().fill(.black.opacity(0.5)))
+                .padding(Spacing.md)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
         }
     }
 

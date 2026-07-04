@@ -1,6 +1,57 @@
 import SwiftUI
 import UIKit
 
+/// Identifiable wrapper so a recorded file URL can drive a `.sheet(item:)`.
+struct ShareableFile: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
+/// Presents the finished recording with a share/save action.
+struct RecordingShareSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.theme) private var theme
+
+    let url: URL
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: Spacing.lg) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 52))
+                    .foregroundStyle(theme.success)
+                Text(L10n("camera.record.title"))
+                    .font(AppTypography.headline)
+                    .foregroundStyle(theme.textPrimary)
+                Text(url.lastPathComponent)
+                    .font(AppTypography.monoCaption)
+                    .foregroundStyle(theme.textSecondary)
+                    .environment(\.layoutDirection, .leftToRight)
+                ShareLink(item: url) {
+                    Label(L10nString("common.share"), systemImage: "square.and.arrow.up")
+                        .font(AppTypography.headline)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                Text(L10n("camera.record.hint"))
+                    .font(AppTypography.footnote)
+                    .foregroundStyle(theme.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(Spacing.xl)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.background)
+            .navigationTitle(Text(L10n("camera.record.title")))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L10nString("common.done")) { dismiss() }
+                }
+            }
+        }
+    }
+}
+
 /// Add / edit form for a saved camera, with optional ONVIF auto-configuration.
 struct CameraEditorSheet: View {
     @Environment(\.dismiss) private var dismiss

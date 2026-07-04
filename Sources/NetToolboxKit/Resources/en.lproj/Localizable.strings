@@ -2,9 +2,11 @@
 
 "app.title" = "NetToolbox";
 "camera.action.add" = "Add camera";
+"camera.action.grid" = "Grid view";
 "camera.action.scan" = "Scan network";
 "camera.action.snapshot" = "Snapshot";
 "camera.badge.idle" = "Idle";
+"camera.badge.rec" = "REC";
 "camera.badge.live" = "LIVE";
 "camera.empty" = "No cameras saved yet. Add one to start a live view.";
 "camera.form.credentials" = "Credentials";
@@ -19,6 +21,9 @@
 "camera.form.stream" = "Stream";
 "camera.form.title" = "Camera";
 "camera.form.username" = "Username";
+"camera.grid.title" = "All cameras";
+"camera.record.hint" = "Saved to the app's Documents folder. Share to export it to Files, Photos or elsewhere.";
+"camera.record.title" = "Recording saved";
 "camera.note" = "Live view speaks RTSP over TCP and decodes H.264/H.265 in hardware — no external player. Streams keep running while you use other tools. Works on cameras you are authorized to access.";
 "camera.ptz.down" = "Tilt down";
 "camera.ptz.left" = "Pan left";

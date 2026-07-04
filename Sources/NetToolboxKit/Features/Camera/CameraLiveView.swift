@@ -23,7 +23,12 @@ final class CameraSession {
     var toolID = ""
     var activity: ActivityCenter?
 
+    private(set) var isRecording = false
+    /// Set when a recording finishes, so the UI can offer to share the file.
+    var lastRecordingURL: URL?
+
     private var client: RTSPClient?
+    private let recorder = CameraRecorder()
     private weak var displayLayer: AVSampleBufferDisplayLayer?
 
     var isActive: Bool {
@@ -68,6 +73,9 @@ final class CameraSession {
     }
 
     func stop() {
+        if recorder.isRecording {
+            Task { let url = await recorder.stop(); isRecording = false; lastRecordingURL = url }
+        }
         client?.stop()
         client = nil
         if isActive { phase = .stopped }
@@ -78,6 +86,19 @@ final class CameraSession {
     func retry() {
         guard let camera else { return }
         play(camera)
+    }
+
+    /// Starts or stops recording the current stream to a file.
+    func toggleRecording() {
+        if recorder.isRecording {
+            Task {
+                let url = await recorder.stop()
+                isRecording = false
+                lastRecordingURL = url
+            }
+        } else if recorder.start() {
+            isRecording = true
+        }
     }
 
     private func apply(_ status: RTSPClient.Status) {
@@ -96,6 +117,7 @@ final class CameraSession {
     }
 
     private func enqueue(_ sample: CMSampleBuffer) {
+        if recorder.isRecording { recorder.append(sample) }
         guard let layer = displayLayer else { return }
         if layer.status == .failed { layer.flush() }
         layer.enqueue(sample)

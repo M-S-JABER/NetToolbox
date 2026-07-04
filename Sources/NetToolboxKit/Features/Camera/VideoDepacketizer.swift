@@ -154,7 +154,8 @@ final class VideoDepacketizer {
         defer { pendingNALs.removeAll(keepingCapacity: true) }
         guard let format, pendingNALs.contains(where: { isVCL($0.first ?? 0) }) else { return }
         let pts = CMTime(value: Int64(currentTimestamp ?? 0), timescale: clockRate)
-        if let sample = SampleBufferBuilder.make(accessUnit: pendingNALs, format: format, pts: pts) {
+        let keyframe = pendingNALs.contains { isKeyframe($0.first ?? 0) }
+        if let sample = SampleBufferBuilder.make(accessUnit: pendingNALs, format: format, pts: pts, isKeyframe: keyframe) {
             onSample(sample)
         }
     }
@@ -165,6 +166,14 @@ final class VideoDepacketizer {
         switch codec {
         case .h264: return (1...5).contains(header & 0x1F)
         case .h265: return ((header >> 1) & 0x3F) <= 31
+        }
+    }
+
+    /// True for an IRAP/IDR NAL — a decodable random-access point (keyframe).
+    private func isKeyframe(_ header: UInt8) -> Bool {
+        switch codec {
+        case .h264: return (header & 0x1F) == 5
+        case .h265: return (16...21).contains((header >> 1) & 0x3F)
         }
     }
 

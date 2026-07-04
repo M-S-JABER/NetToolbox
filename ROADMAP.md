@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.32.0** · Tools: **46** · Localization: **en/ar at parity (754 keys)**
+Latest working tag: **1.33.0** · Tools: **46** · Localization: **en/ar at parity (759 keys)**
 
 ---
 
@@ -25,15 +25,17 @@ Latest working tag: **1.32.0** · Tools: **46** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (35 tools)
+## 2) What's done / ما أُنجز (46 tools)
 
-**Calculators (8):** Subnet Calculator · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator.
+**Calculators (9):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator.
 
-**Diagnostics (17):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test · History · Ping (TCP) · Traceroute (ICMP) · Port Scanner (custom range/list + live progress) · DNS Lookup · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests.
+**Diagnostics (21):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare) · HTTP Request · History · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · WHOIS · nslookup · SSL/TLS Checker · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
 
-**Local Network (6):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN · Wi-Fi QR.
+**Local Network (8):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ) · Wi-Fi QR.
 
-**Professional (6):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**) · SFTP (browse + download over the SSH transport) · Telnet · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port).
+**Professional (6):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**, saved profiles) · SFTP (browse + download over the SSH transport) · Telnet (saved addresses) · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port).
+
+**BGP (2):** ASN Info · IP→BGP (origin AS / prefix, via the public RIPEstat API).
 
 **Design/UX (persistent sidebar, 1.17.0):** the home is a `NavigationSplitView` — a `.sidebar` tool list that stays open beside the detail pane on iPad and collapses to a phone-style push on iPhone. Sidebar rows are deliberately plain: a hollow SF Symbol + the tool's short name only (no boxes, tiles, or subtitles). Selecting a tool fills the detail column; swipe a row to favorite. Earlier native-iOS work (1.16.0): the previous inset-grouped `List` (Settings-app idiom) with system search, Settings-style colored icon tiles, a Favorites section, swipe-to-favorite, and a live network-status row. All surfaces use the system grouped-background / label colors (`ColorTokens` → `systemGroupedBackground` etc.), so every screen matches iOS and follows the system Light/Dark automatically (no more forced dark). 6 accent themes still tint controls; global search keeps smart input detection; unified history + share.
 
@@ -98,7 +100,13 @@ Native, zero-dep camera stack (no VLCKit/ffmpeg — AVPlayer can't do RTSP).
   aligned to the camera clock via `measureClockOffset()`. `CameraPTZ.swift`:
   `PTZController` + `PTZSection` control pad (press-and-hold pan/tilt/zoom via
   `PTZHoldButton`) + preset recall, shown under the live view when the camera
-  reports a PTZ service. IP-camera stack complete.
+  reports a PTZ service.
+- **Phase 4 — grid + recording (1.33.0, DONE):** `CameraGrid` plays every saved
+  camera at once (one `CameraSession` per cell). `CameraRecorder` writes the
+  live H.264/H.265 straight to an MP4 in Documents via `AVAssetWriter`
+  passthrough (starts on the first keyframe; delta frames flagged `NotSync` in
+  `SampleBufferBuilder`), then a `ShareLink` sheet exports it. IP-camera stack
+  complete. Recording/grid still want real-hardware verification.
 
 ## 5) Release checklist / قائمة الإصدار
 

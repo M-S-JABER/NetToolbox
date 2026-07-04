@@ -54,7 +54,9 @@ enum SampleBufferBuilder {
     }
 
     /// Wraps one access unit (its NAL units) as a display-ready sample buffer.
-    static func make(accessUnit: [Data], format: CMFormatDescription, pts: CMTime) -> CMSampleBuffer? {
+    /// `isKeyframe` marks the sample as a sync sample (so recording can start on
+    /// a keyframe and seek correctly); non-keyframes get the `NotSync` flag.
+    static func make(accessUnit: [Data], format: CMFormatDescription, pts: CMTime, isKeyframe: Bool) -> CMSampleBuffer? {
         // Convert Annex-B-style NALs into AVCC: 4-byte big-endian length + bytes.
         var avcc = Data()
         for nal in accessUnit {
@@ -116,6 +118,15 @@ enum SampleBufferBuilder {
                 Unmanaged.passUnretained(kCMSampleAttachmentKey_DisplayImmediately).toOpaque(),
                 Unmanaged.passUnretained(kCFBooleanTrue).toOpaque()
             )
+            // Flag delta frames so a recording writer treats only keyframes as
+            // sync samples.
+            if !isKeyframe {
+                CFDictionarySetValue(
+                    dict,
+                    Unmanaged.passUnretained(kCMSampleAttachmentKey_NotSync).toOpaque(),
+                    Unmanaged.passUnretained(kCFBooleanTrue).toOpaque()
+                )
+            }
         }
         return sampleBuffer
     }

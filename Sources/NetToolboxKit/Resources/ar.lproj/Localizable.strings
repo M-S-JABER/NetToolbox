@@ -2,9 +2,11 @@
 
 "app.title" = "عدة الشبكات";
 "camera.action.add" = "إضافة كاميرا";
+"camera.action.grid" = "عرض شبكي";
 "camera.action.scan" = "مسح الشبكة";
 "camera.action.snapshot" = "لقطة";
 "camera.badge.idle" = "متوقف";
+"camera.badge.rec" = "تسجيل";
 "camera.badge.live" = "مباشر";
 "camera.empty" = "لا توجد كاميرات محفوظة بعد. أضف واحدة لبدء العرض المباشر.";
 "camera.form.credentials" = "بيانات الدخول";
@@ -19,6 +21,9 @@
 "camera.form.stream" = "البث";
 "camera.form.title" = "الكاميرا";
 "camera.form.username" = "اسم المستخدم";
+"camera.grid.title" = "كل الكاميرات";
+"camera.record.hint" = "حُفظ في مجلّد مستندات التطبيق. شارِكه لتصديره إلى الملفات أو الصور أو غيرها.";
+"camera.record.title" = "حُفظ التسجيل";
 "camera.note" = "العرض المباشر يتحدث RTSP عبر TCP ويفكّ ترميز H.264/H.265 عبر العتاد — دون مشغّل خارجي. يستمر البث أثناء استخدامك لأدوات أخرى. يعمل على الكاميرات المصرّح لك بالوصول إليها.";
 "camera.ptz.down" = "إمالة لأسفل";
 "camera.ptz.left" = "تدوير يساراً";
