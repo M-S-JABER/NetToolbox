@@ -137,6 +137,7 @@ struct SSHView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions
     @Environment(ActivityCenter.self) private var activity
+    @Environment(SSHProfilesStore.self) private var profiles
 
     private var viewModel: SSHViewModel {
         sessions.session("ssh") {
@@ -177,9 +178,60 @@ struct SSHView: View {
         .navigationBarTitleDisplayMode(.large)
     }
 
+    private var profilesMenu: some View {
+        Menu {
+            if profiles.profiles.isEmpty {
+                Text(L10n("ssh.profiles.empty"))
+            } else {
+                Section(L10nString("ssh.profiles.saved")) {
+                    ForEach(profiles.profiles) { profile in
+                        Button { load(profile) } label: { Text(profile.displayName) }
+                    }
+                }
+            }
+            Divider()
+            Button {
+                saveProfile()
+            } label: {
+                Label(L10nString("ssh.profiles.save"), systemImage: "square.and.arrow.down")
+            }
+        } label: {
+            Image(systemName: "person.crop.circle.badge.plus")
+                .foregroundStyle(theme.accent)
+        }
+    }
+
+    private func load(_ profile: SSHProfilesStore.Profile) {
+        viewModel.host = profile.host
+        viewModel.portText = profile.port
+        viewModel.username = profile.username
+        viewModel.password = profile.password
+        viewModel.useKey = profile.usesKey
+        viewModel.privateKey = profile.privateKey
+    }
+
+    private func saveProfile() {
+        var profile = SSHProfilesStore.Profile()
+        profile.host = viewModel.host
+        profile.port = viewModel.portText
+        profile.username = viewModel.username
+        profile.password = viewModel.password
+        profile.usesKey = viewModel.useKey
+        profile.privateKey = viewModel.privateKey
+        profiles.save(profile)
+    }
+
     private var connectionSection: some View {
         @Bindable var viewModel = viewModel
         return SectionCard(title: L10n("ssh.input.title"), systemImage: "network") {
+            HStack {
+                Text(L10n("ssh.profiles.title"))
+                    .font(AppTypography.caption.weight(.semibold))
+                    .foregroundStyle(theme.textSecondary)
+                    .textCase(.uppercase)
+                Spacer()
+                profilesMenu
+            }
             HStack(spacing: Spacing.md) {
                 TextField(L10nString("ssh.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)

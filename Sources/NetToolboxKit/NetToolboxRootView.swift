@@ -23,6 +23,7 @@ public struct NetToolboxRootView: View {
     @State private var favorites = FavoritesStore()
     @State private var history = HistoryStore()
     @State private var savedHosts = SavedHostsStore()
+    @State private var sshProfiles = SSHProfilesStore()
     @State private var activity = ActivityCenter()
     private let toolSessions = ToolSessions()
 
@@ -44,6 +45,7 @@ public struct NetToolboxRootView: View {
             .environment(favorites)
             .environment(history)
             .environment(savedHosts)
+            .environment(sshProfiles)
             .environment(activity)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)

@@ -247,6 +247,10 @@
 "ssl.trusted" = "Trusted";
 "ssl.untrusted" = "Not trusted";
 "ssh.action.run" = "Run command";
+"ssh.profiles.title" = "Saved hosts";
+"ssh.profiles.saved" = "Saved SSH hosts";
+"ssh.profiles.empty" = "No saved hosts yet";
+"ssh.profiles.save" = "Save current host";
 "ssh.auth.key" = "Key";
 "ssh.auth.mode" = "Authentication";
 "ssh.auth.password" = "Password";

@@ -247,6 +247,10 @@
 "ssl.trusted" = "موثوقة";
 "ssl.untrusted" = "غير موثوقة";
 "ssh.action.run" = "تشغيل الأمر";
+"ssh.profiles.title" = "المضيفون المحفوظون";
+"ssh.profiles.saved" = "مضيفو SSH المحفوظون";
+"ssh.profiles.empty" = "لا يوجد مضيفون محفوظون بعد";
+"ssh.profiles.save" = "احفظ المضيف الحالي";
 "ssh.auth.key" = "مفتاح";
 "ssh.auth.mode" = "المصادقة";
 "ssh.auth.password" = "كلمة مرور";
