@@ -103,7 +103,16 @@ struct IPInfoTool: NetworkTool {
 
 struct IPInfoView: View {
     @Environment(\.theme) private var theme
+    @Environment(HistoryStore.self) private var history
     @State private var viewModel = IPInfoViewModel()
+
+    private func lookup() async {
+        await viewModel.lookup()
+        if case .success(let info) = viewModel.output {
+            let place = [info.city, info.country].compactMap { $0 }.joined(separator: ", ")
+            history.log(toolID: "ip-info", input: viewModel.query, summary: "\(info.ip) \(place)")
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -129,10 +138,10 @@ struct IPInfoView: View {
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
                 .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.lookup() } }
+                .onSubmit { Task { await lookup() } }
 
             Button {
-                Task { await viewModel.lookup() }
+                Task { await lookup() }
             } label: {
                 Label(L10nString("common.search"), systemImage: "magnifyingglass.circle.fill")
                     .font(AppTypography.headline)
@@ -189,7 +198,17 @@ struct IPInfoView: View {
                 if let timezone = info.timezone {
                     ResultRow(label: L10n("publicip.result.timezone"), value: timezone, isMonospaced: false)
                 }
+                HStack { Spacer(); ShareButton(text: shareText(info)) }
             }
         }
+    }
+
+    private func shareText(_ info: PublicIPInfo) -> String {
+        var lines = ["IP: \(info.ip)"]
+        if let c = info.country { lines.append("Country: \(c)") }
+        if let city = info.city { lines.append("City: \(city)") }
+        if let isp = info.isp { lines.append("ISP: \(isp)") }
+        if let asn = info.asn { lines.append("ASN: AS\(asn)") }
+        return lines.joined(separator: "\n")
     }
 }

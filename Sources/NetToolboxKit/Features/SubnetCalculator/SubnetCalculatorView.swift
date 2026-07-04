@@ -5,6 +5,7 @@ import SwiftData
 struct SubnetCalculatorView: View {
     @Environment(\.theme) private var theme
     @Environment(\.modelContext) private var modelContext
+    @Environment(HistoryStore.self) private var historyStore
 
     @State private var viewModel = SubnetCalculatorViewModel()
 
@@ -51,6 +52,14 @@ struct SubnetCalculatorView: View {
     private func calculate() {
         viewModel.calculate(context: modelContext)
         reloadHistory()
+        switch viewModel.output {
+        case .ipv4(let result):
+            historyStore.log(toolID: "subnet-calculator", input: "\(viewModel.addressInput) \(viewModel.maskInput)", summary: result.cidrNotation)
+        case .ipv6(let result):
+            historyStore.log(toolID: "subnet-calculator", input: viewModel.addressInput, summary: result.cidrNotation)
+        default:
+            break
+        }
     }
 
     /// Loads the five most recent calculations for this tool.

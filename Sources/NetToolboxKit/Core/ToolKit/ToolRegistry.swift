@@ -18,6 +18,7 @@ enum ToolRegistry {
         // Phase 2 — diagnostics
         PublicIPTool(),
         IPInfoTool(),
+        HistoryTool(),
         PingTool(),
         TracerouteTool(),
         PortScannerTool(),
@@ -28,6 +29,7 @@ enum ToolRegistry {
         NTPTool(),
         SelfTestTool(),
         // Phase 2 — local network
+        NetworkOverviewTool(),
         LANScannerTool(),
         WakeOnLANTool(),
         WiFiQRTool(),

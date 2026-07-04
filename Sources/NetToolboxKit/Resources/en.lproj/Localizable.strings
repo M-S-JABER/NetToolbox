@@ -418,3 +418,17 @@
 "lan.section.permission" = "Local Network access";
 "tool.lan.subtitle" = "Discover Bonjour services around you";
 "tool.lan.title" = "LAN Scanner";
+
+/* History, overview, share */
+"common.share" = "Share";
+"history.clear" = "Clear";
+"history.empty.description" = "Runs from Subnet, DNS, WHOIS and IP tools appear here.";
+"history.empty.title" = "No history yet";
+"history.section.recent" = "Recent";
+"overview.section.connection" = "Connection";
+"overview.section.local" = "Local addresses";
+"overview.section.public" = "Public IP";
+"tool.history.subtitle" = "Recent runs across all tools";
+"tool.history.title" = "History";
+"tool.overview.subtitle" = "Your connection, public and local IPs at a glance";
+"tool.overview.title" = "Network Overview";

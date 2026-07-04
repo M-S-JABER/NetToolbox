@@ -95,7 +95,16 @@ struct WhoisTool: NetworkTool {
 
 struct WhoisView: View {
     @Environment(\.theme) private var theme
+    @Environment(HistoryStore.self) private var history
     @State private var viewModel = WhoisViewModel()
+
+    private func lookup() async {
+        await viewModel.lookup()
+        if case .success(let text) = viewModel.output {
+            let firstLine = text.split(separator: "\n").first.map(String.init) ?? "OK"
+            history.log(toolID: "whois", input: viewModel.domain, summary: String(firstLine.prefix(60)))
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -121,10 +130,10 @@ struct WhoisView: View {
                 .textInputAutocapitalization(.never)
                 .keyboardType(.URL)
                 .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.lookup() } }
+                .onSubmit { Task { await lookup() } }
 
             Button {
-                Task { await viewModel.lookup() }
+                Task { await lookup() }
             } label: {
                 Label(L10nString("common.search"), systemImage: "magnifyingglass.circle.fill")
                     .font(AppTypography.headline)

@@ -418,3 +418,17 @@
 "lan.section.permission" = "الوصول للشبكة المحلية";
 "tool.lan.subtitle" = "اكتشاف خدمات Bonjour حولك";
 "tool.lan.title" = "ماسح الشبكة المحلية";
+
+/* History, overview, share */
+"common.share" = "مشاركة";
+"history.clear" = "مسح";
+"history.empty.description" = "تظهر هنا عمليات أدوات الشبكات و DNS و WHOIS و IP.";
+"history.empty.title" = "لا يوجد سجل بعد";
+"history.section.recent" = "الأحدث";
+"overview.section.connection" = "الاتصال";
+"overview.section.local" = "العناوين المحلية";
+"overview.section.public" = "العنوان العام";
+"tool.history.subtitle" = "آخر العمليات من كل الأدوات";
+"tool.history.title" = "السجل";
+"tool.overview.subtitle" = "اتصالك وعناوينك العامة والمحلية بلمحة";
+"tool.overview.title" = "نظرة عامة على الشبكة";

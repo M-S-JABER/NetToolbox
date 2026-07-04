@@ -71,7 +71,19 @@ struct DNSLookupTool: NetworkTool {
 
 struct DNSLookupView: View {
     @Environment(\.theme) private var theme
+    @Environment(HistoryStore.self) private var history
     @State private var viewModel = DNSLookupViewModel()
+
+    private func lookup() async {
+        await viewModel.lookup()
+        if case .success(let records) = viewModel.output {
+            history.log(
+                toolID: "dns-lookup",
+                input: "\(viewModel.name) \(viewModel.type.label)",
+                summary: records.first?.value ?? "0 records"
+            )
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -118,7 +130,7 @@ struct DNSLookupView: View {
             }
 
             Button {
-                Task { await viewModel.lookup() }
+                Task { await lookup() }
             } label: {
                 Label(L10nString("common.search"), systemImage: "magnifyingglass.circle.fill")
                     .font(AppTypography.headline)

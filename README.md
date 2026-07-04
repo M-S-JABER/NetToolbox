@@ -82,6 +82,8 @@ That's it — press **Run**. `NetToolboxRootView(theme:)` also accepts a custom 
 | **Traceroute** | ICMP echo with increasing TTL over an unprivileged `SOCK_DGRAM`/`IPPROTO_ICMP` socket (Apple's SimplePing socket type) — shows each hop and RTT, no entitlement needed. |
 | **IP Info Lookup** | Geo/ISP/ASN for any IP or hostname (not just the device's own) via ipwho.is. |
 | **HTTP Headers** | Fetches a URL and lists status code, final URL and all response headers. |
+| **Network Overview** | Connection type (live), public IP/ISP and all local interface addresses in one dashboard. |
+| **History** | Unified cross-tool run history (Subnet/DNS/WHOIS/IP), persisted, with copy/share/clear. |
 | **NTP Time** | SNTP query (pure `NTP` codec) reporting server time and this device's clock offset. |
 | **Text Converter** | Offline Base64 / Hex / URL encode & decode (pure `TextConverter`). |
 | **Wi-Fi QR Code** | Generates a `WIFI:` QR (pure payload builder + CoreImage) to share network access. |
