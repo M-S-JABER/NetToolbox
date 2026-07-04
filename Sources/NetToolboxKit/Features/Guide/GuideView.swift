@@ -26,6 +26,7 @@ struct GuideView: View {
         Section(icon: "magnifyingglass", title: "guide.tools.title", body: "guide.tools.body"),
         Section(icon: "wifi", title: "guide.wifi.title", body: "guide.wifi.body"),
         Section(icon: "lock.shield", title: "guide.permissions.title", body: "guide.permissions.body"),
+        Section(icon: "network", title: "guide.localnet.title", body: "guide.localnet.body"),
         Section(icon: "terminal", title: "guide.pro.title", body: "guide.pro.body"),
         Section(icon: "exclamationmark.triangle", title: "guide.limits.title", body: "guide.limits.body"),
         Section(icon: "checkmark.seal", title: "guide.tests.title", body: "guide.tests.body"),
