@@ -25,6 +25,7 @@ enum ToolRegistry {
         HTTPRequestTool(),
         HistoryTool(),
         PingTool(),
+        WorldPingTool(),
         TracerouteTool(),
         PortScannerTool(),
         DNSLookupTool(),

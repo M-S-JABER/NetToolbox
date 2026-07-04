@@ -326,6 +326,8 @@
 "tool.whois.title" = "WHOIS";
 "tool.wol.subtitle" = "إرسال حزمة سحرية لإيقاظ جهاز";
 "tool.wol.title" = "التنبيه عبر الشبكة";
+"tool.worldping.subtitle" = "اختبر الوصول إلى هدف من نقاط حول العالم";
+"tool.worldping.title" = "بنك عالمي";
 "whois.empty.description" = "أدخل نطاقاً لجلب سجل تسجيله في WHOIS.";
 "whois.empty.title" = "ابحث عن نطاق";
 "whois.input.domain" = "النطاق (مثل example.com)";
@@ -341,6 +343,15 @@
 "wol.note" = "يعمل التنبيه عبر الشبكة داخل الشبكة المحلية فقط، ويجب تفعيل WoL في إعدادات الجهاز الهدف.";
 "wol.section.status" = "الحالة";
 "wol.sent" = "أُرسلت الحزمة السحرية إلى عنوان البث.";
+"worldping.action.start" = "اختبر عالمياً";
+"worldping.error.badInput" = "استجابة غير متوقعة من خدمة القياس.";
+"worldping.error.network" = "تعذّر الوصول إلى خدمة البنك العالمي. تحقق من اتصالك.";
+"worldping.input.host" = "المضيف أو الـ IP (مثال 1.1.1.1)";
+"worldping.input.title" = "الهدف";
+"worldping.note" = "يختبر هدفك من نقاط موزعة حول العالم عبر شبكة globalping.io المجانية — دون استخدام ICMP محلي. يعرض كل صف موقع النقطة وشبكتها وأدنى/متوسط/أقصى زمن استجابة ونسبة الفقد.";
+"worldping.opt.limit" = "عدد النقاط";
+"worldping.opt.packets" = "الحزم";
+"worldping.section.results" = "النتائج حسب الموقع";
 
 /* Native utility tools */
 "convert.input.placeholder" = "أدخل نصاً للتحويل";

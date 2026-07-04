@@ -326,6 +326,8 @@
 "tool.whois.title" = "WHOIS";
 "tool.wol.subtitle" = "Send a magic packet to wake a device";
 "tool.wol.title" = "Wake-on-LAN";
+"tool.worldping.subtitle" = "Ping a target from probes around the globe";
+"tool.worldping.title" = "World Ping";
 "whois.empty.description" = "Enter a domain to fetch its WHOIS registration record.";
 "whois.empty.title" = "Look up a domain";
 "whois.input.domain" = "Domain (e.g. example.com)";
@@ -341,6 +343,15 @@
 "wol.note" = "Wake-on-LAN works within the local network only. The target device must have WoL enabled in its BIOS/firmware.";
 "wol.section.status" = "Status";
 "wol.sent" = "Magic packet sent to the broadcast address.";
+"worldping.action.start" = "Ping worldwide";
+"worldping.error.badInput" = "Unexpected response from the measurement service.";
+"worldping.error.network" = "Could not reach the global ping service. Check your connection.";
+"worldping.input.host" = "Host or IP (e.g. 1.1.1.1)";
+"worldping.input.title" = "Target";
+"worldping.note" = "Pings your target from probes distributed around the world via the free globalping.io network — no local ICMP is used. Each row shows a probe's location, network, min / avg / max latency and packet loss.";
+"worldping.opt.limit" = "Probes";
+"worldping.opt.packets" = "Packets";
+"worldping.section.results" = "Results by location";
 
 /* Native utility tools */
 "convert.input.placeholder" = "Enter text to convert";
