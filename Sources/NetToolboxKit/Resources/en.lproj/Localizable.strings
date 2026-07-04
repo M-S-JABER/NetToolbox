@@ -513,3 +513,4 @@
 "wifiinfo.section.available" = "Available";
 "wifiinfo.section.unavailable" = "Not available on iOS";
 "wifiinfo.unavailable.intro" = "iOS gives no public API for these Wi-Fi radio details — they're blocked for all apps, so the app shows only what the system exposes.";
+"wifiinfo.shortcutHint" = "Tip: to read the SSID and BSSID, use the iOS Shortcuts app — its \"Get Network Details\" action can access them (apps can't). See the Shortcut recipe shared with you.";

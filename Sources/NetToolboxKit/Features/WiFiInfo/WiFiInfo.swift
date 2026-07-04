@@ -126,6 +126,16 @@ struct WiFiInfoView: View {
                 unavailableRow("wifiinfo.metric.linkSpeed")
                 unavailableRow("wifiinfo.metric.ssid")
             }
+            Divider().overlay(theme.separator)
+            HStack(alignment: .top, spacing: Spacing.sm) {
+                Image(systemName: "lightbulb")
+                    .font(.footnote)
+                    .foregroundStyle(theme.accent)
+                Text(L10n("wifiinfo.shortcutHint"))
+                    .font(AppTypography.footnote)
+                    .foregroundStyle(theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 
