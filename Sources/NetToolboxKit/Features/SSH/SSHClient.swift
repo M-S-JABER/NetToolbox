@@ -154,7 +154,10 @@ final class SSHClient: @unchecked Sendable {
         let hostKeyType = keyTypeReader.readStringUTF8() ?? "?"
         let fingerprint = "SHA256:" + Data(SHA256.hash(data: hostKey)).base64EncodedString()
             .trimmingCharacters(in: CharacterSet(charactersIn: "="))
-        diagnostics = "SSHv2 · host=\(hostKeyType) · verified=\(verified) · \(fingerprint)"
+        let hHex = exchangeHash.prefix(6).map { String(format: "%02x", $0) }.joined()
+        diagnostics = "SSHv2 host=\(hostKeyType) verified=\(verified) vs=[\(serverVersion)] "
+            + "ic=\(clientKexInit.count) is=\(serverKexInit.count) ks=\(hostKey.count) "
+            + "qc=\(qc.count) qs=\(qs.count) K=\(sharedBytes.count) H=\(hHex)"
 
         // 4) Activate keys.
         stage = "newkeys"

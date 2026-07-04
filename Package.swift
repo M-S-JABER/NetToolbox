@@ -36,12 +36,14 @@ let package = Package(
             name: "NetToolboxKit",
             resources: [
                 .process("Resources")
-            ],
-            swiftSettings: [
-                // Swift 6-style strict concurrency checking while staying
-                // compatible with the Swift Playgrounds (5.9/5.10) toolchain.
-                .enableExperimentalFeature("StrictConcurrency")
             ]
+            // Note: the opt-in `StrictConcurrency` experimental feature was
+            // removed. It surfaced Swift 6 *preview* warnings that cannot be
+            // resolved on the Swift 5 Playgrounds toolchain — SwiftData's
+            // `#Predicate` macro emits non-Sendable `ReferenceWritableKeyPath`
+            // references, and `NWConnection` callbacks send Sendable Results
+            // through a continuation. Both are safe here; the flag only added
+            // noise, so the package now builds warning-free under Swift 5.
         ),
         .testTarget(
             name: "NetToolboxKitTests",
