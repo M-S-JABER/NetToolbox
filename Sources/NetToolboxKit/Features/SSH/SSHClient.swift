@@ -336,7 +336,10 @@ final class SSHClient: @unchecked Sendable {
 
         return entries
             .filter { $0.name != "." && $0.name != ".." }
-            .sorted { ($0.isDirectory ? 0 : 1, $0.name.lowercased()) < ($1.isDirectory ? 0 : 1, $1.name.lowercased()) }
+            .sorted { a, b in
+                if a.isDirectory != b.isDirectory { return a.isDirectory }   // folders first
+                return a.name.lowercased() < b.name.lowercased()
+            }
     }
 
     /// Downloads a remote file over SFTP (fresh connection, capped at ~8 MB).

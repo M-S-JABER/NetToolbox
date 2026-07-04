@@ -105,7 +105,12 @@ enum SFTPProtocol {
             guard let filename = reader.readStringUTF8(),
                   let longname = reader.readStringUTF8() else { break }
             let attrs = parseAttrs(&reader)
-            let isDir = attrs.permissions.map { ($0 & 0o170000) == 0o040000 } ?? longname.hasPrefix("d")
+            let isDir: Bool
+            if let permissions = attrs.permissions {
+                isDir = (permissions & 0o170000) == 0o040000   // S_IFDIR
+            } else {
+                isDir = longname.hasPrefix("d")                // ls -l style fallback
+            }
             entries.append(SFTPEntry(name: filename, longname: longname, size: attrs.size ?? 0, isDirectory: isDir))
         }
         return entries
