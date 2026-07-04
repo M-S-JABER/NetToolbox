@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.12.0** · Tools: **35** · Localization: **en/ar at parity (516 keys)**
+Latest working tag: **1.14.0** · Tools: **40** · Localization: **en/ar at parity (577 keys)**
 
 ---
 
@@ -51,7 +51,11 @@ Latest working tag: **1.12.0** · Tools: **35** · Localization: **en/ar at pari
 
 ---
 
-## 4) Suggested next / اقتراحات الدفعة القادمة (feasible, native)
+## 4) Shipped from the previous suggestion list (1.14.0)
+
+Subnet Membership · WHOIS field parsing · Saved Hosts · HTTP Request builder · DNS-over-HTTPS · Ping sparkline · History JSON export/import · SSL SANs · Bonjour TXT · Router vendor (ARP+OUI). Next ideas below.
+
+## 4b) Suggested next / اقتراحات الدفعة القادمة (feasible, native)
 
 Ranked by value × low risk:
 

@@ -578,6 +578,23 @@ struct EngineTestSuite: Sendable {
                 expect(FTP.parsePASV("500 error") == nil, equals: true, "reject non-PASV")
             )
         },
+        Case(name: "Subnet membership") {
+            firstFailure(
+                expect(IPTools.contains(ip: "10.0.0.5", cidr: "10.0.0.0/24") ?? false, equals: true, "inside"),
+                expect(IPTools.contains(ip: "10.0.1.5", cidr: "10.0.0.0/24") ?? true, equals: false, "outside"),
+                expect(IPTools.contains(ip: "192.168.1.255", cidr: "192.168.1.0/24") ?? false, equals: true, "broadcast in range")
+            )
+        },
+        Case(name: "WHOIS field parsing") {
+            let sample = "Registrar: Example Registrar\nCreation Date: 2020-01-02\nRegistry Expiry Date: 2030-01-02\nName Server: NS1.EXAMPLE.COM\nName Server: NS2.EXAMPLE.COM"
+            let fields = WhoisParser.parse(sample)
+            return firstFailure(
+                expect(fields.registrar ?? "", equals: "Example Registrar", "registrar"),
+                expect(fields.created ?? "", equals: "2020-01-02", "created"),
+                expect(fields.expires ?? "", equals: "2030-01-02", "expires"),
+                expect(fields.nameServers.count, equals: 2, "name servers")
+            )
+        },
         Case(name: "SNMP GETNEXT encoding") {
             do {
                 let getRequest = try SNMPMessage.encodeGet(oid: "1.3.6.1", community: "public", requestID: 1)

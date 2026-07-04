@@ -13,6 +13,7 @@ struct SSLCertInfo: Equatable, Sendable {
     let daysRemaining: Int?
     let chainLength: Int
     let systemTrusted: Bool
+    var subjectAltNames: [String] = []
 }
 
 /// Opens a TLS connection and inspects the presented certificate chain.
@@ -87,6 +88,7 @@ struct SSLInspector: SSLInspecting {
         // parse them out of the DER ourselves.
         let der = SecCertificateCopyData(leaf) as Data
         let (notBefore, notAfter) = X509.validity(fromDER: der)
+        let sans = X509.subjectAltNames(fromDER: der)
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
@@ -100,7 +102,8 @@ struct SSLInspector: SSLInspecting {
             notAfter: notAfter.map(formatter.string(from:)) ?? "—",
             daysRemaining: notAfter.map { Int($0.timeIntervalSinceNow / 86_400) },
             chainLength: chain.count,
-            systemTrusted: trusted
+            systemTrusted: trusted,
+            subjectAltNames: sans
         )
     }
 }
@@ -246,6 +249,19 @@ struct SSLCheckerView: View {
             ResultRow(label: L10n("ssl.result.notBefore"), value: info.notBefore)
             ResultRow(label: L10n("ssl.result.notAfter"), value: info.notAfter)
             ResultRow(label: L10n("ssl.result.chain"), value: String(info.chainLength))
+            if !info.subjectAltNames.isEmpty {
+                Divider().overlay(theme.separator)
+                Text(L10n("ssl.result.sans"))
+                    .font(AppTypography.footnote)
+                    .foregroundStyle(theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text(info.subjectAltNames.prefix(20).joined(separator: "\n"))
+                    .font(AppTypography.monoCaption)
+                    .foregroundStyle(theme.mono)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .environment(\.layoutDirection, .leftToRight)
+            }
         }
     }
 }

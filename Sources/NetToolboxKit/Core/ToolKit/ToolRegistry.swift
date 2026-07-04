@@ -8,6 +8,7 @@ enum ToolRegistry {
     static let all: [any NetworkTool] = [
         // Phase 1 — calculators & reference
         SubnetCalculatorTool(),
+        SubnetMembershipTool(),
         VLSMTool(),
         MACLookupTool(),
         PortReferenceTool(),
@@ -21,11 +22,13 @@ enum ToolRegistry {
         IPInfoTool(),
         HostToIPTool(),
         SpeedTestTool(),
+        HTTPRequestTool(),
         HistoryTool(),
         PingTool(),
         TracerouteTool(),
         PortScannerTool(),
         DNSLookupTool(),
+        DoHTool(),
         WhoisTool(),
         NSLookupTool(),
         SSLCheckerTool(),
@@ -37,6 +40,7 @@ enum ToolRegistry {
         // Phase 2 — local network
         NetworkOverviewTool(),
         WiFiInfoTool(),
+        SavedHostsTool(),
         LANScannerTool(),
         IPRangeScannerTool(),
         WakeOnLANTool(),

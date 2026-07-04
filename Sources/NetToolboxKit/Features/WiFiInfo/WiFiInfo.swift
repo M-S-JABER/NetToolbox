@@ -16,10 +16,13 @@ final class WiFiInfoViewModel {
 
     private(set) var wifiAddresses: [LocalInterfaceAddress] = []
     private(set) var gateway: String?
+    private(set) var routerMAC: String?
+    private(set) var routerVendor: String?
     private(set) var publicState: PublicState = .idle
 
     private let localProvider: any LocalIPProviding
     private let publicService: any PublicIPProviding
+    private let ouiDatabase = BundledOUIDatabase()
 
     init(
         localProvider: any LocalIPProviding = SystemLocalIPProvider(),
@@ -35,6 +38,14 @@ final class WiFiInfoViewModel {
         let enZero = all.filter { $0.interface == "en0" && !$0.isIPv6 }
         wifiAddresses = enZero.isEmpty ? all.filter { !$0.isIPv6 } : enZero
         gateway = RouteInfo.defaultGatewayIPv4()
+
+        if let gateway, let mac = ARPTable.macAddress(for: gateway) {
+            routerMAC = mac
+            routerVendor = (try? MACAddress(parsing: mac)).flatMap { ouiDatabase.vendor(forOUI: $0.ouiKey) }
+        } else {
+            routerMAC = nil
+            routerVendor = nil
+        }
 
         publicState = .loading
         do {
@@ -99,6 +110,12 @@ struct WiFiInfoView: View {
                 ResultRow(label: L10n("wifiinfo.gateway"), value: gateway)
             } else {
                 ResultRow(label: L10n("wifiinfo.gateway"), value: "—")
+            }
+            if let mac = viewModel.routerMAC {
+                ResultRow(label: L10n("wifiinfo.routerMAC"), value: mac)
+            }
+            if let vendor = viewModel.routerVendor {
+                ResultRow(label: L10n("wifiinfo.routerVendor"), value: vendor, isMonospaced: false)
             }
 
             switch viewModel.publicState {

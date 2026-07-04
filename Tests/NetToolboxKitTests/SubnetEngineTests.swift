@@ -368,6 +368,21 @@ final class SubnetEngineTests: XCTestCase {
         XCTAssertNil(FTP.parsePASV("500 error"))
     }
 
+    func testSubnetMembership() {
+        XCTAssertEqual(IPTools.contains(ip: "10.0.0.5", cidr: "10.0.0.0/24"), true)
+        XCTAssertEqual(IPTools.contains(ip: "10.0.1.5", cidr: "10.0.0.0/24"), false)
+        XCTAssertEqual(IPTools.contains(ip: "192.168.1.255", cidr: "192.168.1.0/24"), true)
+    }
+
+    func testWhoisParsing() {
+        let sample = "Registrar: Example Registrar\nCreation Date: 2020-01-02\nRegistry Expiry Date: 2030-01-02\nName Server: NS1.EXAMPLE.COM\nName Server: NS2.EXAMPLE.COM"
+        let fields = WhoisParser.parse(sample)
+        XCTAssertEqual(fields.registrar, "Example Registrar")
+        XCTAssertEqual(fields.created, "2020-01-02")
+        XCTAssertEqual(fields.expires, "2030-01-02")
+        XCTAssertEqual(fields.nameServers.count, 2)
+    }
+
     func testSNMPGetNextEncoding() throws {
         let get = [UInt8](try SNMPMessage.encodeGet(oid: "1.3.6.1", community: "public", requestID: 1))
         let next = [UInt8](try SNMPMessage.encodeGetNext(oid: "1.3.6.1", community: "public", requestID: 1))

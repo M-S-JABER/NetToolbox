@@ -6,6 +6,7 @@ import Network
 struct DiscoveredService: Identifiable, Equatable, Sendable {
     let name: String
     let type: String
+    var txt: [String: String] = [:]
 
     var id: String { "\(name)|\(type)" }
 
@@ -85,10 +86,12 @@ final class LANScannerViewModel {
     }
 
     private nonisolated static func service(from result: NWBrowser.Result) -> DiscoveredService? {
-        if case let .service(name, type, _, _) = result.endpoint {
-            return DiscoveredService(name: name, type: type)
+        guard case let .service(name, type, _, _) = result.endpoint else { return nil }
+        var txt: [String: String] = [:]
+        if case let .bonjour(record) = result.metadata {
+            txt = record.dictionary
         }
-        return nil
+        return DiscoveredService(name: name, type: type, txt: txt)
     }
 }
 
@@ -181,6 +184,19 @@ struct LANScannerView: View {
                             .font(AppTypography.monoCaption)
                             .foregroundStyle(theme.textSecondary)
                             .environment(\.layoutDirection, .leftToRight)
+                    }
+                    if !service.txt.isEmpty {
+                        ForEach(service.txt.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                            HStack(spacing: Spacing.xs) {
+                                Text("\(key)=\(value)")
+                                    .font(AppTypography.monoCaption)
+                                    .foregroundStyle(theme.textSecondary)
+                                    .lineLimit(1)
+                                    .environment(\.layoutDirection, .leftToRight)
+                                Spacer()
+                            }
+                            .padding(.leading, 40)
+                        }
                     }
                 }
             }

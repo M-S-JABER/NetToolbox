@@ -22,6 +22,7 @@ public struct NetToolboxRootView: View {
     @State private var status = NetworkStatusMonitor()
     @State private var favorites = FavoritesStore()
     @State private var history = HistoryStore()
+    @State private var savedHosts = SavedHostsStore()
 
     /// - Parameter theme: pass a custom `Theme` to force one look and hide
     ///   the built-in theme picker's effect; omit to let the user choose.
@@ -40,6 +41,7 @@ public struct NetToolboxRootView: View {
             .environment(status)
             .environment(favorites)
             .environment(history)
+            .environment(savedHosts)
             .tint(activeTheme.accent)
             // Dark-first design; both appearances are fully supported.
             .preferredColorScheme(.dark)

@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HistoryTool: NetworkTool {
     let id = "history"
@@ -13,6 +14,7 @@ struct HistoryTool: NetworkTool {
 struct HistoryView: View {
     @Environment(\.theme) private var theme
     @Environment(HistoryStore.self) private var history
+    @State private var showImporter = false
 
     private static let formatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -52,9 +54,23 @@ struct HistoryView: View {
     }
 
     private var actionsBar: some View {
-        HStack {
-            ShareButton(text: history.exportText())
+        HStack(spacing: Spacing.sm) {
+            ShareLink(item: history.exportJSONString()) {
+                Label(L10nString("history.export"), systemImage: "square.and.arrow.up")
+                    .font(AppTypography.footnote)
+            }
+            .buttonStyle(.bordered)
+
+            Button {
+                showImporter = true
+            } label: {
+                Label(L10nString("history.import"), systemImage: "square.and.arrow.down")
+                    .font(AppTypography.footnote)
+            }
+            .buttonStyle(.bordered)
+
             Spacer()
+
             Button(role: .destructive) {
                 withAnimation { history.clear() }
             } label: {
@@ -62,6 +78,14 @@ struct HistoryView: View {
                     .font(AppTypography.footnote)
             }
             .buttonStyle(.bordered)
+        }
+        .fileImporter(isPresented: $showImporter, allowedContentTypes: [.json, .plainText]) { result in
+            guard case .success(let url) = result else { return }
+            guard url.startAccessingSecurityScopedResource() else { return }
+            defer { url.stopAccessingSecurityScopedResource() }
+            if let data = try? Data(contentsOf: url) {
+                history.importJSON(data)
+            }
         }
     }
 

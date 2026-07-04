@@ -63,6 +63,26 @@ final class HistoryStore {
         }.joined(separator: "\n")
     }
 
+    /// The history as a pretty JSON string for export.
+    func exportJSONString() -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(entries) else { return "[]" }
+        return String(decoding: data, as: UTF8.self)
+    }
+
+    /// Replaces the history with the contents of an exported JSON file.
+    @discardableResult
+    func importJSON(_ data: Data) -> Bool {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        guard let decoded = try? decoder.decode([Entry].self, from: data) else { return false }
+        entries = Array(decoded.prefix(maxEntries))
+        save()
+        return true
+    }
+
     private func save() {
         if let data = try? JSONEncoder().encode(entries) {
             UserDefaults.standard.set(data, forKey: key)

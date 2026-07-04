@@ -113,4 +113,46 @@ enum X509 {
         calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
         return calendar.date(from: components)
     }
+
+    /// Extracts dNSName entries from the certificate's subjectAltName
+    /// extension (OID 2.5.29.17). Best-effort; returns [] on any mismatch.
+    static func subjectAltNames(fromDER data: Data) -> [String] {
+        let bytes = [UInt8](data)
+        let marker: [UInt8] = [0x06, 0x03, 0x55, 0x1D, 0x11]   // OID 2.5.29.17
+        guard let start = firstRange(of: marker, in: bytes) else { return [] }
+
+        var cursor = start + marker.count
+        // Optional critical BOOLEAN (01 01 FF).
+        if cursor + 2 < bytes.count, bytes[cursor] == 0x01, bytes[cursor + 1] == 0x01 {
+            cursor += 3
+        }
+        guard cursor < bytes.count, bytes[cursor] == 0x04 else { return [] }
+
+        var octetReader = DERReader(Array(bytes[cursor...]))
+        guard let octet = octetReader.readElement(), octet.tag == 0x04 else { return [] }
+        var sequenceReader = DERReader(octet.value)
+        guard let sequence = sequenceReader.readElement(), sequence.tag == 0x30 else { return [] }
+
+        var namesReader = DERReader(sequence.value)
+        var names: [String] = []
+        while let element = namesReader.readElement() {
+            if element.tag == 0x82 {   // context-specific [2] = dNSName
+                names.append(String(decoding: element.value, as: UTF8.self))
+            }
+        }
+        return names
+    }
+
+    private static func firstRange(of pattern: [UInt8], in bytes: [UInt8]) -> Int? {
+        guard !pattern.isEmpty, bytes.count >= pattern.count else { return nil }
+        for index in 0...(bytes.count - pattern.count) {
+            var matched = true
+            for offset in 0..<pattern.count where bytes[index + offset] != pattern[offset] {
+                matched = false
+                break
+            }
+            if matched { return index }
+        }
+        return nil
+    }
 }

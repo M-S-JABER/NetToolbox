@@ -113,6 +113,12 @@ struct PingView: View {
             ResultRow(label: L10n("ping.result.min"), value: format(summary.minMs))
             ResultRow(label: L10n("ping.result.avg"), value: format(summary.avgMs))
             ResultRow(label: L10n("ping.result.max"), value: format(summary.maxMs))
+
+            let series = viewModel.attempts.compactMap(\.milliseconds)
+            if series.count > 1 {
+                Sparkline(values: series)
+                    .padding(.top, Spacing.sm)
+            }
         }
     }
 

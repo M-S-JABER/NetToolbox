@@ -162,13 +162,36 @@ struct WhoisView: View {
                 Text(message).font(AppTypography.body).foregroundStyle(theme.danger)
             }
         case .success(let text):
-            SectionCard(title: L10n("whois.section.result"), systemImage: "doc.plaintext") {
-                Text(text)
-                    .font(AppTypography.monoCaption)
-                    .foregroundStyle(theme.textPrimary)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .environment(\.layoutDirection, .leftToRight)
+            let fields = WhoisParser.parse(text)
+            VStack(alignment: .leading, spacing: Spacing.lg) {
+                if fields.hasAny {
+                    SectionCard(title: L10n("whois.section.summary"), systemImage: "doc.text.magnifyingglass") {
+                        if let registrar = fields.registrar {
+                            ResultRow(label: L10n("whois.registrar"), value: registrar, isMonospaced: false)
+                        }
+                        if let created = fields.created {
+                            ResultRow(label: L10n("whois.created"), value: created, isMonospaced: false)
+                        }
+                        if let updated = fields.updated {
+                            ResultRow(label: L10n("whois.updated"), value: updated, isMonospaced: false)
+                        }
+                        if let expires = fields.expires {
+                            ResultRow(label: L10n("whois.expires"), value: expires, isMonospaced: false)
+                        }
+                        if !fields.nameServers.isEmpty {
+                            ResultRow(label: L10n("whois.nameServers"),
+                                      value: fields.nameServers.joined(separator: "\n"))
+                        }
+                    }
+                }
+                SectionCard(title: L10n("whois.section.result"), systemImage: "doc.plaintext") {
+                    Text(text)
+                        .font(AppTypography.monoCaption)
+                        .foregroundStyle(theme.textPrimary)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .environment(\.layoutDirection, .leftToRight)
+                }
             }
         }
     }
