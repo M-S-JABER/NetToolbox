@@ -750,6 +750,39 @@ struct EngineTestSuite: Sendable {
                 expect(parsed, equals: Modbus.ParseResult.registers([10, 20]), "parsed registers")
             )
         },
+        Case(name: "Regex matching + groups") {
+            guard case .success(let matches) = RegexTools.matches(pattern: "(\\d)(\\d)", text: "a12b34", caseInsensitive: false) else {
+                return "regex failed to compile"
+            }
+            guard case .failure = RegexTools.matches(pattern: "(", text: "x", caseInsensitive: false) else {
+                return "invalid pattern was not rejected"
+            }
+            return firstFailure(
+                expect(matches.count, equals: 2, "match count"),
+                expect(matches.first?.full ?? "", equals: "12", "first match"),
+                expect(matches.first?.groups ?? [], equals: ["1", "2"], "capture groups")
+            )
+        },
+        Case(name: "URL component parsing") {
+            guard let rows = URLParse.components("https://user@host.com:8080/a/b?x=1&y=2#frag") else {
+                return "URL did not parse"
+            }
+            let map = Dictionary(rows.map { ($0.label, $0.value) }, uniquingKeysWith: { a, _ in a })
+            return firstFailure(
+                expect(map["Scheme"] ?? "", equals: "https", "scheme"),
+                expect(map["Host"] ?? "", equals: "host.com", "host"),
+                expect(map["Port"] ?? "", equals: "8080", "port"),
+                expect(map["Path"] ?? "", equals: "/a/b", "path"),
+                expect(map["query: x"] ?? "", equals: "1", "query x")
+            )
+        },
+        Case(name: "Data transfer time") {
+            let seconds = DataCalc.transferSeconds(
+                sizeBytes: DataCalc.bytes(value: 1, unit: "GB"),
+                bitsPerSecond: DataCalc.bitsPerSecond(value: 100, unit: "Mbps")
+            )
+            return expect(seconds, equals: 80, "1GB over 100Mbps = 80s")
+        },
         Case(name: "MQTT wire encoding") {
             let string = MQTTClient.encodeString("MQTT")
             let long = MQTTClient.encodeRemainingLength(321)

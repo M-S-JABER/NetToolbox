@@ -23,6 +23,9 @@ enum ToolRegistry {
         TimestampTool(),
         GeneratorsTool(),
         JSONFormatterTool(),
+        RegexTesterTool(),
+        URLParserTool(),
+        DataCalcTool(),
         // Phase 2 — diagnostics
         GuideTool(),
         PublicIPTool(),
