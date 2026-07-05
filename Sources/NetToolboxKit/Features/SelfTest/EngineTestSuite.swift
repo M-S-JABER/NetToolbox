@@ -641,6 +641,23 @@ struct EngineTestSuite: Sendable {
                 expect(jwt.payload.contains("John Doe"), equals: true, "payload claim")
             )
         },
+        Case(name: "Pwned SHA-1 + range parse") {
+            let (prefix, suffix) = PwnedCheck.split("password")
+            let body = "0018A45C4D1DEF81644B54AB7F969B88D65:1\r\n1E4C9B93F3F0682250B6CF8331B7EE68FD8:9999"
+            return firstFailure(
+                expect(prefix, equals: "5BAA6", "SHA-1 prefix"),
+                expect(suffix, equals: "1E4C9B93F3F0682250B6CF8331B7EE68FD8", "SHA-1 suffix"),
+                expect(PwnedCheck.countInResponse(body, suffix: suffix), equals: 9999, "matched count")
+            )
+        },
+        Case(name: "Hash identifier heuristics") {
+            return firstFailure(
+                expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),
+                expect(HashID.identify("a9993e364706816aba3e25717850c26c9cd0d89d").contains("SHA-1"), equals: true, "SHA-1 length"),
+                expect(HashID.identify("$2b$12$abcdefghijklmnopqrstuv"), equals: ["bcrypt"], "bcrypt prefix"),
+                expect(HashID.identify("xyz").isEmpty, equals: true, "unknown")
+            )
+        },
         Case(name: "Base64url decoding") {
             let data = CryptoTools.base64urlDecode("SGVsbG8t"[...]) ?? Data()
             return expect(String(decoding: data, as: UTF8.self), equals: "Hello-", "base64url")

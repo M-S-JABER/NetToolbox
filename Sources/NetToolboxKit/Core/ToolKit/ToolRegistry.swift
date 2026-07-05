@@ -17,6 +17,7 @@ enum ToolRegistry {
         PasswordGeneratorTool(),
         QRGeneratorTool(),
         CryptoToolboxTool(),
+        HashIDTool(),
         // Phase 2 — diagnostics
         GuideTool(),
         PublicIPTool(),
@@ -33,6 +34,9 @@ enum ToolRegistry {
         DNSLookupTool(),
         DoHTool(),
         DNSCompareTool(),
+        EmailSecurityTool(),
+        PwnedCheckTool(),
+        CertTransparencyTool(),
         WhoisTool(),
         NSLookupTool(),
         SSLCheckerTool(),
