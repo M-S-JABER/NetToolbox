@@ -730,6 +730,26 @@ struct EngineTestSuite: Sendable {
             }
             return expect(minified, equals: "{\"a\":2,\"b\":1}", "sorted minified JSON")
         },
+        Case(name: "RESP formatting") {
+            let simple = RESP.format(Data("+OK\r\n".utf8))
+            let integer = RESP.format(Data(":42\r\n".utf8))
+            let bulk = RESP.format(Data("$3\r\nfoo\r\n".utf8))
+            return firstFailure(
+                expect(simple, equals: "OK", "simple string"),
+                expect(integer, equals: "(integer) 42", "integer"),
+                expect(bulk, equals: "\"foo\"", "bulk string")
+            )
+        },
+        Case(name: "Modbus request + parse") {
+            let request = [UInt8](Modbus.request(transaction: 1, unit: 1, function: 3, address: 0, quantity: 2))
+            guard let parsed = Modbus.parse(Data([0, 1, 0, 0, 0, 5, 1, 3, 4, 0, 10, 0, 20])) else {
+                return "Modbus response did not parse"
+            }
+            return firstFailure(
+                expect(request, equals: [0, 1, 0, 0, 0, 6, 1, 3, 0, 0, 0, 2], "read-holding request"),
+                expect(parsed, equals: Modbus.ParseResult.registers([10, 20]), "parsed registers")
+            )
+        },
         Case(name: "MQTT wire encoding") {
             let string = MQTTClient.encodeString("MQTT")
             let long = MQTTClient.encodeRemainingLength(321)
