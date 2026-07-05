@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.41.0** · Tools: **56** · Localization: **en/ar at parity (894 keys)**
+Latest working tag: **1.42.0** · Tools: **61** · Localization: **en/ar at parity (940 keys)**
 
 ---
 
@@ -25,9 +25,9 @@ Latest working tag: **1.41.0** · Tools: **56** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (56 tools)
+## 2) What's done / ما أُنجز (61 tools)
 
-**Calculators (11):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator · Hash & JWT (MD5/SHA + JWT decode, CryptoKit) · Hash Identifier.
+**Calculators (16):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator · Hash & JWT (MD5/SHA + JWT decode, CryptoKit) · Hash Identifier · EUI-64 / SLAAC · CIDR Aggregator · Timestamp Converter · Generators (UUID/MAC/hex) · JSON Formatter.
 
 **Diagnostics (26):** Public IP · IP Info Lookup (+ MapKit location) · Host→IP · Speed Test (download/upload/ping/jitter + ISP/edge, Cloudflare, history sparkline) · HTTP Request · History · Backup & Restore (export/import all data as JSON) · Ping (real ICMP/ICMPv6, pro options) · World Ping (globalping.io, worldwide probes) · Traceroute (ICMP, per-hop timeout/retries/max-hops) · Port Scanner (custom range/list + live progress) · DNS Lookup · DNS-over-HTTPS · DNS Compare (4 public resolvers, agreement check) · Email Security (SPF/DMARC/DKIM) · Pwned Password (HIBP k-anonymity) · Cert Transparency (crt.sh) · WHOIS · nslookup · SSL/TLS Checker (SANs) · HTTP Headers · Email Validator (+MX) · RBL Blacklist · NTP · Engine Self-Tests · Guide.
 

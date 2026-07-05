@@ -705,6 +705,31 @@ struct EngineTestSuite: Sendable {
                 expect(first.height ?? 0, equals: 1080, "height")
             )
         },
+        Case(name: "EUI-64 / SLAAC") {
+            guard let iface = EUI64.interfaceID(fromMAC: "00:1a:2b:3c:4d:5e") else { return "interface ID nil" }
+            let address = EUI64.slaac(prefix: "fe80::/64", mac: "00:1a:2b:3c:4d:5e") ?? ""
+            return firstFailure(
+                expect(iface, equals: "021a:2bff:fe3c:4d5e", "modified EUI-64"),
+                expect(address, equals: "fe80::21a:2bff:fe3c:4d5e", "SLAAC address")
+            )
+        },
+        Case(name: "CIDR aggregation") {
+            let merged = CIDRAggregate.aggregate("192.168.0.0/24\n192.168.1.0/24")
+            let split = CIDRAggregate.aggregate("10.0.0.1, 10.0.0.2, 10.0.0.3")
+            return firstFailure(
+                expect(merged, equals: ["192.168.0.0/23"], "adjacent /24s merge"),
+                expect(split, equals: ["10.0.0.1/32", "10.0.0.2/31"], "host range to CIDRs")
+            )
+        },
+        Case(name: "JSON format / minify") {
+            guard case .success(let minified) = JSONTools.transform("{\"b\":1,\"a\":2}", minify: true) else {
+                return "minify failed"
+            }
+            guard case .failure = JSONTools.transform("{bad}", minify: false) else {
+                return "invalid JSON was not rejected"
+            }
+            return expect(minified, equals: "{\"a\":2,\"b\":1}", "sorted minified JSON")
+        },
         Case(name: "MQTT wire encoding") {
             let string = MQTTClient.encodeString("MQTT")
             let long = MQTTClient.encodeRemainingLength(321)

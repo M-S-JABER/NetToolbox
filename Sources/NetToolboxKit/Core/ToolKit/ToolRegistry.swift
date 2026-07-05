@@ -18,6 +18,11 @@ enum ToolRegistry {
         QRGeneratorTool(),
         CryptoToolboxTool(),
         HashIDTool(),
+        EUI64Tool(),
+        CIDRAggregateTool(),
+        TimestampTool(),
+        GeneratorsTool(),
+        JSONFormatterTool(),
         // Phase 2 — diagnostics
         GuideTool(),
         PublicIPTool(),
