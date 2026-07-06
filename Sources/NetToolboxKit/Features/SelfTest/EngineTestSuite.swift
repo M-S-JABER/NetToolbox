@@ -783,6 +783,21 @@ struct EngineTestSuite: Sendable {
             )
             return expect(seconds, equals: 80, "1GB over 100Mbps = 80s")
         },
+        Case(name: "CoAP GET encode + parse") {
+            let request = [UInt8](CoAP.get(path: "test", messageID: 0x1234))
+            guard let parsed = CoAP.parse(Data([0x60, 0x45, 0, 0, 0xFF, 0x68, 0x69])) else {
+                return "CoAP response did not parse"
+            }
+            return firstFailure(
+                expect(request, equals: [0x40, 0x01, 0x12, 0x34, 0xB4, 0x74, 0x65, 0x73, 0x74], "GET /test"),
+                expect(parsed.code, equals: "2.05", "response code"),
+                expect(parsed.payload, equals: "hi", "payload")
+            )
+        },
+        Case(name: "SNMP trap community decode") {
+            let message = Data([0x30, 0x0B, 0x02, 0x01, 0x01, 0x04, 0x06, 0x70, 0x75, 0x62, 0x6C, 0x69, 0x63])
+            return expect(SNMPTrapDecode.summary(message), equals: "SNMP v2c · community: public", "v2c community")
+        },
         Case(name: "MQTT wire encoding") {
             let string = MQTTClient.encodeString("MQTT")
             let long = MQTTClient.encodeRemainingLength(321)

@@ -78,6 +78,9 @@ enum ToolRegistry {
         ModbusTool(),
         SMTPTool(),
         MemcachedTool(),
+        CoAPTool(),
+        SyslogTool(),
+        SNMPTrapTool(),
         MikroTikAPITool(),
         SNMPTool(),
         // BGP / global routing (RIPEstat)
