@@ -783,6 +783,13 @@ struct EngineTestSuite: Sendable {
             )
             return expect(seconds, equals: 80, "1GB over 100Mbps = 80s")
         },
+        Case(name: "TFTP read request") {
+            let rrq = TFTPClient.rrqPacket(filename: "boot.cfg")
+            var expected: [UInt8] = [0x00, 0x01]
+            expected.append(contentsOf: Array("boot.cfg".utf8)); expected.append(0)
+            expected.append(contentsOf: Array("octet".utf8)); expected.append(0)
+            return expect(rrq, equals: expected, "RRQ packet")
+        },
         Case(name: "CoAP GET encode + parse") {
             let request = [UInt8](CoAP.get(path: "test", messageID: 0x1234))
             guard let parsed = CoAP.parse(Data([0x60, 0x45, 0, 0, 0xFF, 0x68, 0x69])) else {

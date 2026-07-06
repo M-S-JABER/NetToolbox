@@ -4,7 +4,7 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.46.0** · Tools: **75** · Localization: **en/ar at parity (1071 keys)**
+Latest working tag: **1.47.0** · Tools: **76** · Localization: **en/ar at parity (1084 keys)**
 
 ---
 
@@ -25,7 +25,7 @@ Latest working tag: **1.46.0** · Tools: **75** · Localization: **en/ar at pari
 
 ---
 
-## 2) What's done / ما أُنجز (75 tools)
+## 2) What's done / ما أُنجز (76 tools)
 
 **Calculators (19):** Subnet Calculator · Subnet Membership (IP-in-CIDR + range converter) · VLSM Planner · MAC/OUI Lookup · Common Ports · Base Converter · Text Converter (Base64/Hex/URL) · Password Generator · QR Generator · Hash & JWT (MD5/SHA + JWT decode, CryptoKit) · Hash Identifier · EUI-64 / SLAAC · CIDR Aggregator · Timestamp Converter · Generators (UUID/MAC/hex) · JSON Formatter · Regex Tester · URL Parser · Data Calculator.
 
@@ -33,7 +33,7 @@ Latest working tag: **1.46.0** · Tools: **75** · Localization: **en/ar at pari
 
 **Local Network (9):** Network Overview · Wi-Fi Info (device IP + Shortcut buttons) · Saved Hosts · LAN Scanner (Bonjour) · IP Range Scanner (ICMP sweep) · Wake-on-LAN (saved addresses) · **IP Cameras** (native RTSP live view + ONVIF auto-setup + PTZ + grid + recording) · Wi-Fi QR · **WireGuard QR** (Curve25519 keygen + scannable tunnel config).
 
-**Professional (15):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**, saved profiles) · SFTP (browse + download over the SSH transport) · Telnet (saved addresses) · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port) · WebSocket (URLSessionWebSocketTask; send/receive frames, live transcript) · MQTT (native 3.1.1 over TCP/TLS; connect/subscribe/publish QoS 0, live messages) · Redis (RESP) · Modbus TCP (FC3/FC4 registers) · SMTP Probe (EHLO) · Memcached (stats) · CoAP (GET/UDP) · Syslog Receiver (UDP) · SNMP Trap Receiver (UDP).
+**Professional (16):** SSH (native SSH-2, curve25519 + AES-256-GCM, password **or ed25519 key** auth, single-command exec **+ interactive shell**, saved profiles) · SFTP (browse + download over the SSH transport) · Telnet (saved addresses) · FTP (passive LIST) · MikroTik RouterOS API (terminal transcript UI: quick-command chips, per-record key/value formatting, auto-scroll, share/clear) · SNMP (GET + Walk, configurable port) · WebSocket (URLSessionWebSocketTask; send/receive frames, live transcript) · MQTT (native 3.1.1 over TCP/TLS; connect/subscribe/publish QoS 0, live messages) · Redis (RESP) · Modbus TCP (FC3/FC4 registers) · SMTP Probe (EHLO) · Memcached (stats) · CoAP (GET/UDP) · Syslog Receiver (UDP) · SNMP Trap Receiver (UDP) · TFTP Client (raw-socket UDP, follows the transfer-ID port).
 
 **BGP (2):** ASN Info · IP→BGP (origin AS / prefix, via the public RIPEstat API).
 

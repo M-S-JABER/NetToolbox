@@ -128,6 +128,17 @@
 "syslog.listening" = "يستمع";
 "syslog.note" = "يستقبل رزم syslog ويعرض المرسِل والخطورة. استخدم منفذاً غير محجوز (مثل 5140) ووجّه أجهزتك إليه؛ قد يُحجب الربط بالمنفذ 514 على iOS.";
 "syslog.section.messages" = "الرسائل";
+"tftp.action.download" = "تنزيل";
+"tftp.downloaded" = "تم التنزيل";
+"tftp.error.resolve" = "تعذّر تحليل اسم المضيف.";
+"tftp.error.server" = "خطأ من الخادم";
+"tftp.error.socket" = "تعذّر فتح المقبس.";
+"tftp.error.timeout" = "لا استجابة من الخادم.";
+"tftp.error.tooLarge" = "الملف يتجاوز حدّ 2 ميغابايت.";
+"tftp.input.filename" = "اسم الملف";
+"tftp.input.title" = "التنزيل";
+"tftp.note" = "يقرأ ملفاً من خادم TFTP (منفذ UDP 69) ويحفظه في مستندات التطبيق. يستخدم مقبساً خاماً لتتبّع منفذ معرّف النقل. نزّل فقط الملفات المصرّح لك بها.";
+"tftp.section.result" = "الملف";
 "datacalc.bytes" = "بايت";
 "datacalc.input.title" = "الحجم والسرعة";
 "datacalc.megabits" = "ميغابت";
@@ -599,6 +610,8 @@
 "tool.snmptrap.title" = "مستقبِل فخاخ SNMP";
 "tool.syslog.subtitle" = "استقبال رسائل syslog (UDP)";
 "tool.syslog.title" = "مستقبِل Syslog";
+"tool.tftp.subtitle" = "تنزيل ملف عبر TFTP (UDP)";
+"tool.tftp.title" = "عميل TFTP";
 "tool.datacalc.subtitle" = "زمن النقل ووحدات الحجم";
 "tool.datacalc.title" = "حاسبة البيانات";
 "tool.regex.subtitle" = "اختبر تعبيراً نمطياً";

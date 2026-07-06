@@ -79,6 +79,7 @@ enum ToolRegistry {
         SMTPTool(),
         MemcachedTool(),
         CoAPTool(),
+        TFTPTool(),
         SyslogTool(),
         SNMPTrapTool(),
         MikroTikAPITool(),

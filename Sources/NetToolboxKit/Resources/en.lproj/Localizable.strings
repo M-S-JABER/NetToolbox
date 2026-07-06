@@ -128,6 +128,17 @@
 "syslog.listening" = "Listening";
 "syslog.note" = "Receives syslog datagrams and shows sender + severity. Use a non-privileged port (e.g. 5140) and point your devices there; binding 514 may be blocked on iOS.";
 "syslog.section.messages" = "Messages";
+"tftp.action.download" = "Download";
+"tftp.downloaded" = "Downloaded";
+"tftp.error.resolve" = "Could not resolve the host.";
+"tftp.error.server" = "Server error";
+"tftp.error.socket" = "Could not open the socket.";
+"tftp.error.timeout" = "No response from the server.";
+"tftp.error.tooLarge" = "File exceeds the 2 MB limit.";
+"tftp.input.filename" = "File name";
+"tftp.input.title" = "Download";
+"tftp.note" = "Reads a file from a TFTP server (UDP port 69) and saves it to the app's Documents. Uses a raw socket to follow the transfer-ID port. Only fetch files you're authorized to.";
+"tftp.section.result" = "File";
 "datacalc.bytes" = "Bytes";
 "datacalc.input.title" = "Size & speed";
 "datacalc.megabits" = "Megabits";
@@ -599,6 +610,8 @@
 "tool.snmptrap.title" = "SNMP Trap Receiver";
 "tool.syslog.subtitle" = "Receive syslog messages (UDP)";
 "tool.syslog.title" = "Syslog Receiver";
+"tool.tftp.subtitle" = "Download a file over TFTP (UDP)";
+"tool.tftp.title" = "TFTP Client";
 "tool.datacalc.subtitle" = "Transfer time & size units";
 "tool.datacalc.title" = "Data Calculator";
 "tool.regex.subtitle" = "Test a regular expression";
