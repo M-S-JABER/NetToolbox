@@ -16,7 +16,7 @@ enum WhoisParser {
 
     static func parse(_ text: String) -> Fields {
         var fields = Fields()
-        for rawLine in text.split(separator: "\n") {
+        for rawLine in text.split(whereSeparator: \.isNewline) {
             let line = rawLine.trimmingCharacters(in: .whitespaces)
             guard let colon = line.firstIndex(of: ":") else { continue }
             let key = line[..<colon].trimmingCharacters(in: .whitespaces).lowercased()

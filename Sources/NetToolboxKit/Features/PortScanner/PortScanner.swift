@@ -70,7 +70,7 @@ actor ConcurrencyLimiter {
 /// list of ports. Pure and unit-tested.
 enum PortList {
     static func parse(_ text: String, max: Int = 4096) -> [UInt16]? {
-        let tokens = text.split(whereSeparator: { $0 == "," || $0 == " " || $0 == "\n" })
+        let tokens = text.split(whereSeparator: { $0 == "," || $0 == " " || $0.isNewline })
         guard !tokens.isEmpty else { return nil }
         var set = Set<Int>()
         for token in tokens {

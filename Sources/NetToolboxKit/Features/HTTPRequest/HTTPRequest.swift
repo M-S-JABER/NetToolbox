@@ -71,7 +71,7 @@ final class HTTPRequestViewModel {
     }
 
     private func parseHeaders() -> [(String, String)] {
-        headersText.split(separator: "\n").compactMap { line in
+        headersText.split(whereSeparator: \.isNewline).compactMap { line in
             guard let colon = line.firstIndex(of: ":") else { return nil }
             let key = line[..<colon].trimmingCharacters(in: .whitespaces)
             let value = line[line.index(after: colon)...].trimmingCharacters(in: .whitespaces)

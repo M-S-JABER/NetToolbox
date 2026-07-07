@@ -20,7 +20,9 @@ enum PwnedCheck {
 
     /// Finds the breach count for `suffix` in a range-API response body.
     static func countInResponse(_ body: String, suffix: String) -> Int {
-        for line in body.split(whereSeparator: { $0 == "\n" || $0 == "\r" }) {
+        // `\r\n` is a single Swift grapheme, so matching "\n"/"\r" individually
+        // would miss CRLF line breaks (which the range API actually returns).
+        for line in body.split(whereSeparator: \.isNewline) {
             let parts = line.split(separator: ":")
             guard parts.count == 2 else { continue }
             if parts[0].uppercased() == suffix {

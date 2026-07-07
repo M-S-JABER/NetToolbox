@@ -45,7 +45,7 @@ final class UptimeViewModel {
 
     func run() async {
         let urls = input
-            .split(whereSeparator: { $0 == "\n" || $0 == "\r" || $0 == "," || $0 == " " })
+            .split(whereSeparator: { $0.isNewline || $0 == "," || $0 == " " })
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
         guard !urls.isEmpty else { return }

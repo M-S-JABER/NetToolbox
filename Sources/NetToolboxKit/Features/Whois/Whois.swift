@@ -102,7 +102,7 @@ struct WhoisView: View {
     private func lookup() async {
         await viewModel.lookup()
         if case .success(let text) = viewModel.output {
-            let firstLine = text.split(separator: "\n").first.map(String.init) ?? "OK"
+            let firstLine = text.split(whereSeparator: \.isNewline).first.map(String.init) ?? "OK"
             history.log(toolID: "whois", input: viewModel.domain, summary: String(firstLine.prefix(60)))
         }
     }

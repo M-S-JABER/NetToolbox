@@ -46,7 +46,7 @@ struct CertTransparencyService: Sendable {
         var entries: [CTEntry] = []
         for row in rows {
             let names = (row.name_value ?? "")
-                .split(whereSeparator: { $0 == "\n" || $0 == "\r" })
+                .split(whereSeparator: \.isNewline)
                 .map { String($0) }
             let key = "\(row.common_name ?? "")|\(row.not_after ?? "")|\(row.issuer_name ?? "")"
             guard !seen.contains(key) else { continue }

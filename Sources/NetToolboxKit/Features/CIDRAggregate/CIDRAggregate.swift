@@ -7,7 +7,7 @@ import Observation
 enum CIDRAggregate {
     static func aggregate(_ input: String) -> [String] {
         var ranges: [(UInt64, UInt64)] = []
-        for token in input.split(whereSeparator: { $0 == "\n" || $0 == "\r" || $0 == "," || $0 == " " || $0 == "\t" }) {
+        for token in input.split(whereSeparator: { $0.isNewline || $0 == "," || $0 == " " || $0 == "\t" }) {
             let line = token.trimmingCharacters(in: .whitespaces)
             guard !line.isEmpty, let range = parse(line) else { continue }
             ranges.append(range)
