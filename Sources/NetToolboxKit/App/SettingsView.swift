@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppLock.self) private var appLock
 
     @Binding var themeSelection: String
 
@@ -15,6 +16,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
                     themeCard
+                    securityCard
                     aboutCard
                 }
                 .padding(Spacing.xl)
@@ -68,6 +70,24 @@ struct SettingsView: View {
             .padding(.vertical, Spacing.sm)
         }
         .buttonStyle(.plain)
+    }
+
+    private var securityCard: some View {
+        SectionCard(title: L10n("settings.security"), systemImage: "lock.shield") {
+            Toggle(isOn: Binding(
+                get: { appLock.isEnabled },
+                set: { newValue in Task { await appLock.setEnabled(newValue) } }
+            )) {
+                Label(L10nString("settings.applock"), systemImage: appLock.symbolName)
+                    .font(AppTypography.body)
+            }
+            .disabled(!appLock.isAvailable)
+
+            Text(L10n(appLock.isAvailable ? "settings.applock.hint" : "settings.applock.unavailable"))
+                .font(AppTypography.caption)
+                .foregroundStyle(theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     private var aboutCard: some View {

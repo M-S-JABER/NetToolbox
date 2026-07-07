@@ -63,7 +63,7 @@ struct BackupView: View {
         .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json, .data]) { result in
             handleImport(result)
         }
-        .alert(L10n("backup.import.password.title"), isPresented: $askImportPassword) {
+        .alert(L10nString("backup.import.password.title"), isPresented: $askImportPassword) {
             SecureField(L10nString("backup.encrypt.password"), text: $importPassword)
             Button(L10nString("backup.action.decrypt")) { finishEncryptedImport() }
             Button(L10nString("common.cancel"), role: .cancel) {

@@ -834,6 +834,15 @@
 "settings.about" = "حول";
 "settings.tagline" = "صندوق أدوات شبكات أصلي ومرن — بدون أي مكتبات خارجية.";
 "settings.theme" = "سمة اللون";
+"settings.security" = "الأمان";
+"settings.applock" = "طلب Face ID / رمز الدخول";
+"settings.applock.hint" = "يقفل التطبيق عند مغادرة الواجهة. تبقى المضيفات المحفوظة وملفات SSH والكاميرات مخفية حتى توثّق هويتك.";
+"settings.applock.unavailable" = "أعدّ Face ID أو Touch ID أو رمز دخول على هذا الجهاز لاستخدام هذه الميزة.";
+"applock.title" = "NetToolbox مقفل";
+"applock.subtitle" = "وثّق هويتك للمتابعة.";
+"applock.unlock" = "فتح القفل";
+"applock.reason" = "افتح NetToolbox";
+"applock.enable.reason" = "تفعيل قفل التطبيق";
 "settings.title" = "الإعدادات";
 "settings.tools" = "الأدوات";
 "settings.version" = "الإصدار";

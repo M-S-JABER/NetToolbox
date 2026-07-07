@@ -836,6 +836,15 @@
 "settings.about" = "About";
 "settings.tagline" = "A modular, native network toolbox — no external dependencies.";
 "settings.theme" = "Accent theme";
+"settings.security" = "Security";
+"settings.applock" = "Require Face ID / passcode";
+"settings.applock.hint" = "Locks the app when it leaves the foreground. Your saved hosts, SSH profiles and cameras stay hidden until you authenticate.";
+"settings.applock.unavailable" = "Set up Face ID, Touch ID or a passcode on this device to use this.";
+"applock.title" = "NetToolbox is locked";
+"applock.subtitle" = "Authenticate to continue.";
+"applock.unlock" = "Unlock";
+"applock.reason" = "Unlock NetToolbox";
+"applock.enable.reason" = "Enable the app lock";
 "settings.title" = "Settings";
 "settings.tools" = "Tools";
 "settings.version" = "Version";

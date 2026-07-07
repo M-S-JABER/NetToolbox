@@ -28,6 +28,8 @@ public struct NetToolboxRootView: View {
     @State private var cameras = CameraStore()
     @State private var speedHistory = SpeedHistoryStore()
     @State private var activity = ActivityCenter()
+    @State private var appLock = AppLock()
+    @Environment(\.scenePhase) private var scenePhase
     private let toolSessions = ToolSessions()
 
     /// - Parameter theme: pass a custom `Theme` to force one look and hide
@@ -52,10 +54,24 @@ public struct NetToolboxRootView: View {
             .environment(cameras)
             .environment(speedHistory)
             .environment(activity)
+            .environment(appLock)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)
             // Native iOS look: follow the system Light/Dark appearance.
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])
             .task { status.start() }
+            // Biometric app lock: cover the UI while locked and re-lock when
+            // the app leaves the foreground.
+            .overlay {
+                if appLock.isLocked {
+                    LockView(lock: appLock)
+                        .environment(\.theme, activeTheme)
+                        .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut, value: appLock.isLocked)
+            .onChange(of: scenePhase) { _, phase in
+                if phase != .active { appLock.lockIfEnabled() }
+            }
     }
 }
