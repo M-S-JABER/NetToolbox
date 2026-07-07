@@ -46,7 +46,7 @@ final class MQTTViewModel {
             clientID: identifier, username: username, password: password
         )
         client.onEvent = { [weak self] event in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated { self?.handle(event) }
             }
         }

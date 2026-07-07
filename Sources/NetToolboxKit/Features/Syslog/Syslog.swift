@@ -47,13 +47,13 @@ final class SyslogViewModel {
         guard let port = UInt16(portText.trimmingCharacters(in: .whitespaces)) else { return }
         errorMessage = nil
         listener.onReady = { [weak self] in
-            DispatchQueue.main.async { MainActor.assumeIsolated { self?.isListening = true } }
+            Task { @MainActor [weak self] in self?.isListening = true }
         }
         listener.onError = { [weak self] message in
-            DispatchQueue.main.async { MainActor.assumeIsolated { self?.errorMessage = message; self?.isListening = false } }
+            Task { @MainActor [weak self] in self?.errorMessage = message; self?.isListening = false }
         }
         listener.onDatagram = { [weak self] data, sender in
-            DispatchQueue.main.async { MainActor.assumeIsolated { self?.append(sender: sender, data: data) } }
+            Task { @MainActor [weak self] in self?.append(sender: sender, data: data) }
         }
         listener.start(port: port)
     }

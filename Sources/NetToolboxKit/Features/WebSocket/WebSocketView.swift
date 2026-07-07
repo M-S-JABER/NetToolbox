@@ -33,7 +33,7 @@ final class WebSocketViewModel {
             return
         }
         client.onEvent = { [weak self] event in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated { self?.handle(event) }
             }
         }

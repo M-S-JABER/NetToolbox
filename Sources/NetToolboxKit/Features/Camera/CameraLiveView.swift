@@ -58,13 +58,14 @@ final class CameraSession {
             password: camera.password,
             url: camera.rtspURL
         )
+        // Hop to main on the main queue (FIFO) so decoded frames stay ordered.
         client.onStatus = { [weak self] status in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated { self?.apply(status) }
             }
         }
         client.onSample = { [weak self] sample in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
                 MainActor.assumeIsolated { self?.enqueue(sample) }
             }
         }

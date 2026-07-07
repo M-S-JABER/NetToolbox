@@ -76,7 +76,7 @@ final class LANScannerViewModel {
             let browser = NWBrowser(for: .bonjour(type: type, domain: nil), using: parameters)
             browser.browseResultsChangedHandler = { [weak self] results, _ in
                 let found = results.compactMap { Self.service(from: $0) }
-                Task { @MainActor in self?.merge(found) }
+                Task { @MainActor [weak self] in self?.merge(found) }
             }
             browser.start(queue: queue)
             browsers.append(browser)
