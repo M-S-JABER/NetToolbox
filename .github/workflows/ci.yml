@@ -1,0 +1,49 @@
+name: CI
+
+# Compiles the package for iOS and runs the self-test suite on a simulator.
+# The library uses UIKit / AVFoundation / VideoToolbox, so it only builds for
+# iOS (not macOS `swift build`) — hence xcodebuild on a macOS runner.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Environment
+        run: |
+          xcodebuild -version
+          echo "--- Schemes ---"
+          xcodebuild -list || true
+          echo "--- Simulators ---"
+          xcrun simctl list devices available | grep -E 'iPhone' || true
+
+      - name: Build for iOS
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -scheme NetToolboxKit \
+            -destination 'generic/platform=iOS' \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test on iOS Simulator
+        run: |
+          set -o pipefail
+          DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9]+( Pro| Plus| Pro Max)?' | head -1)
+          echo "Using simulator: ${DEVICE:-iPhone 15}"
+          xcodebuild test \
+            -scheme NetToolboxKit \
+            -destination "platform=iOS Simulator,name=${DEVICE:-iPhone 15}" \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO
