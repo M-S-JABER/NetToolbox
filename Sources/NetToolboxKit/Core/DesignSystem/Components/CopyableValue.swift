@@ -35,6 +35,7 @@ struct CopyableValue: View {
             .buttonStyle(.plain)
             .accessibilityLabel(justCopied ? Text(L10n("common.copied")) : Text(L10n("common.copy")))
         }
+        .sensoryFeedback(.success, trigger: justCopied) { _, copied in copied }
     }
 
     private func copy() {

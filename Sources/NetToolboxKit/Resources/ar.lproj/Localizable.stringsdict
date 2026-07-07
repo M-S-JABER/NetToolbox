@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>regex.count</key>
+    <dict>
+        <key>NSStringLocalizedFormatKey</key>
+        <string>%#@n@</string>
+        <key>n</key>
+        <dict>
+            <key>NSStringFormatSpecTypeKey</key>
+            <string>NSStringPluralRuleType</string>
+            <key>NSStringFormatValueTypeKey</key>
+            <string>d</string>
+            <key>zero</key>
+            <string>لا تطابقات</string>
+            <key>one</key>
+            <string>تطابق واحد</string>
+            <key>two</key>
+            <string>تطابقان</string>
+            <key>few</key>
+            <string>%d تطابقات</string>
+            <key>many</key>
+            <string>%d تطابقًا</string>
+            <key>other</key>
+            <string>%d تطابق</string>
+        </dict>
+    </dict>
+</dict>
+</plist>

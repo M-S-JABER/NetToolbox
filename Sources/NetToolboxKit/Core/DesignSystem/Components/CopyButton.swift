@@ -25,6 +25,7 @@ struct CopyButton: View {
         }
         .buttonStyle(.bordered)
         .disabled(value.isEmpty)
+        .sensoryFeedback(.success, trigger: justCopied) { _, copied in copied }
     }
 
     private func copy() {

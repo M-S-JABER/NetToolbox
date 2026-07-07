@@ -190,5 +190,6 @@ struct PTZHoldButton: View {
                         onRelease()
                     }
             )
+            .sensoryFeedback(.impact(flexibility: .soft), trigger: isPressing) { _, pressing in pressing }
     }
 }
