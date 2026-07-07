@@ -94,6 +94,7 @@ struct NTPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(NTPView()) }
 }
 
+@MainActor
 struct NTPView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = NTPViewModel()

@@ -34,6 +34,7 @@ struct CryptoToolboxTool: NetworkTool {
     func makeView() -> AnyView { AnyView(CryptoToolboxView()) }
 }
 
+@MainActor
 struct CryptoToolboxView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = CryptoToolboxViewModel()

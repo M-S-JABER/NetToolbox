@@ -22,6 +22,7 @@ struct BackupTool: NetworkTool {
     func makeView() -> AnyView { AnyView(BackupView()) }
 }
 
+@MainActor
 struct BackupView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var hosts

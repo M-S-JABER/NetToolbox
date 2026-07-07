@@ -40,6 +40,7 @@ struct URLParserTool: NetworkTool {
     func makeView() -> AnyView { AnyView(URLParserView()) }
 }
 
+@MainActor
 struct URLParserView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = URLParserViewModel()

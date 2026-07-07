@@ -120,6 +120,7 @@ struct RedisTool: NetworkTool {
     func makeView() -> AnyView { AnyView(RedisView()) }
 }
 
+@MainActor
 struct RedisView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

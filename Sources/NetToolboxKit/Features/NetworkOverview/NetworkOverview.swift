@@ -45,6 +45,7 @@ struct NetworkOverviewTool: NetworkTool {
     func makeView() -> AnyView { AnyView(NetworkOverviewView()) }
 }
 
+@MainActor
 struct NetworkOverviewView: View {
     @Environment(\.theme) private var theme
     @Environment(NetworkStatusMonitor.self) private var status

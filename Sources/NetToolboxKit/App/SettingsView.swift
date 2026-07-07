@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Settings sheet: pick an accent theme and see app info.
+@MainActor
 struct SettingsView: View {
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss

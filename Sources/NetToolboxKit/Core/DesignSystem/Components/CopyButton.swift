@@ -5,6 +5,7 @@ import UIKit
 
 /// A standalone "Copy" button with brief confirmation, for multi-line or
 /// large values where `CopyableValue`'s single-line layout doesn't fit.
+@MainActor
 struct CopyButton: View {
     @Environment(\.theme) private var theme
 

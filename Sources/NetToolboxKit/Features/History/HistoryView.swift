@@ -11,6 +11,7 @@ struct HistoryTool: NetworkTool {
     func makeView() -> AnyView { AnyView(HistoryView()) }
 }
 
+@MainActor
 struct HistoryView: View {
     @Environment(\.theme) private var theme
     @Environment(HistoryStore.self) private var history

@@ -113,6 +113,7 @@ struct WireGuardQRTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WireGuardQRView()) }
 }
 
+@MainActor
 struct WireGuardQRView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = WireGuardQRViewModel()

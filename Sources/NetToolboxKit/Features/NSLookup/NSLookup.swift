@@ -88,6 +88,7 @@ struct NSLookupTool: NetworkTool {
     func makeView() -> AnyView { AnyView(NSLookupView()) }
 }
 
+@MainActor
 struct NSLookupView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = NSLookupViewModel()

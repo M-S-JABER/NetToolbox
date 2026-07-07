@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Searchable, filterable reference of common TCP/UDP ports.
+@MainActor
 struct PortReferenceView: View {
     @Environment(\.theme) private var theme
 

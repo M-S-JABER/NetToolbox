@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// A titled card that groups related rows of content.
+@MainActor
 struct SectionCard<Content: View>: View {
     @Environment(\.theme) private var theme
 

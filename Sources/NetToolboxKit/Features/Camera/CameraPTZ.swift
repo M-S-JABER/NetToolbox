@@ -67,6 +67,7 @@ final class PTZController {
 }
 
 /// The PTZ card shown under the live view for cameras that expose PTZ.
+@MainActor
 struct PTZSection: View {
     @Environment(\.theme) private var theme
 
@@ -156,6 +157,7 @@ struct PTZSection: View {
 
 /// A round button that fires `onPress` when first touched and `onRelease` when
 /// the finger lifts — the press-and-hold interaction PTZ needs.
+@MainActor
 struct PTZHoldButton: View {
     @Environment(\.theme) private var theme
 

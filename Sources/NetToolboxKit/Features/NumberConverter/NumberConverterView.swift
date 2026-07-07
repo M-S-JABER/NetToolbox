@@ -33,6 +33,7 @@ struct NumberConverterTool: NetworkTool {
     func makeView() -> AnyView { AnyView(NumberConverterView()) }
 }
 
+@MainActor
 struct NumberConverterView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = NumberConverterViewModel()

@@ -110,6 +110,7 @@ struct RDAPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(RDAPView()) }
 }
 
+@MainActor
 struct RDAPView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = RDAPViewModel()

@@ -146,6 +146,7 @@ struct WorldPingTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WorldPingView()) }
 }
 
+@MainActor
 struct WorldPingView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

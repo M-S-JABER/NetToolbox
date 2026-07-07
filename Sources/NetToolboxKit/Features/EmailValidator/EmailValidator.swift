@@ -76,6 +76,7 @@ struct EmailValidatorTool: NetworkTool {
     func makeView() -> AnyView { AnyView(EmailValidatorView()) }
 }
 
+@MainActor
 struct EmailValidatorView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = EmailValidatorViewModel()

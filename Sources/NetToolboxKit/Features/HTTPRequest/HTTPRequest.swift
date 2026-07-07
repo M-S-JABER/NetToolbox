@@ -100,6 +100,7 @@ struct HTTPRequestTool: NetworkTool {
     func makeView() -> AnyView { AnyView(HTTPRequestView()) }
 }
 
+@MainActor
 struct HTTPRequestView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = HTTPRequestViewModel()

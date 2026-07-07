@@ -68,6 +68,7 @@ struct DoHTool: NetworkTool {
     func makeView() -> AnyView { AnyView(DoHView()) }
 }
 
+@MainActor
 struct DoHView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = DoHViewModel()

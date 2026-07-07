@@ -66,6 +66,7 @@ struct HashIDTool: NetworkTool {
     func makeView() -> AnyView { AnyView(HashIDView()) }
 }
 
+@MainActor
 struct HashIDView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = HashIDViewModel()

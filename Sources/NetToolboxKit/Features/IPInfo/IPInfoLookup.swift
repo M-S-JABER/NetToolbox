@@ -107,6 +107,7 @@ struct IPInfoTool: NetworkTool {
     func makeView() -> AnyView { AnyView(IPInfoView()) }
 }
 
+@MainActor
 struct IPInfoView: View {
     @Environment(\.theme) private var theme
     @Environment(HistoryStore.self) private var history

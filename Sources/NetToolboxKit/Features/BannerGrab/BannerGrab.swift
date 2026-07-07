@@ -67,6 +67,7 @@ struct BannerGrabTool: NetworkTool {
     func makeView() -> AnyView { AnyView(BannerGrabView()) }
 }
 
+@MainActor
 struct BannerGrabView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

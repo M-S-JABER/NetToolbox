@@ -40,6 +40,7 @@ struct GeneratorsTool: NetworkTool {
     func makeView() -> AnyView { AnyView(GeneratorsView()) }
 }
 
+@MainActor
 struct GeneratorsView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = GeneratorsViewModel()

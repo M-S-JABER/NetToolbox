@@ -60,6 +60,7 @@ struct MemcachedTool: NetworkTool {
     func makeView() -> AnyView { AnyView(MemcachedView()) }
 }
 
+@MainActor
 struct MemcachedView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

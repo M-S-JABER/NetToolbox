@@ -182,6 +182,7 @@ struct IPRangeScannerTool: NetworkTool {
     func makeView() -> AnyView { AnyView(IPRangeScannerView()) }
 }
 
+@MainActor
 struct IPRangeScannerView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

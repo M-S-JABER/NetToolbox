@@ -66,6 +66,7 @@ struct SubnetMembershipTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SubnetMembershipView()) }
 }
 
+@MainActor
 struct SubnetMembershipView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = SubnetMembershipViewModel()

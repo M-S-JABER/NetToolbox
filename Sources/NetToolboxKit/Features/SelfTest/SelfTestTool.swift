@@ -16,6 +16,7 @@ struct SelfTestTool: NetworkTool {
 }
 
 /// Runs `EngineTestSuite` and lists each case with its result.
+@MainActor
 struct SelfTestView: View {
     @Environment(\.theme) private var theme
 

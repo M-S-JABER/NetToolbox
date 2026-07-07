@@ -159,6 +159,7 @@ struct TFTPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(TFTPView()) }
 }
 
+@MainActor
 struct TFTPView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

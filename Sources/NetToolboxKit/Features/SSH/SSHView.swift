@@ -133,6 +133,7 @@ struct SSHTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SSHView()) }
 }
 
+@MainActor
 struct SSHView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

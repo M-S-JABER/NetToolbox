@@ -112,6 +112,7 @@ struct SNMPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SNMPView()) }
 }
 
+@MainActor
 struct SNMPView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = SNMPViewModel()

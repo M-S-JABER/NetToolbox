@@ -3,6 +3,7 @@ import SwiftUI
 /// Card used on the home grid for every registered tool.
 /// A colour-coded gradient icon chip gives each category its own identity;
 /// a favourite star and a "soon" state round out the interactions.
+@MainActor
 struct ToolCard: View {
     @Environment(\.theme) private var theme
 

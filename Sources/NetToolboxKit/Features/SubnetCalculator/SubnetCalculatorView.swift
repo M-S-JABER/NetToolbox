@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 /// Subnet Calculator screen: IPv4 (full) and IPv6 (basics), auto-detected.
+@MainActor
 struct SubnetCalculatorView: View {
     @Environment(\.theme) private var theme
     @Environment(\.modelContext) private var modelContext

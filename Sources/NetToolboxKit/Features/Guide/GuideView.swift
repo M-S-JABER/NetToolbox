@@ -10,6 +10,7 @@ struct GuideTool: NetworkTool {
     func makeView() -> AnyView { AnyView(GuideView()) }
 }
 
+@MainActor
 struct GuideView: View {
     @Environment(\.theme) private var theme
 

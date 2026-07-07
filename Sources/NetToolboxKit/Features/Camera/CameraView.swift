@@ -27,6 +27,7 @@ struct CameraTool: NetworkTool {
     func makeView() -> AnyView { AnyView(CameraView()) }
 }
 
+@MainActor
 struct CameraView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

@@ -95,6 +95,7 @@ struct WebSocketTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WebSocketView()) }
 }
 
+@MainActor
 struct WebSocketView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

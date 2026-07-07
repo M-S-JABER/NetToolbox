@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A tiny line chart for a series of values (e.g. ping latencies), drawn
 /// with a `Path` so it needs no charting dependency.
+@MainActor
 struct Sparkline: View {
     @Environment(\.theme) private var theme
 

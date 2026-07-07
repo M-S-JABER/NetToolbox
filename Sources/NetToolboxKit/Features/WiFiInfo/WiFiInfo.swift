@@ -53,6 +53,7 @@ struct WiFiInfoTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WiFiInfoView()) }
 }
 
+@MainActor
 struct WiFiInfoView: View {
     @Environment(\.theme) private var theme
     @Environment(\.openURL) private var openURL

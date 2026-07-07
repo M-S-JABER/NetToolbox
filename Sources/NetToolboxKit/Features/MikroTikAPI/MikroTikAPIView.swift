@@ -230,6 +230,7 @@ struct MikroTikAPITool: NetworkTool {
     func makeView() -> AnyView { AnyView(MikroTikAPIView()) }
 }
 
+@MainActor
 struct MikroTikAPIView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

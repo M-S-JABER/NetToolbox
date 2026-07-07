@@ -97,6 +97,7 @@ struct HTTPHeadersTool: NetworkTool {
     func makeView() -> AnyView { AnyView(HTTPHeadersView()) }
 }
 
+@MainActor
 struct HTTPHeadersView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = HTTPHeadersViewModel()

@@ -105,6 +105,7 @@ struct SNMPTrapTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SNMPTrapView()) }
 }
 
+@MainActor
 struct SNMPTrapView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

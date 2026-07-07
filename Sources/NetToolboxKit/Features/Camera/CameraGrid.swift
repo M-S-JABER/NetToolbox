@@ -3,6 +3,7 @@ import SwiftUI
 /// A wall of every saved camera playing live at once, each in its own RTSP
 /// session. Sessions start on appear and stop on disappear so leaving the grid
 /// frees them.
+@MainActor
 struct CameraGridView: View {
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
@@ -39,6 +40,7 @@ struct CameraGridView: View {
     }
 }
 
+@MainActor
 private struct CameraGridCell: View {
     @Environment(\.theme) private var theme
     let camera: CameraStore.Camera

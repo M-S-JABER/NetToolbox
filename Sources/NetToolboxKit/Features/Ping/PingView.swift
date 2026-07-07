@@ -13,6 +13,7 @@ struct PingTool: NetworkTool {
 }
 
 /// TCP-ping screen: repeated handshake latency measurements to a host/port.
+@MainActor
 struct PingView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

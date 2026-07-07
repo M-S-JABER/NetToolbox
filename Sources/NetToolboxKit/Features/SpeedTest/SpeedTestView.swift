@@ -92,6 +92,7 @@ struct SpeedTestTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SpeedTestView()) }
 }
 
+@MainActor
 struct SpeedTestView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

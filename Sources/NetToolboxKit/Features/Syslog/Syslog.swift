@@ -82,6 +82,7 @@ struct SyslogTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SyslogView()) }
 }
 
+@MainActor
 struct SyslogView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

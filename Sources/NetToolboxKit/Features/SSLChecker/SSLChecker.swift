@@ -153,6 +153,7 @@ struct SSLCheckerTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SSLCheckerView()) }
 }
 
+@MainActor
 struct SSLCheckerView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = SSLCheckerViewModel()

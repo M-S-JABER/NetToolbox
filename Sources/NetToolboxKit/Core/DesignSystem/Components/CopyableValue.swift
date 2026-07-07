@@ -4,6 +4,7 @@ import UIKit
 #endif
 
 /// A technical value with a one-tap copy button and brief confirmation.
+@MainActor
 struct CopyableValue: View {
     @Environment(\.theme) private var theme
 

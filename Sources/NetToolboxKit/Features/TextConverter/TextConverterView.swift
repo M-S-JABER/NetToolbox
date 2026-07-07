@@ -31,6 +31,7 @@ struct TextConverterTool: NetworkTool {
     func makeView() -> AnyView { AnyView(TextConverterView()) }
 }
 
+@MainActor
 struct TextConverterView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = TextConverterViewModel()

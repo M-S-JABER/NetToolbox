@@ -39,6 +39,7 @@ struct JSONFormatterTool: NetworkTool {
     func makeView() -> AnyView { AnyView(JSONFormatterView()) }
 }
 
+@MainActor
 struct JSONFormatterView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = JSONFormatterViewModel()

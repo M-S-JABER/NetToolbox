@@ -83,6 +83,7 @@ struct DNSCompareTool: NetworkTool {
     func makeView() -> AnyView { AnyView(DNSCompareView()) }
 }
 
+@MainActor
 struct DNSCompareView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = DNSCompareViewModel()

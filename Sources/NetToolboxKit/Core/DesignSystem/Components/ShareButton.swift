@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A small share button backed by `ShareLink`, for exporting a result as
 /// text to the system share sheet.
+@MainActor
 struct ShareButton: View {
     @Environment(\.theme) private var theme
 

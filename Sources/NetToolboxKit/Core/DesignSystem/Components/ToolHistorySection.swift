@@ -2,6 +2,7 @@ import SwiftUI
 
 /// A tool's own "Recent" log, shown inside the tool. Each tool keeps its own
 /// list of recent runs in its (persistent) view-model and passes it here.
+@MainActor
 struct ToolHistorySection: View {
     @Environment(\.theme) private var theme
     let entries: [String]

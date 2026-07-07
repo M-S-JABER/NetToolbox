@@ -25,6 +25,7 @@ struct PasswordGeneratorTool: NetworkTool {
     func makeView() -> AnyView { AnyView(PasswordGeneratorView()) }
 }
 
+@MainActor
 struct PasswordGeneratorView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = PasswordGeneratorViewModel()

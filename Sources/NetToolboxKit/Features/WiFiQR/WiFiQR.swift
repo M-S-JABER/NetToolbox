@@ -71,6 +71,7 @@ struct WiFiQRTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WiFiQRView()) }
 }
 
+@MainActor
 struct WiFiQRView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = WiFiQRViewModel()

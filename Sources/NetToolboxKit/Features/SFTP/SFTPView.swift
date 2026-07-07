@@ -104,6 +104,7 @@ struct SFTPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SFTPView()) }
 }
 
+@MainActor
 struct SFTPView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = SFTPViewModel()

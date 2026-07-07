@@ -93,6 +93,7 @@ struct WhoisTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WhoisView()) }
 }
 
+@MainActor
 struct WhoisView: View {
     @Environment(\.theme) private var theme
     @Environment(HistoryStore.self) private var history

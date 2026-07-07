@@ -184,6 +184,7 @@ struct PortScannerTool: NetworkTool {
     func makeView() -> AnyView { AnyView(PortScannerView()) }
 }
 
+@MainActor
 struct PortScannerView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

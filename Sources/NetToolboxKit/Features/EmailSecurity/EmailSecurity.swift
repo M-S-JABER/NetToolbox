@@ -78,6 +78,7 @@ struct EmailSecurityTool: NetworkTool {
     func makeView() -> AnyView { AnyView(EmailSecurityView()) }
 }
 
+@MainActor
 struct EmailSecurityView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = EmailSecurityViewModel()

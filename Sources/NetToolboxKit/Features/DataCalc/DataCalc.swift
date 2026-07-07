@@ -69,6 +69,7 @@ struct DataCalcTool: NetworkTool {
     func makeView() -> AnyView { AnyView(DataCalcView()) }
 }
 
+@MainActor
 struct DataCalcView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = DataCalcViewModel()

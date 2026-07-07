@@ -79,6 +79,7 @@ struct CoAPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(CoAPView()) }
 }
 
+@MainActor
 struct CoAPView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

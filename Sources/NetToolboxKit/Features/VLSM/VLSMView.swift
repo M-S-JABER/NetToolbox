@@ -41,6 +41,7 @@ struct VLSMTool: NetworkTool {
     func makeView() -> AnyView { AnyView(VLSMView()) }
 }
 
+@MainActor
 struct VLSMView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = VLSMViewModel()

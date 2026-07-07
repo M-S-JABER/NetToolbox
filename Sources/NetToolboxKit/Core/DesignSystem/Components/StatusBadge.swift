@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Small capsule badge for statuses: success / warning / danger / info / neutral.
+@MainActor
 struct StatusBadge: View {
     enum Kind {
         case success, warning, danger, info, neutral

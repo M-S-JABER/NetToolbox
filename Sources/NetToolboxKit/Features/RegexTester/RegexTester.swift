@@ -57,6 +57,7 @@ struct RegexTesterTool: NetworkTool {
     func makeView() -> AnyView { AnyView(RegexTesterView()) }
 }
 
+@MainActor
 struct RegexTesterView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = RegexTesterViewModel()

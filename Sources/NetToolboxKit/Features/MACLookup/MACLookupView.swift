@@ -2,6 +2,7 @@ import SwiftUI
 
 /// MAC / OUI lookup screen: normalize any MAC format and identify
 /// the vendor from the bundled offline OUI database.
+@MainActor
 struct MACLookupView: View {
     @Environment(\.theme) private var theme
 

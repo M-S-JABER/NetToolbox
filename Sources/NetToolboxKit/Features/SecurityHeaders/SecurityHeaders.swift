@@ -79,6 +79,7 @@ struct SecurityHeadersTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SecurityHeadersView()) }
 }
 
+@MainActor
 struct SecurityHeadersView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = SecurityHeadersViewModel()

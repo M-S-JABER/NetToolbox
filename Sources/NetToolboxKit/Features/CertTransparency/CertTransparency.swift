@@ -115,6 +115,7 @@ struct CertTransparencyTool: NetworkTool {
     func makeView() -> AnyView { AnyView(CertTransparencyView()) }
 }
 
+@MainActor
 struct CertTransparencyView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = CertTransparencyViewModel()

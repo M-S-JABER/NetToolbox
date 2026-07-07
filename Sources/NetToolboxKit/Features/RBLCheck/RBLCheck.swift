@@ -76,6 +76,7 @@ struct RBLCheckTool: NetworkTool {
     func makeView() -> AnyView { AnyView(RBLCheckView()) }
 }
 
+@MainActor
 struct RBLCheckView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = RBLCheckViewModel()

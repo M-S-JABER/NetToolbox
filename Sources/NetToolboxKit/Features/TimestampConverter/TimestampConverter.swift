@@ -43,6 +43,7 @@ struct TimestampTool: NetworkTool {
     func makeView() -> AnyView { AnyView(TimestampView()) }
 }
 
+@MainActor
 struct TimestampView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = TimestampViewModel()

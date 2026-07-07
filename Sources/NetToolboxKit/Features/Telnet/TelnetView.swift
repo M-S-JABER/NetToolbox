@@ -91,6 +91,7 @@ struct TelnetTool: NetworkTool {
     func makeView() -> AnyView { AnyView(TelnetView()) }
 }
 
+@MainActor
 struct TelnetView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

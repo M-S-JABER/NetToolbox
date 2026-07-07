@@ -113,6 +113,7 @@ struct MQTTTool: NetworkTool {
     func makeView() -> AnyView { AnyView(MQTTView()) }
 }
 
+@MainActor
 struct MQTTView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions

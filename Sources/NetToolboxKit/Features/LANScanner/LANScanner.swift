@@ -187,6 +187,7 @@ struct LANScannerTool: NetworkTool {
     func makeView() -> AnyView { AnyView(LANScannerView()) }
 }
 
+@MainActor
 struct LANScannerView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

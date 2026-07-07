@@ -105,6 +105,7 @@ struct ModbusTool: NetworkTool {
     func makeView() -> AnyView { AnyView(ModbusView()) }
 }
 
+@MainActor
 struct ModbusView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

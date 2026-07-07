@@ -3,6 +3,7 @@ import SwiftUI
 /// A single label/value result line.
 /// Technical values are rendered monospaced and pinned to left-to-right
 /// layout even when the UI language is Arabic (RTL).
+@MainActor
 struct ResultRow: View {
     @Environment(\.theme) private var theme
 

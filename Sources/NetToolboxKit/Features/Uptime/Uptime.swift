@@ -52,6 +52,7 @@ final class UptimeViewModel {
         isRunning = true
         rows = []
         var collected: [UptimeRow] = []
+        let service = self.service
         await withTaskGroup(of: UptimeRow.self) { group in
             for url in urls { group.addTask { await service.check(url) } }
             for await row in group { collected.append(row) }
@@ -73,6 +74,7 @@ struct UptimeTool: NetworkTool {
     func makeView() -> AnyView { AnyView(UptimeView()) }
 }
 
+@MainActor
 struct UptimeView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = UptimeViewModel()

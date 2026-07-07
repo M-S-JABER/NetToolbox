@@ -17,6 +17,7 @@ struct QRGeneratorTool: NetworkTool {
     func makeView() -> AnyView { AnyView(QRGeneratorView()) }
 }
 
+@MainActor
 struct QRGeneratorView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = QRGeneratorViewModel()

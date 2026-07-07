@@ -10,6 +10,7 @@ struct SavedHostsTool: NetworkTool {
     func makeView() -> AnyView { AnyView(SavedHostsView()) }
 }
 
+@MainActor
 struct SavedHostsView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var store

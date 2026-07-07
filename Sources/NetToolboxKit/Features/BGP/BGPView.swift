@@ -38,6 +38,7 @@ struct ASNInfoTool: NetworkTool {
     func makeView() -> AnyView { AnyView(ASNInfoView()) }
 }
 
+@MainActor
 struct ASNInfoView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = ASNInfoViewModel()
@@ -150,6 +151,7 @@ struct IPBGPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(IPBGPView()) }
 }
 
+@MainActor
 struct IPBGPView: View {
     @Environment(\.theme) private var theme
     @Environment(SavedHostsStore.self) private var savedHosts

@@ -8,6 +8,7 @@ struct ShareableFile: Identifiable {
 }
 
 /// Presents the finished recording with a share/save action.
+@MainActor
 struct RecordingShareSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
@@ -53,6 +54,7 @@ struct RecordingShareSheet: View {
 }
 
 /// Add / edit form for a saved camera, with optional ONVIF auto-configuration.
+@MainActor
 struct CameraEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
@@ -221,6 +223,7 @@ struct CameraEditorSheet: View {
 }
 
 /// Fetches and shows a still snapshot for a camera via its ONVIF snapshot URI.
+@MainActor
 struct SnapshotSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
@@ -290,6 +293,7 @@ struct SnapshotSheet: View {
 
 /// Scans the local subnet for hosts with the RTSP port open and lets the user
 /// turn one into a new camera.
+@MainActor
 struct CameraScanSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme

@@ -74,6 +74,7 @@ struct CIDRAggregateTool: NetworkTool {
     func makeView() -> AnyView { AnyView(CIDRAggregateView()) }
 }
 
+@MainActor
 struct CIDRAggregateView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = CIDRAggregateViewModel()

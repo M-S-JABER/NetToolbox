@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Public IP + ISP details with the device's local interface addresses.
+@MainActor
 struct PublicIPView: View {
     @Environment(\.theme) private var theme
 

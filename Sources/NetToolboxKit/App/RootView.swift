@@ -4,6 +4,7 @@ import SwiftUI
 /// the tool list stays open on the left while a tool fills the detail pane,
 /// and it collapses to a phone-style push on iPhone. Sidebar rows are plain —
 /// a hollow SF Symbol and the tool's short name, nothing else.
+@MainActor
 struct RootView: View {
     @Environment(\.theme) private var theme
     @Environment(NetworkStatusMonitor.self) private var status

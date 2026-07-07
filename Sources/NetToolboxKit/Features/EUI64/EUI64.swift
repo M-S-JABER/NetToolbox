@@ -56,6 +56,7 @@ struct EUI64Tool: NetworkTool {
     func makeView() -> AnyView { AnyView(EUI64View()) }
 }
 
+@MainActor
 struct EUI64View: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = EUI64ViewModel()

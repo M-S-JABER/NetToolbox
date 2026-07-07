@@ -88,6 +88,7 @@ struct HostToIPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(HostToIPView()) }
 }
 
+@MainActor
 struct HostToIPView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = HostToIPViewModel()

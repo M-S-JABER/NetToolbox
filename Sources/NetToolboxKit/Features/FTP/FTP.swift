@@ -142,6 +142,7 @@ struct FTPTool: NetworkTool {
     func makeView() -> AnyView { AnyView(FTPView()) }
 }
 
+@MainActor
 struct FTPView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = FTPViewModel()

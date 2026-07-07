@@ -41,6 +41,7 @@ struct WakeOnLANTool: NetworkTool {
     func makeView() -> AnyView { AnyView(WakeOnLANView()) }
 }
 
+@MainActor
 struct WakeOnLANView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = WakeOnLANViewModel()

@@ -85,6 +85,7 @@ struct PwnedCheckTool: NetworkTool {
     func makeView() -> AnyView { AnyView(PwnedCheckView()) }
 }
 
+@MainActor
 struct PwnedCheckView: View {
     @Environment(\.theme) private var theme
     @State private var viewModel = PwnedCheckViewModel()

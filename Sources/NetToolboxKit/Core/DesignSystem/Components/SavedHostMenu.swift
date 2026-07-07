@@ -3,6 +3,7 @@ import SwiftUI
 /// A compact bookmark menu placed next to a host text field: it lists the
 /// user's saved hosts (tap to fill the field) and offers to save whatever is
 /// currently typed. Drop it into any tool that takes a host.
+@MainActor
 struct SavedHostMenu: View {
     @Environment(SavedHostsStore.self) private var savedHosts
     @Environment(\.theme) private var theme
