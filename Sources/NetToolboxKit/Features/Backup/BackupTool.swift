@@ -34,6 +34,12 @@ struct BackupView: View {
     @State private var isImporting = false
     @State private var message: BackupMessage?
 
+    @State private var encryptExport = false
+    @State private var exportPassword = ""
+    @State private var pendingImportData: Data?
+    @State private var importPassword = ""
+    @State private var askImportPassword = false
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
@@ -54,8 +60,18 @@ struct BackupView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.backup.title")))
         .navigationBarTitleDisplayMode(.large)
-        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json]) { result in
+        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.json, .data]) { result in
             handleImport(result)
+        }
+        .alert(L10n("backup.import.password.title"), isPresented: $askImportPassword) {
+            SecureField(L10nString("backup.encrypt.password"), text: $importPassword)
+            Button(L10nString("backup.action.decrypt")) { finishEncryptedImport() }
+            Button(L10nString("common.cancel"), role: .cancel) {
+                pendingImportData = nil
+                importPassword = ""
+            }
+        } message: {
+            Text(L10n("backup.import.password.message"))
         }
     }
 
@@ -85,6 +101,20 @@ struct BackupView: View {
 
     private var exportSection: some View {
         SectionCard(title: L10n("backup.section.export"), systemImage: "square.and.arrow.up") {
+            Toggle(isOn: $encryptExport) {
+                Label(L10nString("backup.encrypt.toggle"), systemImage: "lock.fill")
+                    .font(AppTypography.body)
+            }
+            if encryptExport {
+                SecureField(L10nString("backup.encrypt.password"), text: $exportPassword)
+                    .textFieldStyle(.roundedBorder)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Text(L10n("backup.encrypt.hint"))
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
+
             Button {
                 prepareExport()
             } label: {
@@ -93,6 +123,7 @@ struct BackupView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .disabled(encryptExport && exportPassword.isEmpty)
 
             if let exportURL {
                 ShareLink(item: exportURL) {
@@ -144,12 +175,21 @@ struct BackupView: View {
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        guard let data = try? encoder.encode(backup),
+        guard var data = try? encoder.encode(backup),
               let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
             message = BackupMessage(text: L10nString("backup.error.export"), isError: true)
             return
         }
-        let url = directory.appendingPathComponent("NetToolbox-backup.json")
+        var filename = "NetToolbox-backup.json"
+        if encryptExport, !exportPassword.isEmpty {
+            guard let encrypted = try? BackupCrypto.encrypt(data, password: exportPassword) else {
+                message = BackupMessage(text: L10nString("backup.error.export"), isError: true)
+                return
+            }
+            data = encrypted
+            filename = "NetToolbox-backup.ntbackup"
+        }
+        let url = directory.appendingPathComponent(filename)
         do {
             try data.write(to: url, options: .atomic)
             exportURL = url
@@ -166,17 +206,44 @@ struct BackupView: View {
         case .success(let url):
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            guard let data = try? Data(contentsOf: url),
-                  let backup = try? JSONDecoder().decode(AppBackup.self, from: data) else {
+            guard let data = try? Data(contentsOf: url) else {
                 message = BackupMessage(text: L10nString("backup.error.import"), isError: true)
                 return
             }
-            hosts.replaceAll(backup.hosts)
-            sshProfiles.replaceAll(backup.sshProfiles)
-            cameras.replaceAll(backup.cameras)
-            speedHistory.replaceAll(backup.speedHistory)
-            message = BackupMessage(text: L10nString("backup.import.done"), isError: false)
+            if BackupCrypto.isEncrypted(data) {
+                // Defer until the user supplies the passphrase.
+                pendingImportData = data
+                importPassword = ""
+                askImportPassword = true
+            } else {
+                applyBackup(data)
+            }
         }
+    }
+
+    private func finishEncryptedImport() {
+        guard let data = pendingImportData else { return }
+        pendingImportData = nil
+        guard let decrypted = try? BackupCrypto.decrypt(data, password: importPassword) else {
+            message = BackupMessage(text: L10nString("backup.error.password"), isError: true)
+            importPassword = ""
+            return
+        }
+        importPassword = ""
+        applyBackup(decrypted)
+    }
+
+    /// Decodes a plaintext backup payload and replaces the current data.
+    private func applyBackup(_ data: Data) {
+        guard let backup = try? JSONDecoder().decode(AppBackup.self, from: data) else {
+            message = BackupMessage(text: L10nString("backup.error.import"), isError: true)
+            return
+        }
+        hosts.replaceAll(backup.hosts)
+        sshProfiles.replaceAll(backup.sshProfiles)
+        cameras.replaceAll(backup.cameras)
+        speedHistory.replaceAll(backup.speedHistory)
+        message = BackupMessage(text: L10nString("backup.import.done"), isError: false)
     }
 }
 

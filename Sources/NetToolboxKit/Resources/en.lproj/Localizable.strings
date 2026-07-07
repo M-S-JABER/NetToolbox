@@ -11,7 +11,15 @@
 "backup.item.hosts" = "Saved hosts";
 "backup.item.speed" = "Speed-test history";
 "backup.item.ssh" = "SSH profiles";
-"backup.note" = "Backups are plain JSON stored on your device. They include SSH and camera credentials in clear text — keep the file somewhere safe.";
+"backup.note" = "Backups are stored on your device. Turn on encryption to protect the SSH and camera credentials they contain with a password.";
+"backup.encrypt.toggle" = "Encrypt with a password";
+"backup.encrypt.password" = "Backup password";
+"backup.encrypt.hint" = "You'll need this password to restore. It can't be recovered if lost.";
+"backup.encrypt.badge" = "Encrypted";
+"backup.import.password.title" = "Backup password";
+"backup.import.password.message" = "This backup is encrypted. Enter its password to restore.";
+"backup.error.password" = "Wrong password, or the file is corrupt.";
+"backup.action.decrypt" = "Restore";
 "backup.section.contents" = "Contents";
 "backup.section.done" = "Done";
 "backup.section.export" = "Export";

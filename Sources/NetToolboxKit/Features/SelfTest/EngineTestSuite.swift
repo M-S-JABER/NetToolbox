@@ -650,6 +650,25 @@ struct EngineTestSuite: Sendable {
                 expect(PwnedCheck.countInResponse(body, suffix: suffix), equals: 9999, "matched count")
             )
         },
+        Case(name: "Encrypted backup round-trip") {
+            let plaintext = Data("{\"secret\":\"hunter2\"}".utf8)
+            do {
+                let box = try BackupCrypto.encrypt(plaintext, password: "correct horse")
+                let isEnc = BackupCrypto.isEncrypted(box)
+                let back = try BackupCrypto.decrypt(box, password: "correct horse")
+                var wrongRejected = false
+                do { _ = try BackupCrypto.decrypt(box, password: "wrong") }
+                catch BackupCrypto.CryptoError.wrongPassword { wrongRejected = true }
+                return firstFailure(
+                    expect(isEnc, equals: true, "magic detected"),
+                    expect(back, equals: plaintext, "decrypts to original"),
+                    expect(wrongRejected, equals: true, "wrong password rejected"),
+                    expect(BackupCrypto.isEncrypted(plaintext), equals: false, "plain not flagged")
+                )
+            } catch {
+                return "unexpected error: \(error)"
+            }
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

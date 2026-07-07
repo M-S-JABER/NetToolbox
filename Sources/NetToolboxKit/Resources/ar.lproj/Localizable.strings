@@ -11,7 +11,15 @@
 "backup.item.hosts" = "المضيفون المحفوظون";
 "backup.item.speed" = "سجل اختبار السرعة";
 "backup.item.ssh" = "ملفات SSH";
-"backup.note" = "النسخ الاحتياطية ملفات JSON عادية مخزّنة على جهازك. تتضمّن بيانات دخول SSH والكاميرات بنص واضح — احتفظ بالملف في مكان آمن.";
+"backup.note" = "النسخ الاحتياطية مخزّنة على جهازك. فعّل التشفير لحماية بيانات دخول SSH والكاميرات التي تحتويها بكلمة مرور.";
+"backup.encrypt.toggle" = "التشفير بكلمة مرور";
+"backup.encrypt.password" = "كلمة مرور النسخة";
+"backup.encrypt.hint" = "ستحتاج هذه الكلمة للاستعادة. لا يمكن استرجاعها إذا فُقدت.";
+"backup.encrypt.badge" = "مشفّرة";
+"backup.import.password.title" = "كلمة مرور النسخة";
+"backup.import.password.message" = "هذه النسخة مشفّرة. أدخل كلمة مرورها للاستعادة.";
+"backup.error.password" = "كلمة المرور خاطئة أو الملف تالف.";
+"backup.action.decrypt" = "استعادة";
 "backup.section.contents" = "المحتويات";
 "backup.section.done" = "تم";
 "backup.section.export" = "تصدير";
