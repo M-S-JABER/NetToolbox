@@ -47,10 +47,22 @@ final class CameraStore {
     private let key = "nettoolbox.cameras.v1"
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: key),
-           let decoded = try? JSONDecoder().decode([Camera].self, from: data) {
-            cameras = decoded
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let decoded = try? JSONDecoder().decode([Camera].self, from: data) else { return }
+        // Camera passwords live in the Keychain, not this JSON. Hydrate each
+        // camera's password from it; migrate any inline password saved before
+        // the Keychain migration by re-persisting.
+        var needsMigration = false
+        cameras = decoded.map { camera in
+            var camera = camera
+            if camera.password.isEmpty {
+                camera.password = KeychainStore.get(service: .camera, account: "\(camera.id).password") ?? ""
+            } else {
+                needsMigration = true
+            }
+            return camera
         }
+        if needsMigration { persist() }
     }
 
     /// Inserts a new camera, or updates one with the same id.
@@ -65,18 +77,28 @@ final class CameraStore {
     }
 
     func remove(_ camera: Camera) {
+        KeychainStore.remove(service: .camera, account: "\(camera.id).password")
         cameras.removeAll { $0.id == camera.id }
         persist()
     }
 
-    /// Replaces all cameras (used when restoring a backup).
+    /// Replaces all cameras (used when restoring a backup). Clears every
+    /// previously stored password first so none are orphaned.
     func replaceAll(_ cameras: [Camera]) {
+        KeychainStore.removeAll(service: .camera)
         self.cameras = cameras
         persist()
     }
 
     private func persist() {
-        if let data = try? JSONEncoder().encode(cameras) {
+        // Write passwords to the Keychain and strip them from the JSON copy.
+        let redacted = cameras.map { camera -> Camera in
+            KeychainStore.set(camera.password, service: .camera, account: "\(camera.id).password")
+            var copy = camera
+            copy.password = ""
+            return copy
+        }
+        if let data = try? JSONEncoder().encode(redacted) {
             UserDefaults.standard.set(data, forKey: key)
         }
     }
