@@ -14,6 +14,7 @@ import SwiftData
 ///     }
 /// }
 /// ```
+@MainActor
 public struct NetToolboxRootView: View {
     /// Optional hard override; when nil the user's chosen accent theme is used.
     private let themeOverride: (any Theme)?
