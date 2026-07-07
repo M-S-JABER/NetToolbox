@@ -48,7 +48,7 @@ final class NetworkStatusMonitor {
         monitor.pathUpdateHandler = { [weak self] path in
             let connection = Self.classify(path)
             let expensive = path.isExpensive
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 self?.connection = connection
                 self?.isExpensive = expensive
             }
