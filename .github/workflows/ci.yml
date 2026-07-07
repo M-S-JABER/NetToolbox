@@ -32,7 +32,7 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild build \
-            -scheme NetToolboxKit \
+            -scheme NetToolbox \
             -destination 'generic/platform=iOS' \
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO
@@ -43,7 +43,7 @@ jobs:
           DEVICE=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9]+( Pro| Plus| Pro Max)?' | head -1)
           echo "Using simulator: ${DEVICE:-iPhone 15}"
           xcodebuild test \
-            -scheme NetToolboxKit \
+            -scheme NetToolbox \
             -destination "platform=iOS Simulator,name=${DEVICE:-iPhone 15}" \
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO
