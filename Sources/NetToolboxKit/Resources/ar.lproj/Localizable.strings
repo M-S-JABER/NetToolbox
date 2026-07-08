@@ -1136,6 +1136,9 @@
 "dnsrel.opt.server" = "خادم DNS";
 "dnsrel.opt.interval" = "الفاصل (ث)";
 "dnsrel.opt.type" = "السجل";
+"dnsrel.opt.threshold" = "بطيء > (ms)";
+"dnsrel.stat.slow" = "استجابات بطيئة";
+"dnsrel.status.slow" = "بطيء";
 "dnsrel.action.start" = "بدء المراقبة";
 "dnsrel.error.host" = "أدخل اسم مضيف للمراقبة.";
 "dnsrel.norecords" = "استجاب دون سجلات";

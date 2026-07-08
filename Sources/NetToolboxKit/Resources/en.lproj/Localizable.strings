@@ -1136,6 +1136,9 @@
 "dnsrel.opt.server" = "DNS server";
 "dnsrel.opt.interval" = "Interval (s)";
 "dnsrel.opt.type" = "Record";
+"dnsrel.opt.threshold" = "Slow > (ms)";
+"dnsrel.stat.slow" = "Slow responses";
+"dnsrel.status.slow" = "Slow";
 "dnsrel.action.start" = "Start monitoring";
 "dnsrel.error.host" = "Enter a hostname to monitor.";
 "dnsrel.norecords" = "responded, no records";

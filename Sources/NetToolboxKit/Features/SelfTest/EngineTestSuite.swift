@@ -673,6 +673,7 @@ struct EngineTestSuite: Sendable {
             func probe(_ ms: Double?) -> DNSProbe { DNSProbe(timestamp: 0, latencyMs: ms, detail: "") }
             let probes = [probe(10), probe(20), probe(nil), probe(nil), probe(30), probe(nil), probe(40)]
             let summary = DNSReliabilityEngine.summarize(probes)
+            let thresholded = DNSReliabilityEngine.summarize(probes, thresholdMs: 25)
             return firstFailure(
                 expect(summary.total, equals: 7, "total"),
                 expect(summary.successes, equals: 4, "successes"),
@@ -683,7 +684,9 @@ struct EngineTestSuite: Sendable {
                 expect(summary.maxLatency ?? -1, equals: 40, "max"),
                 expect(summary.avgLatency ?? -1, equals: 25, "avg"),
                 expect(summary.jitter ?? -1, equals: 10, "jitter"),
-                expect(Int(summary.successRate.rounded()), equals: 57, "success rate")
+                expect(Int(summary.successRate.rounded()), equals: 57, "success rate"),
+                expect(summary.slowCount, equals: 0, "slow disabled"),
+                expect(thresholded.slowCount, equals: 2, "slow over 25ms")
             )
         },
         Case(name: "Hash identifier heuristics") {

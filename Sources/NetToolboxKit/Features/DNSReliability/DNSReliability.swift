@@ -27,11 +27,12 @@ struct DNSReliabilitySummary: Equatable, Sendable {
     var jitter: Double?          // mean |Δ| between consecutive successful latencies
     var dropEpisodes = 0         // number of separate failure runs
     var longestDropStreak = 0    // longest run of consecutive failures
+    var slowCount = 0            // successful responses slower than the threshold
 }
 
 /// Pure statistics for the reliability monitor — unit-tested, no I/O.
 enum DNSReliabilityEngine {
-    static func summarize(_ probes: [DNSProbe]) -> DNSReliabilitySummary {
+    static func summarize(_ probes: [DNSProbe], thresholdMs: Double? = nil) -> DNSReliabilitySummary {
         var summary = DNSReliabilitySummary()
         summary.total = probes.count
         guard summary.total > 0 else { return summary }
@@ -54,6 +55,10 @@ enum DNSReliabilityEngine {
             } else {
                 summary.jitter = 0
             }
+        }
+
+        if let thresholdMs {
+            summary.slowCount = latencies.filter { $0 > thresholdMs }.count
         }
 
         var episodes = 0, longest = 0, current = 0, inFailure = false
@@ -89,6 +94,8 @@ final class DNSReliabilityViewModel {
     var server = "1.1.1.1"
     var type: DNSRecordType = .a
     var intervalText = "1.0"
+    /// Responses slower than this many ms count as "slow". Empty/0 disables it.
+    var thresholdText = "200"
 
     private(set) var probes: [DNSProbe] = []
     private(set) var summary = DNSReliabilitySummary()
@@ -113,6 +120,12 @@ final class DNSReliabilityViewModel {
     /// Latency series for the sparkline; drops render as 0 (a dip to the floor).
     var latencySeries: [Double] { probes.map { $0.latencyMs ?? 0 } }
 
+    /// Parsed slow-response threshold in ms, or nil when disabled.
+    var threshold: Double? {
+        let value = Double(thresholdText.replacingOccurrences(of: ",", with: "."))
+        return (value ?? 0) > 0 ? value : nil
+    }
+
     func run() async {
         guard !isRunning else { return }
         let name = host.trimmingCharacters(in: .whitespaces)
@@ -122,6 +135,7 @@ final class DNSReliabilityViewModel {
         let interval = max(0.3, Double(intervalText.replacingOccurrences(of: ",", with: ".")) ?? 1.0)
         let type = self.type
         let resolver = self.resolver
+        let threshold = self.threshold
 
         errorMessage = nil
         probes = []
@@ -142,7 +156,7 @@ final class DNSReliabilityViewModel {
             }
             probes.append(DNSProbe(timestamp: Date().timeIntervalSince1970, latencyMs: latency, detail: detail))
             if probes.count > maxProbes { probes.removeFirst(probes.count - maxProbes) }
-            summary = DNSReliabilityEngine.summarize(probes)
+            summary = DNSReliabilityEngine.summarize(probes, thresholdMs: threshold)
 
             guard isRunning else { break }
             try? await Task.sleep(for: .seconds(interval))
@@ -224,9 +238,11 @@ struct DNSReliabilityView: View {
                 SavedHostMenu(host: $viewModel.host)
             }
 
+            labeledField(L10n("dnsrel.opt.server"), text: $viewModel.server, wide: true)
             HStack(spacing: Spacing.sm) {
-                labeledField(L10n("dnsrel.opt.server"), text: $viewModel.server, wide: true)
                 labeledField(L10n("dnsrel.opt.interval"), text: $viewModel.intervalText, wide: false)
+                labeledField(L10n("dnsrel.opt.threshold"), text: $viewModel.thresholdText, wide: false)
+                Spacer()
             }
 
             Picker(L10nString("dnsrel.opt.type"), selection: $viewModel.type) {
@@ -278,22 +294,26 @@ struct DNSReliabilityView: View {
 
     private var summarySection: some View {
         let summary = viewModel.summary
-        let healthy = summary.successRate >= 99 && summary.dropEpisodes == 0
+        let hasDrops = summary.dropEpisodes > 0 || summary.successRate < 99
+        let hasSlow = summary.slowCount > 0
+        let kind: StatusBadge.Kind = hasDrops ? (summary.successRate >= 90 ? .warning : .danger)
+            : (hasSlow ? .warning : .success)
+        let statusKey = hasDrops ? "dnsrel.status.unstable" : (hasSlow ? "dnsrel.status.slow" : "dnsrel.status.stable")
         return SectionCard(title: L10n("dnsrel.section.summary"), systemImage: "chart.bar") {
             HStack {
-                StatusBadge(
-                    kind: healthy ? .success : (summary.successRate >= 90 ? .warning : .danger),
-                    text: healthy ? L10n("dnsrel.status.stable") : L10n("dnsrel.status.unstable")
-                )
+                StatusBadge(kind: kind, text: L10n(statusKey))
                 Spacer()
                 Text(String(format: "%.1f%%", summary.successRate))
                     .font(AppTypography.monoLarge)
-                    .foregroundStyle(healthy ? theme.success : theme.warning)
+                    .foregroundStyle(kind == .success ? theme.success : (kind == .danger ? theme.danger : theme.warning))
                     .environment(\.layoutDirection, .leftToRight)
             }
             ResultRow(label: L10n("dnsrel.stat.samples"), value: "\(summary.successes)/\(summary.total)")
             ResultRow(label: L10n("dnsrel.stat.drops"), value: "\(summary.dropEpisodes)")
             ResultRow(label: L10n("dnsrel.stat.longest"), value: "\(summary.longestDropStreak)")
+            if viewModel.threshold != nil {
+                ResultRow(label: L10n("dnsrel.stat.slow"), value: "\(summary.slowCount)")
+            }
             if let avg = summary.avgLatency {
                 ResultRow(label: L10n("dnsrel.stat.latency"), value: latencyRange(summary))
                 ResultRow(label: L10n("dnsrel.stat.avg"), value: String(format: "%.0f ms", avg))
@@ -321,9 +341,10 @@ struct DNSReliabilityView: View {
     private var recentSection: some View {
         SectionCard(title: L10n("dnsrel.section.recent"), systemImage: "list.bullet") {
             ForEach(viewModel.probes.suffix(12).reversed()) { probe in
+                let isSlow = probe.ok && (viewModel.threshold.map { (probe.latencyMs ?? 0) > $0 } ?? false)
                 HStack(spacing: Spacing.sm) {
-                    Image(systemName: probe.ok ? "checkmark.circle.fill" : "xmark.octagon.fill")
-                        .foregroundStyle(probe.ok ? theme.success : theme.danger)
+                    Image(systemName: probe.ok ? (isSlow ? "clock.badge.exclamationmark" : "checkmark.circle.fill") : "xmark.octagon.fill")
+                        .foregroundStyle(probe.ok ? (isSlow ? theme.warning : theme.success) : theme.danger)
                     Text(probe.detail)
                         .font(AppTypography.monoCaption)
                         .foregroundStyle(theme.mono)
@@ -333,7 +354,7 @@ struct DNSReliabilityView: View {
                     Spacer()
                     Text(probe.latencyMs.map { String(format: "%.0f ms", $0) } ?? L10nString("dnsrel.drop"))
                         .font(AppTypography.monoCaption)
-                        .foregroundStyle(probe.ok ? theme.textSecondary : theme.danger)
+                        .foregroundStyle(probe.ok ? (isSlow ? theme.warning : theme.textSecondary) : theme.danger)
                         .environment(\.layoutDirection, .leftToRight)
                 }
             }
