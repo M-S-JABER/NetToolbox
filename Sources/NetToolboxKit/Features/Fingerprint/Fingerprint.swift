@@ -105,7 +105,7 @@ final class FingerprintViewModel {
             let match = ServiceFingerprint.identify(banner: text, port: port)
             output = .success(service: match.service, product: match.product, banner: text)
         case .failure(let error):
-            output = .failure(error)
+            output = .failure(error.description)
         }
     }
 }

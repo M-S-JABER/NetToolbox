@@ -502,6 +502,8 @@
 "ping.opt.payload" = "حجم الحمولة (بايت)";
 "ping.opt.ttl" = "TTL / حد القفزات";
 "ping.opt.ipv6" = "تفضيل IPv6";
+"ping.opt.fallbackPort" = "منفذ TCP الاحتياطي";
+"ping.mode.tcp" = "ICMP محجوب — يتم قياس زمن مصافحة TCP بدلاً منه";
 "ping.error.resolve" = "تعذّر تحليل اسم المضيف. تحقّق من الاسم أو الاتصال.";
 "ping.badge.loss" = "الفقد";
 "ping.input.count" = "العدد";

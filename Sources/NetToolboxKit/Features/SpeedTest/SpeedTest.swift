@@ -185,53 +185,50 @@ struct CloudflareSpeedEngine: Sendable {
     // MARK: - Download
 
     private func measureDownload(live: @escaping @Sendable (Double) -> Void) async throws -> Double {
-        guard let url = URL(string: "https://speed.cloudflare.com/__down?bytes=300000000") else { throw NetworkServiceError.invalidURL }
-        let probe = ThroughputProbe()
-        let session = URLSession(configuration: sessionConfig(), delegate: probe, delegateQueue: nil)
-        defer { session.invalidateAndCancel() }
-
+        // Pull fixed-size chunks back-to-back with the same async API the upload
+        // uses. URLSession keeps the HTTP/2 connection alive between chunks, so
+        // throughput stays high — and unlike a delegate-driven session, this
+        // works reliably inside the Swift Playgrounds preview sandbox.
+        let chunkBytes = 20_000_000
+        guard let url = URL(string: "https://speed.cloudflare.com/__down?bytes=\(chunkBytes)") else {
+            throw NetworkServiceError.invalidURL
+        }
+        let session = self.session
         let clock = ContinuousClock()
         let start = clock.now
-        probe.begin()
-        session.dataTask(with: url).resume()
-
+        var total = 0
         var warmupBytes = 0
         var warmupTime = start
         var warmupDone = false
-        var lastBytes = 0
-        var lastTime = start
 
         while true {
-            try? await Task.sleep(for: .milliseconds(200))
             if Task.isCancelled { break }
+            if Self.seconds(clock.now - start) >= downloadSeconds { break }
+            do {
+                let (data, _) = try await session.data(from: url)
+                total += data.count
+            } catch {
+                if total > 0 { break }   // slow link timed out mid-chunk — use what arrived
+                throw error
+            }
             let now = clock.now
-            let elapsed = Self.seconds(now - start)
-            let bytes = probe.received
-
-            if !warmupDone, elapsed >= warmupSeconds {
-                warmupBytes = bytes
+            if !warmupDone, Self.seconds(now - start) >= warmupSeconds {
+                warmupBytes = total
                 warmupTime = now
                 warmupDone = true
             }
-            let interval = Self.seconds(now - lastTime)
-            if interval > 0 {
-                live(Double(bytes - lastBytes) * 8 / interval / 1_000_000)
+            let measured = Self.seconds(now - (warmupDone ? warmupTime : start))
+            if measured > 0 {
+                live(Double(total - warmupBytes) * 8 / measured / 1_000_000)
             }
-            lastBytes = bytes
-            lastTime = now
-
-            // Keep the pipe full if a payload finished before the window closed.
-            if probe.isCompleted, elapsed < downloadSeconds {
-                probe.begin()
-                session.dataTask(with: url).resume()
-            }
-            if elapsed >= downloadSeconds { break }
         }
 
         let measuredSeconds = Self.seconds(clock.now - warmupTime)
-        let measuredBytes = probe.received - warmupBytes
-        guard measuredSeconds > 0, measuredBytes > 0 else { throw NetworkServiceError.decoding }
-        return Double(measuredBytes) * 8 / measuredSeconds / 1_000_000
+        let measuredBytes = total - warmupBytes
+        let seconds = measuredSeconds > 0 ? measuredSeconds : Self.seconds(clock.now - start)
+        let bytes = measuredBytes > 0 ? measuredBytes : total
+        guard seconds > 0, bytes > 0 else { throw NetworkServiceError.decoding }
+        return Double(bytes) * 8 / seconds / 1_000_000
     }
 
     // MARK: - Upload
@@ -280,45 +277,7 @@ struct CloudflareSpeedEngine: Sendable {
 
     // MARK: - Helpers
 
-    private func sessionConfig() -> URLSessionConfiguration {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 30
-        configuration.urlCache = nil
-        configuration.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        return configuration
-    }
-
     private static func seconds(_ duration: Duration) -> Double {
         Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1_000_000_000_000_000_000
-    }
-}
-
-/// Accumulates received bytes for a delegate-driven download so throughput can
-/// be sampled live without iterating the stream byte by byte.
-private final class ThroughputProbe: NSObject, URLSessionDataDelegate, @unchecked Sendable {
-    private let lock = NSLock()
-    private var total = 0
-    private var completed = false
-
-    var received: Int {
-        lock.lock(); defer { lock.unlock() }
-        return total
-    }
-
-    var isCompleted: Bool {
-        lock.lock(); defer { lock.unlock() }
-        return completed
-    }
-
-    func begin() {
-        lock.lock(); completed = false; lock.unlock()
-    }
-
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
-        lock.lock(); total += data.count; lock.unlock()
-    }
-
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        lock.lock(); completed = true; lock.unlock()
     }
 }

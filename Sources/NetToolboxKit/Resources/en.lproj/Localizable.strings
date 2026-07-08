@@ -502,6 +502,8 @@
 "ping.opt.payload" = "Payload Size (bytes)";
 "ping.opt.ttl" = "TTL / hop limit";
 "ping.opt.ipv6" = "Prefer IPv6";
+"ping.opt.fallbackPort" = "TCP fallback port";
+"ping.mode.tcp" = "ICMP filtered — measuring TCP handshake time instead";
 "ping.error.resolve" = "Could not resolve the host. Check the name or your connection.";
 "ping.badge.loss" = "Loss";
 "ping.input.count" = "Count";

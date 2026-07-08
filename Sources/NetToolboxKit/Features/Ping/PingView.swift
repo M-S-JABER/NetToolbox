@@ -114,6 +114,7 @@ struct PingView: View {
             optionRow(L10n("ping.opt.ttl"), text: $viewModel.ttlText)
             Toggle(L10nString("ping.opt.ipv6"), isOn: $viewModel.preferIPv6)
                 .disabled(viewModel.isRunning)
+            optionRow(L10n("ping.opt.fallbackPort"), text: $viewModel.fallbackPortText)
         }
     }
 
@@ -137,6 +138,12 @@ struct PingView: View {
 
     private func summarySection(_ summary: PingSummary) -> some View {
         SectionCard(title: L10n("ping.section.summary"), systemImage: "chart.bar") {
+            if viewModel.usingTCPFallback {
+                Label(L10n("ping.mode.tcp"), systemImage: "bolt.horizontal.circle")
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.warning)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             HStack {
                 StatusBadge(
                     kind: summary.lossPercent == 0 ? .success : (summary.lossPercent < 100 ? .warning : .danger),

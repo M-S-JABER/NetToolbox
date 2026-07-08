@@ -18,6 +18,11 @@ final class PingViewModel {
     var ttlText = "64"           // TTL / hop-limit
     var preferIPv6 = false       // Prefer IPv6
     var continuous = false       // keep pinging until stopped
+    var fallbackPortText = "443" // TCP port used when ICMP is blocked
+
+    /// True once the run has fallen back to TCP-connect timing because ICMP
+    /// echoes went unanswered (common on iOS/cellular networks that filter it).
+    private(set) var usingTCPFallback = false
 
     private(set) var attempts: [PingAttempt] = []
     private(set) var summary: PingSummary?
@@ -46,12 +51,14 @@ final class PingViewModel {
         let timeout = max(0.2, Double(timeoutText) ?? 2)
         let payload = max(0, min(65_500, Int(payloadText) ?? 56))
         let ttl = max(1, min(255, Int(ttlText) ?? 64))
+        let fallbackPort = UInt16(fallbackPortText.trimmingCharacters(in: .whitespaces)) ?? 443
 
         isRunning = true
         errorMessage = nil
         attempts = []
         summary = nil
         resolvedIP = nil
+        usingTCPFallback = false
 
         guard let resolved = ICMPPingEngine.resolve(host: target, preferIPv6: preferIPv6) else {
             errorMessage = L10nString("ping.error.resolve")
@@ -60,14 +67,31 @@ final class PingViewModel {
         }
         resolvedIP = resolved.ip
 
+        let tcpPinger = TCPPingService()
+        var useICMP = true
         var collected: [PingAttempt] = []
         var sequence = 0
         while isRunning, sequence < count {
             sequence += 1
-            let reply = await ICMPPingEngine.ping(
-                target: resolved, sequence: sequence, ttl: ttl, payloadSize: payload, timeout: timeout
-            )
-            collected.append(PingAttempt(sequence: sequence, milliseconds: reply.milliseconds))
+            var milliseconds: Double?
+            if useICMP {
+                let reply = await ICMPPingEngine.ping(
+                    target: resolved, sequence: sequence, ttl: ttl, payloadSize: payload, timeout: timeout
+                )
+                milliseconds = reply.milliseconds
+                // If the very first ICMP echo goes unanswered the network is
+                // almost certainly filtering ICMP — switch to a TCP handshake
+                // (like other iOS ping tools) for the rest of the run.
+                if milliseconds == nil, sequence == 1 {
+                    useICMP = false
+                    usingTCPFallback = true
+                }
+            }
+            if milliseconds == nil {
+                let tcp = await tcpPinger.attempt(host: resolved.ip, port: fallbackPort, timeout: timeout)
+                milliseconds = tcp.milliseconds
+            }
+            collected.append(PingAttempt(sequence: sequence, milliseconds: milliseconds))
             attempts = collected
             summary = TCPPingService.summarize(collected)
             if isRunning, sequence < count {
