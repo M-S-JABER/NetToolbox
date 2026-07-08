@@ -67,6 +67,7 @@ enum ToolRegistry {
         WiFiInfoTool(),
         SavedHostsTool(),
         LANScannerTool(),
+        SSDPTool(),
         IPRangeScannerTool(),
         WakeOnLANTool(),
         CameraTool(),

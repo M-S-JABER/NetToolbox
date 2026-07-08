@@ -1256,3 +1256,13 @@
 "fingerprint.banner" = "الراية الخام";
 "fingerprint.note" = "يتصل ويقرأ التحية (أو استجابة HTTP) ويحدّد الخدمة والبرنامج من أنماط الرايات المعروفة. استدلال تقريبي، وليس مسحاً كاملاً للمنافذ.";
 
+
+// SSDP / UPnP discovery
+"tool.ssdp.title" = "اكتشاف SSDP / UPnP";
+"tool.ssdp.subtitle" = "اعثر على أجهزة UPnP في الشبكة المحلية";
+"ssdp.input.title" = "البحث";
+"ssdp.opt.target" = "الهدف";
+"ssdp.action.scan" = "اكتشف";
+"ssdp.section.devices" = "الأجهزة";
+"ssdp.empty" = "لم يستجب أي جهاز. على iOS يتطلب هذا إذن الشبكة المحلية وصلاحية multicast.";
+"ssdp.note" = "يرسل SSDP M-SEARCH إلى مجموعة multicast ويعرض المستجيبين (العنوان، الخادم، الموقع، النوع). يتطلب إذن الشبكة المحلية وصلاحية multicast من Apple ليعمل على الجهاز.";

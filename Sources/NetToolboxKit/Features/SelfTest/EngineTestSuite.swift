@@ -813,6 +813,16 @@ struct EngineTestSuite: Sendable {
                 expect(result.lastAddress, equals: "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff", "last")
             )
         },
+        Case(name: "SSDP response parsing") {
+            let response = "HTTP/1.1 200 OK\r\nLOCATION: http://192.168.1.1:5000/rootDesc.xml\r\nSERVER: Linux/3.14 UPnP/1.0\r\nST: upnp:rootdevice\r\nUSN: uuid:abcd::upnp:rootdevice\r\n\r\n"
+            let device = SSDPEngine.parse(response, address: "192.168.1.1")
+            return firstFailure(
+                expect(device.location, equals: "http://192.168.1.1:5000/rootDesc.xml", "location"),
+                expect(device.server, equals: "Linux/3.14 UPnP/1.0", "server"),
+                expect(device.searchTarget, equals: "upnp:rootdevice", "st"),
+                expect(device.usn, equals: "uuid:abcd::upnp:rootdevice", "usn")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

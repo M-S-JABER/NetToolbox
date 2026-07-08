@@ -1256,3 +1256,13 @@
 "fingerprint.banner" = "Raw banner";
 "fingerprint.note" = "Connects, reads the greeting (or an HTTP response), and identifies the service and software from well-known banner patterns. A best-effort heuristic, not a full port scan.";
 
+
+// SSDP / UPnP discovery
+"tool.ssdp.title" = "SSDP / UPnP Discovery";
+"tool.ssdp.subtitle" = "Find UPnP devices on the local network";
+"ssdp.input.title" = "Search";
+"ssdp.opt.target" = "Target";
+"ssdp.action.scan" = "Discover";
+"ssdp.section.devices" = "Devices";
+"ssdp.empty" = "No devices answered. On iOS this needs the local-network permission and the multicast entitlement.";
+"ssdp.note" = "Sends an SSDP M-SEARCH to the multicast group and lists responders (address, server, location, type). Requires the local-network permission and Apple's multicast entitlement to work on device.";
