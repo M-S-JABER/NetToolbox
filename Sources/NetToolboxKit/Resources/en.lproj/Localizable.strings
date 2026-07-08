@@ -824,6 +824,7 @@
 "tool.bgpip.subtitle" = "Resolve an IP to its prefix & origin AS";
 "tool.bgpip.title" = "IP → BGP";
 "common.done" = "Done";
+"common.export" = "Export";
 "home.favorite" = "Favorite";
 "home.favorites" = "Favorites";
 "home.smart.title" = "Smart suggestion";

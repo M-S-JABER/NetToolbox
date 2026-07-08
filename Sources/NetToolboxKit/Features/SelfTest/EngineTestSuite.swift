@@ -795,6 +795,15 @@ struct EngineTestSuite: Sendable {
                 expect(pop.service, equals: "POP3", "pop3 service")
             )
         },
+        Case(name: "CSV export encoding") {
+            return firstFailure(
+                expect(CSV.field("plain"), equals: "plain", "plain"),
+                expect(CSV.field("a,b"), equals: "\"a,b\"", "comma quoted"),
+                expect(CSV.field("say \"hi\""), equals: "\"say \"\"hi\"\"\"", "quote escaped"),
+                expect(CSV.row(["a", "b,c"]), equals: "a,\"b,c\"", "row"),
+                expect(CSV.table(header: ["x"], rows: [["1"], ["2"]]), equals: "x\n1\n2", "table")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

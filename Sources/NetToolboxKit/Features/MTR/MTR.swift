@@ -273,8 +273,29 @@ struct MTRView: View {
         }
     }
 
+    private var mtrCSV: String {
+        CSV.table(
+            header: ["hop", "host", "loss%", "last", "avg", "best", "worst", "asn"],
+            rows: viewModel.hops.map { hop in
+                [
+                    String(hop.ttl), hop.address ?? "",
+                    String(format: "%.0f", hop.lossPercent),
+                    hop.last.map { String(format: "%.0f", $0) } ?? "",
+                    hop.avg.map { String(format: "%.0f", $0) } ?? "",
+                    hop.best.map { String(format: "%.0f", $0) } ?? "",
+                    hop.worst.map { String(format: "%.0f", $0) } ?? "",
+                    hop.asn ?? "",
+                ]
+            }
+        )
+    }
+
     private var hopsSection: some View {
         SectionCard(title: L10n("mtr.section.hops"), systemImage: "list.number") {
+            HStack {
+                Spacer()
+                ExportButton(content: mtrCSV)
+            }
             ForEach(viewModel.hops) { hop in
                 hopRow(hop)
                 if hop.id != viewModel.hops.last?.id {

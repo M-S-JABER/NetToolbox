@@ -157,8 +157,21 @@ struct CertExpiryView: View {
         }
     }
 
+    private var certCSV: String {
+        CSV.table(
+            header: ["host", "daysRemaining", "notAfter", "subject", "error"],
+            rows: viewModel.results.map {
+                [$0.host, $0.daysRemaining.map(String.init) ?? "", $0.notAfter ?? "", $0.subject ?? "", $0.error ?? ""]
+            }
+        )
+    }
+
     private var listSection: some View {
         SectionCard(title: L10n("certexp.section.hosts"), systemImage: "lock.doc") {
+            HStack {
+                Spacer()
+                ExportButton(content: certCSV)
+            }
             ForEach(viewModel.results) { result in
                 row(result)
                 if result.id != viewModel.results.last?.id {

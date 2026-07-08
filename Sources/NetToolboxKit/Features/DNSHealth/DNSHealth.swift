@@ -206,6 +206,13 @@ struct DNSHealthView: View {
         }
     }
 
+    private var propagationCSV: String {
+        CSV.table(
+            header: ["resolver", "server", "values", "error"],
+            rows: viewModel.results.map { [$0.name, $0.server, $0.values.joined(separator: " "), $0.error ?? ""] }
+        )
+    }
+
     private var propagationSection: some View {
         SectionCard(title: L10n("dnshealth.section.propagation"), systemImage: "arrow.triangle.branch") {
             HStack {
@@ -214,6 +221,7 @@ struct DNSHealthView: View {
                     text: viewModel.consistent ? L10n("dnshealth.consistent") : L10n("dnshealth.inconsistent")
                 )
                 Spacer()
+                ExportButton(content: propagationCSV)
             }
             ForEach(viewModel.results) { result in
                 Divider().overlay(theme.separator)

@@ -822,6 +822,7 @@
 "tool.bgpip.subtitle" = "حوّل IP إلى بادئته وAS المصدر";
 "tool.bgpip.title" = "IP → BGP";
 "common.done" = "تم";
+"common.export" = "تصدير";
 "home.favorite" = "تفضيل";
 "home.favorites" = "المفضّلة";
 "home.smart.title" = "اقتراح ذكي";
