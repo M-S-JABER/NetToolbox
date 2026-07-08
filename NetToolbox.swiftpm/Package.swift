@@ -54,7 +54,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.0.0")
+        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.48.0")
     ],
     targets: [
         .executableTarget(
