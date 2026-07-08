@@ -878,6 +878,11 @@
 "onboarding.start" = "لنبدأ";
 "home.smart.title" = "اقتراح ذكي";
 "home.unfavorite" = "إزالة من المفضّلة";
+"home.hide" = "إخفاء الأداة";
+"home.unhide" = "إظهار الأداة";
+"settings.general" = "عام";
+"settings.showHidden" = "إظهار الأدوات المخفية";
+"settings.unhideAll" = "إظهار كل الأدوات";
 "home.favorites.caption" = "أدواتك المميّزة بنجمة";
 "home.noResults" = "لا توجد أدوات";
 "home.noResults.caption" = "جرّب كلمة مختلفة.";

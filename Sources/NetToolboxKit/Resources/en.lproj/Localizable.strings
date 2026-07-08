@@ -880,6 +880,11 @@
 "onboarding.start" = "Get started";
 "home.smart.title" = "Smart suggestion";
 "home.unfavorite" = "Unfavorite";
+"home.hide" = "Hide tool";
+"home.unhide" = "Unhide tool";
+"settings.general" = "General";
+"settings.showHidden" = "Show hidden tools";
+"settings.unhideAll" = "Unhide all tools";
 "home.favorites.caption" = "Your starred tools";
 "home.noResults" = "No tools found";
 "home.noResults.caption" = "Try a different keyword.";

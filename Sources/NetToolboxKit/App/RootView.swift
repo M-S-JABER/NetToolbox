@@ -10,12 +10,14 @@ struct RootView: View {
     @Environment(NetworkStatusMonitor.self) private var status
     @Environment(FavoritesStore.self) private var favorites
     @Environment(RecentToolsStore.self) private var recentTools
+    @Environment(HiddenToolsStore.self) private var hiddenTools
     @Environment(ActivityCenter.self) private var activity
 
     @Binding var themeSelection: String
     @State private var search = ""
     @State private var selectedToolID: String?
     @State private var showSettings = false
+    @AppStorage("nettoolbox.showHidden") private var showHidden = false
     @AppStorage("nettoolbox.onboarded") private var onboarded = false
     @State private var showOnboarding = false
 
@@ -25,7 +27,9 @@ struct RootView: View {
                 if searchQuery.isEmpty {
                     if !favoriteTools.isEmpty { favoritesSection }
                     ForEach(ToolRegistry.activeCategories) { category in
-                        categorySection(category)
+                        if !visibleTools(in: category).isEmpty {
+                            categorySection(category)
+                        }
                     }
                 } else {
                     if let suggestion = smartSuggestion { row(suggestion.tool) }
@@ -128,9 +132,13 @@ struct RootView: View {
         }
     }
 
+    private func visibleTools(in category: ToolCategory) -> [any NetworkTool] {
+        ToolRegistry.tools(in: category).filter { showHidden || !hiddenTools.isHidden($0.id) }
+    }
+
     private func categorySection(_ category: ToolCategory) -> some View {
         Section {
-            ForEach(ToolRegistry.tools(in: category), id: \.id) { row($0) }
+            ForEach(visibleTools(in: category), id: \.id) { row($0) }
         } header: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: category.systemImage)
@@ -169,6 +177,31 @@ struct RootView: View {
                 Image(systemName: favorites.isFavorite(tool.id) ? "star.slash" : "star")
             }
             .tint(theme.warning)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: hiddenTools.isHidden(tool.id) ? .none : .destructive) {
+                hiddenTools.toggle(tool.id)
+            } label: {
+                Image(systemName: hiddenTools.isHidden(tool.id) ? "eye" : "eye.slash")
+            }
+        }
+        .contextMenu {
+            Button {
+                favorites.toggle(tool.id)
+            } label: {
+                Label(
+                    L10nString(favorites.isFavorite(tool.id) ? "home.unfavorite" : "home.favorite"),
+                    systemImage: favorites.isFavorite(tool.id) ? "star.slash" : "star"
+                )
+            }
+            Button(role: hiddenTools.isHidden(tool.id) ? .none : .destructive) {
+                hiddenTools.toggle(tool.id)
+            } label: {
+                Label(
+                    L10nString(hiddenTools.isHidden(tool.id) ? "home.unhide" : "home.hide"),
+                    systemImage: hiddenTools.isHidden(tool.id) ? "eye" : "eye.slash"
+                )
+            }
         }
     }
 }

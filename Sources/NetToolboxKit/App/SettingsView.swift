@@ -11,6 +11,8 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
     @Environment(AppLock.self) private var appLock
     @Environment(CloudSync.self) private var cloudSync
+    @Environment(HiddenToolsStore.self) private var hiddenTools
+    @AppStorage("nettoolbox.showHidden") private var showHidden = false
 
     @Binding var themeSelection: String
     @AppStorage("nettoolbox.appearance") private var appearanceSelection = AppearanceOption.system.rawValue
@@ -24,6 +26,7 @@ struct SettingsView: View {
                     appearanceCard
                     themeCard
                     permissionsCard
+                    generalCard
                     securityCard
                     aboutCard
                 }
@@ -141,6 +144,24 @@ struct SettingsView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var generalCard: some View {
+        SectionCard(title: L10n("settings.general"), systemImage: "slider.horizontal.3") {
+            Toggle(isOn: $showHidden) {
+                Label(L10nString("settings.showHidden"), systemImage: "eye")
+                    .font(AppTypography.body)
+            }
+            if hiddenTools.hasHidden {
+                Button(role: .destructive) {
+                    hiddenTools.showAll()
+                } label: {
+                    Label(L10nString("settings.unhideAll"), systemImage: "eye.circle")
+                        .font(AppTypography.footnote)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
     }
 
     private var securityCard: some View {
