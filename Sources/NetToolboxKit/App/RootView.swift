@@ -142,9 +142,10 @@ struct RootView: View {
             }
             if activity.running.contains(tool.id) {
                 Spacer()
-                Circle()
-                    .fill(theme.success)
-                    .frame(width: 8, height: 8)
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 8))
+                    .foregroundStyle(theme.success)
+                    .symbolEffect(.pulse, options: .repeating, isActive: true)
                     .accessibilityLabel(Text(L10n("activity.running")))
             }
         }

@@ -880,6 +880,10 @@
 "settings.about" = "About";
 "settings.tagline" = "A modular, native network toolbox — no external dependencies.";
 "settings.theme" = "Accent theme";
+"settings.appearance" = "Appearance";
+"appearance.system" = "System";
+"appearance.light" = "Light";
+"appearance.dark" = "Dark";
 "settings.security" = "Security";
 "settings.permissions" = "Permissions";
 "settings.permissions.hint" = "Some tools need system access to work. Grant or revoke it any time in iOS Settings.";

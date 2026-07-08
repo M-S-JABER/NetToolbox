@@ -20,6 +20,7 @@ public struct NetToolboxRootView: View {
     private let themeOverride: (any Theme)?
 
     @AppStorage("nettoolbox.theme") private var themeSelection = ThemeOption.teal.rawValue
+    @AppStorage("nettoolbox.appearance") private var appearanceSelection = AppearanceOption.system.rawValue
     @State private var status = NetworkStatusMonitor()
     @State private var favorites = FavoritesStore()
     @State private var recentTools = RecentToolsStore()
@@ -61,7 +62,8 @@ public struct NetToolboxRootView: View {
             .environment(cloudSync)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)
-            // Native iOS look: follow the system Light/Dark appearance.
+            // Follow the system appearance by default, or force light/dark.
+            .preferredColorScheme((AppearanceOption(rawValue: appearanceSelection) ?? .system).colorScheme)
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])
             .task { status.start() }
             .task { cloudSync.start() }

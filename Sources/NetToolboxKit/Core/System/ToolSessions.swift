@@ -1,5 +1,8 @@
 import SwiftUI
 import Observation
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Retains tool view-models across navigation. Because a tool's view is torn
 /// down when you switch tools in the split view, its `@State` view-model would
@@ -38,5 +41,14 @@ final class ActivityCenter {
     var running: Set<String> = []
 
     func start(_ id: String) { running.insert(id) }
-    func stop(_ id: String) { running.remove(id) }
+
+    func stop(_ id: String) {
+        guard running.contains(id) else { return }
+        running.remove(id)
+        // A gentle tap when a scan/probe finishes — confirms completion even
+        // when you've navigated away from the tool.
+        #if canImport(UIKit)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        #endif
+    }
 }

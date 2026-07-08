@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(CloudSync.self) private var cloudSync
 
     @Binding var themeSelection: String
+    @AppStorage("nettoolbox.appearance") private var appearanceSelection = AppearanceOption.system.rawValue
 
     private let swatchColumns = [GridItem(.adaptive(minimum: 96), spacing: Spacing.md)]
 
@@ -20,6 +21,7 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
+                    appearanceCard
                     themeCard
                     permissionsCard
                     securityCard
@@ -37,6 +39,17 @@ struct SettingsView: View {
                     Button(L10nString("common.done")) { dismiss() }
                 }
             }
+        }
+    }
+
+    private var appearanceCard: some View {
+        SectionCard(title: L10n("settings.appearance"), systemImage: "circle.lefthalf.filled") {
+            Picker(L10nString("settings.appearance"), selection: $appearanceSelection) {
+                ForEach(AppearanceOption.allCases) { option in
+                    Label(option.labelKey, systemImage: option.symbol).tag(option.rawValue)
+                }
+            }
+            .pickerStyle(.segmented)
         }
     }
 

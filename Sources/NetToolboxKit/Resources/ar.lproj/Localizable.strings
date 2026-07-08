@@ -878,6 +878,10 @@
 "settings.about" = "حول";
 "settings.tagline" = "صندوق أدوات شبكات أصلي ومرن — بدون أي مكتبات خارجية.";
 "settings.theme" = "سمة اللون";
+"settings.appearance" = "المظهر";
+"appearance.system" = "النظام";
+"appearance.light" = "فاتح";
+"appearance.dark" = "داكن";
 "settings.security" = "الأمان";
 "settings.permissions" = "الأذونات";
 "settings.permissions.hint" = "بعض الأدوات تحتاج وصولاً للنظام لتعمل. يمكنك منحها أو سحبها في أي وقت من إعدادات iOS.";
