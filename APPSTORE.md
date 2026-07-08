@@ -35,6 +35,63 @@ Declared in `NetToolbox.swiftpm/Package.swift` via `.iOSApplication(capabilities
 | `NSPhotoLibraryAddUsageDescription` | Save camera snapshots to Photos |
 | `NSLocalNetworkUsageDescription` + `NSBonjourServices` | Bonjour browser, LAN scan, IP cameras |
 
+These are the **only** permissions the app requests, and each is prompted
+lazily the first time its feature is used — none are asked for at launch.
+
+## Capabilities / entitlements to enable
+
+| Capability | Needed by | Where to enable |
+| --- | --- | --- |
+| Keychain (default) | Storing SSH/camera secrets | Automatic — no entitlement needed for the app's own keychain items |
+| iCloud → **Key-value storage** | The optional "Sync settings via iCloud" toggle | Xcode → Signing & Capabilities → **+ iCloud** → tick *Key-value storage*. (Swift Playgrounds can't add this; the toggle simply no-ops until it's enabled.) |
+| Face ID | App lock | Covered by `NSFaceIDUsageDescription` above — no separate entitlement |
+
+Notes:
+- No push, no background modes, no HealthKit/location — keep the entitlements
+  list minimal so review is fast.
+- App Transport Security: the app talks to user-supplied hosts (SSH, RTSP,
+  plain HTTP tools by design). If a specific tool needs cleartext to a host the
+  user typed, that is expected; document it in the review notes rather than
+  disabling ATS globally.
+
+## App icon
+
+- Source: `NetToolbox.swiftpm/AppIcon.svg` (1024×1024, no text, teal network
+  motif). Export a **1024×1024 PNG, no alpha/transparency** for App Store.
+- Swift Playgrounds: App Settings → App Icon → choose the PNG.
+- Xcode: `Assets.xcassets` → `AppIcon` → drop the 1024 PNG into "App Store iOS".
+
+## How to submit
+
+**Prerequisites:** an Apple Developer Program membership ($99/yr) and an app
+record in App Store Connect (`appstoreconnect.apple.com` → Apps → +).
+
+### Path A — straight from Swift Playgrounds on iPad
+1. Open the app project → tap the title menu → **App Store Connect** →
+   **Publish App**. Playgrounds builds, signs (with your developer account) and
+   uploads the build for you.
+2. In App Store Connect, the build appears under the app's **TestFlight** /
+   **App Store** tab after processing (a few minutes).
+
+### Path B — Xcode on a Mac (needed for the iCloud entitlement)
+1. Open the `.swiftpm` in Xcode (File → Open) or create an App target that
+   imports `NetToolboxKit`.
+2. Signing & Capabilities: pick your team; add **iCloud → Key-value storage**
+   if you want the sync toggle to work.
+3. Set version 1.4.0, build number, and the 1024 icon in `Assets.xcassets`.
+4. Product → **Archive** → **Distribute App** → **App Store Connect** → Upload.
+
+### Then, in App Store Connect (both paths)
+1. **App information:** name, subtitle, category (Utilities), privacy policy URL.
+2. **Privacy → Data collection:** answer **"Data Not Collected"** (matches
+   `PrivacyInfo.xcprivacy`).
+3. **Version metadata:** paste the description/keywords/"What's New" from this
+   file; add screenshots (6.7" iPhone + 12.9" iPad required).
+4. **Build:** select the uploaded build.
+5. **Age rating**, **export compliance** (uses only standard OS encryption →
+   usually exempt; answer the encryption question accordingly).
+6. **Submit for Review.**
+
 ## Description (English)
 
 NetToolbox is a professional network toolkit for iPad and iPhone — 76 native
