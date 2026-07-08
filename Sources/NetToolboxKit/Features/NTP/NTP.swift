@@ -124,14 +124,17 @@ struct NTPView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("ntp.input.title"), systemImage: "clock") {
-            TextField("time.apple.com", text: $viewModel.server)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.query() } }
+            HStack(spacing: Spacing.sm) {
+                TextField("time.apple.com", text: $viewModel.server)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await viewModel.query() } }
+                SavedHostMenu(host: $viewModel.server)
+            }
 
             Button {
                 Task { await viewModel.query() }

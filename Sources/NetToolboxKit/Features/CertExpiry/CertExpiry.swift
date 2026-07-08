@@ -128,14 +128,17 @@ struct CertExpiryView: View {
         @Bindable var viewModel = viewModel
         return SectionCard(title: L10n("certexp.input.title"), systemImage: "plus.circle") {
             HStack(spacing: Spacing.sm) {
-                TextField(L10nString("certexp.input.host"), text: $viewModel.newHost)
-                    .textFieldStyle(.roundedBorder)
-                    .font(AppTypography.monoBody)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.URL)
-                    .environment(\.layoutDirection, .leftToRight)
-                    .onSubmit { viewModel.add() }
+                HStack(spacing: Spacing.sm) {
+                    TextField(L10nString("certexp.input.host"), text: $viewModel.newHost)
+                        .textFieldStyle(.roundedBorder)
+                        .font(AppTypography.monoBody)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        .environment(\.layoutDirection, .leftToRight)
+                        .onSubmit { viewModel.add() }
+                    SavedHostMenu(host: $viewModel.newHost)
+                }
                 Button {
                     viewModel.add()
                 } label: {

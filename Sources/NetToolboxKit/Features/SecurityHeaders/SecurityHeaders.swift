@@ -102,10 +102,13 @@ struct SecurityHeadersView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 SectionCard(title: L10n("secheaders.input.title"), systemImage: "checkerboard.shield") {
-                    TextField(L10nString("httptiming.input.url"), text: $viewModel.url)
-                        .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
-                        .autocorrectionDisabled().textInputAutocapitalization(.never).keyboardType(.URL)
-                        .environment(\.layoutDirection, .leftToRight)
+                    HStack(spacing: Spacing.sm) {
+                        TextField(L10nString("httptiming.input.url"), text: $viewModel.url)
+                            .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
+                            .autocorrectionDisabled().textInputAutocapitalization(.never).keyboardType(.URL)
+                            .environment(\.layoutDirection, .leftToRight)
+                        SavedHostMenu(host: $viewModel.url)
+                    }
                     Button {
                         Task { await viewModel.run() }
                     } label: {

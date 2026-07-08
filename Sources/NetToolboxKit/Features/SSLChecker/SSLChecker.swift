@@ -312,6 +312,7 @@ struct SSLCheckerView: View {
                     .keyboardType(.numberPad)
                     .frame(maxWidth: 90)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
             }
 
             Button {

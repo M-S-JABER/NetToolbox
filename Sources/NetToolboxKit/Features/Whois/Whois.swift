@@ -124,14 +124,17 @@ struct WhoisView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("whois.input.title"), systemImage: "globe") {
-            TextField(L10nString("whois.input.domain"), text: $viewModel.domain)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await lookup() } }
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("whois.input.domain"), text: $viewModel.domain)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await lookup() } }
+                SavedHostMenu(host: $viewModel.domain)
+            }
 
             Button {
                 Task { await lookup() }

@@ -136,14 +136,17 @@ struct WebSocketView: View {
     private var connectionSection: some View {
         @Bindable var viewModel = viewModel
         return SectionCard(title: L10n("websocket.input.title"), systemImage: "bolt.horizontal.circle") {
-            TextField(L10nString("websocket.input.url"), text: $viewModel.url)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .disabled(viewModel.isConnected)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("websocket.input.url"), text: $viewModel.url)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .disabled(viewModel.isConnected)
+                SavedHostMenu(host: $viewModel.url)
+            }
 
             if viewModel.isConnected {
                 Button(role: .destructive) {

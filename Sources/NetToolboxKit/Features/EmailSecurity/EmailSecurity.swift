@@ -110,13 +110,16 @@ struct EmailSecurityView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("emailsec.input.title"), systemImage: "envelope") {
-            TextField(L10nString("emailsec.input.domain"), text: $viewModel.domain)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("emailsec.input.domain"), text: $viewModel.domain)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.domain)
+            }
             HStack {
                 Text(L10n("emailsec.input.selector")).font(AppTypography.caption).foregroundStyle(theme.textSecondary)
                 TextField("default", text: $viewModel.selector)

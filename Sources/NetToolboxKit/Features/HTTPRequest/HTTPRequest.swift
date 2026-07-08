@@ -127,11 +127,14 @@ struct HTTPRequestView: View {
             }
             .pickerStyle(.segmented)
 
-            TextField(L10nString("httpreq.url"), text: $viewModel.url)
-                .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
-                .keyboardType(.URL).autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("httpreq.url"), text: $viewModel.url)
+                    .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
+                    .keyboardType(.URL).autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.url)
+            }
 
             TextField(L10nString("httpreq.headers"), text: $viewModel.headersText, axis: .vertical)
                 .textFieldStyle(.roundedBorder).font(AppTypography.monoCaption)

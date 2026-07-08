@@ -152,13 +152,16 @@ struct DNSHealthView: View {
     private var inputSection: some View {
         @Bindable var viewModel = viewModel
         return SectionCard(title: L10n("dnshealth.input.title"), systemImage: "globe") {
-            TextField(L10nString("dnshealth.input.host"), text: $viewModel.name)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("dnshealth.input.host"), text: $viewModel.name)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.name)
+            }
 
             Picker(L10nString("dnshealth.opt.type"), selection: $viewModel.type) {
                 ForEach(DNSRecordType.allCases) { recordType in

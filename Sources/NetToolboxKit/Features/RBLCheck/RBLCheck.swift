@@ -103,14 +103,17 @@ struct RBLCheckView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("rbl.input.title"), systemImage: "hand.raised.slash") {
-            TextField("8.8.8.8", text: $viewModel.ip)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .keyboardType(.numbersAndPunctuation)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.check() } }
+            HStack(spacing: Spacing.sm) {
+                TextField("8.8.8.8", text: $viewModel.ip)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .keyboardType(.numbersAndPunctuation)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await viewModel.check() } }
+                SavedHostMenu(host: $viewModel.ip)
+            }
 
             Button {
                 Task { await viewModel.check() }

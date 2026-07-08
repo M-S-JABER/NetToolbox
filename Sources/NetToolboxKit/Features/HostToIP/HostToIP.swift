@@ -110,14 +110,17 @@ struct HostToIPView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("host.input.title"), systemImage: "arrow.right.arrow.left") {
-            TextField(L10nString("host.input.placeholder"), text: $viewModel.host)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.resolve() } }
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("host.input.placeholder"), text: $viewModel.host)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await viewModel.resolve() } }
+                SavedHostMenu(host: $viewModel.host)
+            }
 
             Button {
                 Task { await viewModel.resolve() }

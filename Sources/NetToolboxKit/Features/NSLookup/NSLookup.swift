@@ -110,14 +110,17 @@ struct NSLookupView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("nslookup.input.title"), systemImage: "magnifyingglass") {
-            TextField(L10nString("nslookup.input.placeholder"), text: $viewModel.query)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.lookup() } }
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("nslookup.input.placeholder"), text: $viewModel.query)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await viewModel.lookup() } }
+                SavedHostMenu(host: $viewModel.query)
+            }
 
             HStack {
                 Button {

@@ -138,14 +138,17 @@ struct IPInfoView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("ipinfo.input.title"), systemImage: "magnifyingglass") {
-            TextField(L10nString("ipinfo.input.placeholder"), text: $viewModel.query)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await lookup() } }
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("ipinfo.input.placeholder"), text: $viewModel.query)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await lookup() } }
+                SavedHostMenu(host: $viewModel.query)
+            }
 
             Button {
                 Task { await lookup() }

@@ -136,10 +136,13 @@ struct RDAPView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("rdap.input.title"), systemImage: "doc.text.magnifyingglass") {
-            TextField(L10nString("rdap.input.query"), text: $viewModel.query)
-                .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
-                .autocorrectionDisabled().textInputAutocapitalization(.never).keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("rdap.input.query"), text: $viewModel.query)
+                    .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
+                    .autocorrectionDisabled().textInputAutocapitalization(.never).keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.query)
+            }
             Button {
                 Task { await viewModel.run() }
             } label: {

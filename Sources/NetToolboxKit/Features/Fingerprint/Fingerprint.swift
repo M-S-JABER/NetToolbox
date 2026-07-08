@@ -163,6 +163,7 @@ struct FingerprintView: View {
                     .keyboardType(.numberPad)
                     .frame(maxWidth: 90)
                     .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.host)
             }
             Button {
                 Task { await viewModel.run() }

@@ -119,14 +119,17 @@ struct HTTPHeadersView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("http.input.title"), systemImage: "link") {
-            TextField(L10nString("http.input.url"), text: $viewModel.urlString)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
-                .onSubmit { Task { await viewModel.inspect() } }
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("http.input.url"), text: $viewModel.urlString)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                    .onSubmit { Task { await viewModel.inspect() } }
+                SavedHostMenu(host: $viewModel.urlString)
+            }
 
             Button {
                 Task { await viewModel.inspect() }

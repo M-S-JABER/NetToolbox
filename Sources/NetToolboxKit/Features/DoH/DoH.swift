@@ -77,11 +77,14 @@ struct DoHView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 SectionCard(title: L10n("dns.input.title"), systemImage: "lock.doc") {
-                    TextField(L10nString("dns.input.name"), text: $viewModel.name)
-                        .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
-                        .autocorrectionDisabled().textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-                        .environment(\.layoutDirection, .leftToRight)
+                    HStack(spacing: Spacing.sm) {
+                        TextField(L10nString("dns.input.name"), text: $viewModel.name)
+                            .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
+                            .autocorrectionDisabled().textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                            .environment(\.layoutDirection, .leftToRight)
+                        SavedHostMenu(host: $viewModel.name)
+                    }
                     Picker(L10nString("dns.input.type"), selection: $viewModel.type) {
                         ForEach(DNSRecordType.allCases) { Text($0.label).tag($0) }
                     }

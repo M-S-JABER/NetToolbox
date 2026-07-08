@@ -103,13 +103,16 @@ struct DNSLookupView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("dns.input.title"), systemImage: "at") {
-            TextField(L10nString("dns.input.name"), text: $viewModel.name)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("dns.input.name"), text: $viewModel.name)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.name)
+            }
 
             Picker(L10nString("dns.input.type"), selection: $viewModel.type) {
                 ForEach(DNSRecordType.allCases) { type in

@@ -145,13 +145,16 @@ struct CertTransparencyView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("ct.input.title"), systemImage: "magnifyingglass") {
-            TextField(L10nString("ct.input.domain"), text: $viewModel.domain)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("ct.input.domain"), text: $viewModel.domain)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.domain)
+            }
             Button {
                 Task { await viewModel.run() }
             } label: {

@@ -113,10 +113,13 @@ struct HTTPTimingView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("httptiming.input.title"), systemImage: "link") {
-            TextField(L10nString("httptiming.input.url"), text: $viewModel.url)
-                .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
-                .autocorrectionDisabled().textInputAutocapitalization(.never).keyboardType(.URL)
-                .environment(\.layoutDirection, .leftToRight)
+            HStack(spacing: Spacing.sm) {
+                TextField(L10nString("httptiming.input.url"), text: $viewModel.url)
+                    .textFieldStyle(.roundedBorder).font(AppTypography.monoBody)
+                    .autocorrectionDisabled().textInputAutocapitalization(.never).keyboardType(.URL)
+                    .environment(\.layoutDirection, .leftToRight)
+                SavedHostMenu(host: $viewModel.url)
+            }
             Button {
                 Task { await viewModel.run() }
             } label: {
