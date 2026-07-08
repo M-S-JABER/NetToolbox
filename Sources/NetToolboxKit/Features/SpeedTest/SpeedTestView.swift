@@ -10,6 +10,10 @@ final class SpeedTestViewModel {
     private(set) var upload: Double = 0
     private(set) var latency: Double = 0
     private(set) var jitter: Double = 0
+    private(set) var loadedLatency: Double = 0
+    private(set) var bufferbloatIncrease: Double?
+    private(set) var bufferbloatGrade: String?
+    private(set) var loss: Double?
     private(set) var server: SpeedServerInfo?
     private(set) var errorMessage: String?
 
@@ -69,6 +73,12 @@ final class SpeedTestViewModel {
         case .finalUpload(let mbps):
             upload = mbps
             liveMbps = mbps
+        case .bufferbloat(_, let loaded, let increase, let grade):
+            loadedLatency = loaded
+            bufferbloatIncrease = increase
+            bufferbloatGrade = grade
+        case .loss(let pct):
+            loss = pct
         }
     }
 
@@ -78,6 +88,10 @@ final class SpeedTestViewModel {
         upload = 0
         latency = 0
         jitter = 0
+        loadedLatency = 0
+        bufferbloatIncrease = nil
+        bufferbloatGrade = nil
+        loss = nil
         errorMessage = nil
     }
 }
@@ -230,7 +244,49 @@ struct SpeedTestView: View {
                 metricTile(L10n("speed.metric.ping"), value: viewModel.latency, unit: L10n("speed.unit.ms"), icon: "timer", tint: theme.success)
                 metricTile(L10n("speed.metric.jitter"), value: viewModel.jitter, unit: L10n("speed.unit.ms"), icon: "waveform.path", tint: theme.warning)
             }
+            if let grade = viewModel.bufferbloatGrade {
+                HStack(spacing: Spacing.md) {
+                    bufferbloatTile(grade: grade, increase: viewModel.bufferbloatIncrease ?? 0)
+                    metricTile(L10n("speed.metric.loss"), value: viewModel.loss ?? 0, unit: L10n("speed.unit.percent"), icon: "chart.line.downtrend.xyaxis", tint: theme.danger)
+                }
+            }
         }
+    }
+
+    private func bufferbloatColor(_ grade: String) -> Color {
+        switch grade {
+        case "A+", "A": theme.success
+        case "B", "C": theme.warning
+        default: theme.danger
+        }
+    }
+
+    private func bufferbloatTile(grade: String, increase: Double) -> some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: "gauge.with.dots.needle.bottom.50percent")
+                    .font(.caption).foregroundStyle(bufferbloatColor(grade))
+                Text(L10n("speed.metric.bufferbloat"))
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
+            HStack(alignment: .lastTextBaseline, spacing: 4) {
+                Text(grade)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(bufferbloatColor(grade))
+                    .environment(\.layoutDirection, .leftToRight)
+                Text(String(format: "+%.0f ms", increase))
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+                    .environment(\.layoutDirection, .leftToRight)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(Spacing.md)
+        .background(
+            RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous)
+                .fill(theme.surfaceElevated)
+        )
     }
 
     private func metricTile(_ label: LocalizedStringResource, value: Double, unit: LocalizedStringResource, icon: String, tint: Color) -> some View {

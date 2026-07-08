@@ -19,6 +19,22 @@ enum SpeedUpdate: Sendable {
     case liveUpload(Double)
     case finalDownload(Double)
     case finalUpload(Double)
+    case bufferbloat(idle: Double, loaded: Double, increase: Double, grade: String)
+    case loss(Double)
+}
+
+/// Grades bufferbloat from the latency increase under load (Waveform-style).
+enum BufferbloatGrade {
+    static func grade(increaseMs delta: Double) -> String {
+        switch delta {
+        case ..<5: "A+"
+        case ..<30: "A"
+        case ..<60: "B"
+        case ..<100: "C"
+        case ..<200: "D"
+        default: "F"
+        }
+    }
 }
 
 enum SpeedPhase: Sendable, Equatable {
@@ -59,12 +75,28 @@ struct CloudflareSpeedEngine: Sendable {
                     continuation.yield(.latency(ms: ping, jitter: jitter))
 
                     continuation.yield(.phase(.download))
+                    // Sample latency *under load* across the download+upload
+                    // window to measure bufferbloat and probe-level loss.
+                    async let loaded = sampleLoadedLatency(duration: downloadSeconds + uploadSeconds + 2)
+
                     let download = try await measureDownload { continuation.yield(.liveDownload($0)) }
                     continuation.yield(.finalDownload(download))
 
                     continuation.yield(.phase(.upload))
                     let upload = try await measureUpload { continuation.yield(.liveUpload($0)) }
                     continuation.yield(.finalUpload(upload))
+
+                    let loadedResult = await loaded
+                    if let loadedAvg = loadedResult.avg {
+                        let increase = max(0, loadedAvg - ping)
+                        continuation.yield(.bufferbloat(
+                            idle: ping, loaded: loadedAvg, increase: increase,
+                            grade: BufferbloatGrade.grade(increaseMs: increase)
+                        ))
+                    }
+                    if loadedResult.sent > 0 {
+                        continuation.yield(.loss(Double(loadedResult.failed) / Double(loadedResult.sent) * 100))
+                    }
 
                     continuation.yield(.phase(.finished))
                     continuation.finish()
@@ -122,6 +154,32 @@ struct CloudflareSpeedEngine: Sendable {
         }
         let jitter = deltas.isEmpty ? 0 : deltas.reduce(0, +) / Double(deltas.count)
         return (ping, jitter)
+    }
+
+    /// Repeatedly measures latency while the throughput tests saturate the
+    /// link, so we can report how much latency grows under load (bufferbloat)
+    /// and how many probes are lost.
+    private func sampleLoadedLatency(duration: Double) async -> (avg: Double?, sent: Int, failed: Int) {
+        guard let url = URL(string: "https://speed.cloudflare.com/__down?bytes=0") else { return (nil, 0, 0) }
+        let session = self.session
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: .seconds(duration))
+        var samples: [Double] = []
+        var sent = 0, failed = 0
+        while clock.now < deadline {
+            if Task.isCancelled { break }
+            sent += 1
+            let start = clock.now
+            do {
+                _ = try await session.data(from: url)
+                samples.append(Self.seconds(clock.now - start) * 1000)
+            } catch {
+                failed += 1
+            }
+            try? await Task.sleep(for: .milliseconds(250))
+        }
+        let avg = samples.isEmpty ? nil : samples.reduce(0, +) / Double(samples.count)
+        return (avg, sent, failed)
     }
 
     // MARK: - Download

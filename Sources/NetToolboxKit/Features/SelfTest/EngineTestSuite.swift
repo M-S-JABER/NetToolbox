@@ -720,6 +720,16 @@ struct EngineTestSuite: Sendable {
                 expect(untrusted.grade, equals: "T", "untrusted")
             )
         },
+        Case(name: "Bufferbloat grade") {
+            return firstFailure(
+                expect(BufferbloatGrade.grade(increaseMs: 2), equals: "A+", "excellent"),
+                expect(BufferbloatGrade.grade(increaseMs: 20), equals: "A", "good"),
+                expect(BufferbloatGrade.grade(increaseMs: 45), equals: "B", "ok"),
+                expect(BufferbloatGrade.grade(increaseMs: 80), equals: "C", "fair"),
+                expect(BufferbloatGrade.grade(increaseMs: 150), equals: "D", "poor"),
+                expect(BufferbloatGrade.grade(increaseMs: 400), equals: "F", "bad")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

@@ -1186,3 +1186,8 @@
 "ssl.note.weakKey" = "The public key is below the recommended strength.";
 "ssl.note.expiring" = "The certificate expires soon (under 15 days).";
 "ssl.note.untrusted" = "The chain is not trusted by the system.";
+
+// Speed Test pro
+"speed.metric.bufferbloat" = "Bufferbloat";
+"speed.metric.loss" = "Packet loss";
+"speed.unit.percent" = "%";

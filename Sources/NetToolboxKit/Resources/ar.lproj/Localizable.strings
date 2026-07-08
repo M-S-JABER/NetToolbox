@@ -1186,3 +1186,8 @@
 "ssl.note.weakKey" = "المفتاح العام أضعف من الموصى به.";
 "ssl.note.expiring" = "تنتهي صلاحية الشهادة قريباً (أقل من 15 يوماً).";
 "ssl.note.untrusted" = "السلسلة غير موثوقة من النظام.";
+
+// Speed Test pro
+"speed.metric.bufferbloat" = "تضخّم التخزين المؤقت";
+"speed.metric.loss" = "فقد الحزم";
+"speed.unit.percent" = "%";
