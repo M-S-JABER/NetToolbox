@@ -109,7 +109,8 @@ enum ICMPHostPinger {
 @MainActor
 @Observable
 final class IPRangeScannerViewModel {
-    var cidr = "192.168.1.0/24"
+    // Pre-fill the device's own subnet so the user can scan straight away.
+    var cidr = LocalNetworkInfo.primaryIPv4CIDR() ?? "192.168.1.0/24"
     private(set) var results: [HostResult] = []
     private(set) var scanned = 0
     private(set) var total = 0
@@ -145,7 +146,14 @@ final class IPRangeScannerViewModel {
                 group.addTask {
                     await limiter.acquire()
                     defer { Task { await limiter.release() } }
-                    if let rtt = await ICMPHostPinger.probe(ip: ip, timeout: 1) {
+                    // Race ICMP against a TCP-connect probe: ICMP gives a true
+                    // round-trip when it's allowed, and the TCP probe still
+                    // finds hosts on networks (and in the Playgrounds sandbox)
+                    // that filter ICMP entirely.
+                    async let icmp = ICMPHostPinger.probe(ip: ip, timeout: 0.9)
+                    async let tcp = TCPHostProbe.probe(ip: ip, timeout: 0.9)
+                    let (viaICMP, viaTCP) = await (icmp, tcp)
+                    if let rtt = viaICMP ?? viaTCP {
                         return HostResult(ip: ip, rttMs: rtt)
                     }
                     return nil

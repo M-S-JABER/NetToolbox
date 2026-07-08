@@ -323,6 +323,10 @@ struct LANScannerView: View {
                 .font(AppTypography.body)
                 .foregroundStyle(theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+            Label(L10nString("lan.tryRange"), systemImage: "list.bullet.below.rectangle")
+                .font(AppTypography.footnote)
+                .foregroundStyle(theme.accent)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

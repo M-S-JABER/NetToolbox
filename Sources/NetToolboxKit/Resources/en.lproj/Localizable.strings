@@ -948,6 +948,7 @@
 "lan.action.scan" = "Scan network";
 "lan.note" = "Uses Bonjour (NWBrowser). iOS requires the Local Network permission; a raw ping-sweep isn't possible without it. Discovery runs for a few seconds.";
 "lan.permission" = "No services found yet. Tap Scan. If nothing appears, enable the Local Network permission for this app in iOS Settings, and make sure the app declares the Bonjour service types.";
+"lan.tryRange" = "This tool only finds devices advertising Bonjour services. To list every device on the network, use the IP Range Scanner.";
 "lan.scanning" = "Scanning the local network…";
 "lan.section.discover" = "Discovery";
 "lan.section.found" = "Devices & services";
@@ -982,7 +983,7 @@
 "ipinfo.coordinates" = "Coordinates";
 "range.action.scan" = "Scan range";
 "range.input.title" = "Range";
-"range.note" = "Sends ICMP echo to each address in the CIDR (max 1024). Scanning the local subnet needs the iOS Local Network permission.";
+"range.note" = "Probes each address in the CIDR (max 1024) with ICMP and a TCP handshake, so it finds hosts even when ICMP is filtered. The range is pre-filled from your Wi-Fi. Scanning the local subnet needs the iOS Local Network permission.";
 "range.section.hosts" = "Live hosts";
 "range.section.progress" = "Progress";
 "speed.action.restart" = "Test again";

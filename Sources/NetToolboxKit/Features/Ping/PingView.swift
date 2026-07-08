@@ -139,7 +139,7 @@ struct PingView: View {
     private func summarySection(_ summary: PingSummary) -> some View {
         SectionCard(title: L10n("ping.section.summary"), systemImage: "chart.bar") {
             if viewModel.usingTCPFallback {
-                Label(L10n("ping.mode.tcp"), systemImage: "bolt.horizontal.circle")
+                Label(L10nString("ping.mode.tcp"), systemImage: "bolt.horizontal.circle")
                     .font(AppTypography.caption)
                     .foregroundStyle(theme.warning)
                     .frame(maxWidth: .infinity, alignment: .leading)
