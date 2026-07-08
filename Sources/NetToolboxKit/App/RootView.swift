@@ -132,7 +132,11 @@ struct RootView: View {
         Section {
             ForEach(ToolRegistry.tools(in: category), id: \.id) { row($0) }
         } header: {
-            Text(category.titleKey)
+            HStack(spacing: Spacing.sm) {
+                Image(systemName: category.systemImage)
+                    .foregroundStyle(category.tint)
+                Text(category.titleKey)
+            }
         }
     }
 

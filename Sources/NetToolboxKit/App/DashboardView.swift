@@ -135,11 +135,11 @@ struct DashboardView: View {
             VStack(spacing: Spacing.sm) {
                 Image(systemName: tool.systemImage)
                     .font(.title3)
-                    .foregroundStyle(tool.category.tint)
+                    .foregroundStyle(.white)
                     .frame(width: 46, height: 46)
                     .background(
                         RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous)
-                            .fill(tool.category.tint.opacity(0.14))
+                            .fill(tool.category.gradient)
                     )
                 Text(tool.titleKey)
                     .font(AppTypography.caption)
