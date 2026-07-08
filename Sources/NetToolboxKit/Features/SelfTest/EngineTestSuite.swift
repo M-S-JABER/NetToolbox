@@ -669,6 +669,23 @@ struct EngineTestSuite: Sendable {
                 return "unexpected error: \(error)"
             }
         },
+        Case(name: "DNS reliability stats") {
+            func probe(_ ms: Double?) -> DNSProbe { DNSProbe(timestamp: 0, latencyMs: ms, detail: "") }
+            let probes = [probe(10), probe(20), probe(nil), probe(nil), probe(30), probe(nil), probe(40)]
+            let summary = DNSReliabilityEngine.summarize(probes)
+            return firstFailure(
+                expect(summary.total, equals: 7, "total"),
+                expect(summary.successes, equals: 4, "successes"),
+                expect(summary.failures, equals: 3, "failures"),
+                expect(summary.dropEpisodes, equals: 2, "drop episodes"),
+                expect(summary.longestDropStreak, equals: 2, "longest streak"),
+                expect(summary.minLatency ?? -1, equals: 10, "min"),
+                expect(summary.maxLatency ?? -1, equals: 40, "max"),
+                expect(summary.avgLatency ?? -1, equals: 25, "avg"),
+                expect(summary.jitter ?? -1, equals: 10, "jitter"),
+                expect(Int(summary.successRate.rounded()), equals: 57, "success rate")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

@@ -1127,3 +1127,29 @@
 "wifiinfo.routerVendor" = "مُصنّع الموجّه";
 "history.export" = "تصدير";
 "history.import" = "استيراد";
+
+// DNS Stability monitor
+"tool.dnsrel.title" = "استقرار DNS";
+"tool.dnsrel.subtitle" = "رصد تقطّع استجابة DNS عبر الزمن";
+"dnsrel.input.title" = "المراقبة";
+"dnsrel.input.host" = "اسم المضيف (مثل apple.com)";
+"dnsrel.opt.server" = "خادم DNS";
+"dnsrel.opt.interval" = "الفاصل (ث)";
+"dnsrel.opt.type" = "السجل";
+"dnsrel.action.start" = "بدء المراقبة";
+"dnsrel.error.host" = "أدخل اسم مضيف للمراقبة.";
+"dnsrel.norecords" = "استجاب دون سجلات";
+"dnsrel.section.summary" = "الموثوقية";
+"dnsrel.status.stable" = "مستقر";
+"dnsrel.status.unstable" = "متقطّع";
+"dnsrel.stat.samples" = "الاستعلامات الناجحة";
+"dnsrel.stat.drops" = "نوبات الانقطاع";
+"dnsrel.stat.longest" = "أطول سلسلة انقطاع";
+"dnsrel.stat.latency" = "مدى زمن الاستجابة";
+"dnsrel.stat.avg" = "متوسط زمن الاستجابة";
+"dnsrel.stat.jitter" = "التذبذب";
+"dnsrel.section.timeline" = "المخطط الزمني للاستجابة";
+"dnsrel.timeline.note" = "كل نقطة استعلام واحد؛ الهبوط إلى القاع يعني انقطاعاً (لا استجابة).";
+"dnsrel.section.recent" = "أحدث الاستعلامات";
+"dnsrel.drop" = "لا استجابة";
+"dnsrel.note" = "يكرّر تحليل اسم المضيف عبر خادم DNS المختار ويرصد المهل (الانقطاعات) وقفزات زمن الاستجابة — مفيد لالتقاط مشاكل DNS المتقطّعة.";

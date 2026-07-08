@@ -1127,3 +1127,29 @@
 "wifiinfo.routerVendor" = "Router vendor";
 "history.export" = "Export";
 "history.import" = "Import";
+
+// DNS Stability monitor
+"tool.dnsrel.title" = "DNS Stability";
+"tool.dnsrel.subtitle" = "Detect intermittent DNS resolution over time";
+"dnsrel.input.title" = "Monitor";
+"dnsrel.input.host" = "Hostname (e.g. apple.com)";
+"dnsrel.opt.server" = "DNS server";
+"dnsrel.opt.interval" = "Interval (s)";
+"dnsrel.opt.type" = "Record";
+"dnsrel.action.start" = "Start monitoring";
+"dnsrel.error.host" = "Enter a hostname to monitor.";
+"dnsrel.norecords" = "responded, no records";
+"dnsrel.section.summary" = "Reliability";
+"dnsrel.status.stable" = "Stable";
+"dnsrel.status.unstable" = "Intermittent";
+"dnsrel.stat.samples" = "Successful lookups";
+"dnsrel.stat.drops" = "Drop episodes";
+"dnsrel.stat.longest" = "Longest drop streak";
+"dnsrel.stat.latency" = "Latency range";
+"dnsrel.stat.avg" = "Average latency";
+"dnsrel.stat.jitter" = "Jitter";
+"dnsrel.section.timeline" = "Latency timeline";
+"dnsrel.timeline.note" = "Each point is one lookup; dips to the floor are drops (no response).";
+"dnsrel.section.recent" = "Recent lookups";
+"dnsrel.drop" = "no response";
+"dnsrel.note" = "Repeatedly resolves the hostname against the chosen DNS server and flags timeouts (drops) and latency spikes — useful for catching intermittent DNS problems.";
