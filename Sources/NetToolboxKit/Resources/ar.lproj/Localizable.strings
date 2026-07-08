@@ -1227,3 +1227,15 @@
 "rpki.status.unknown" = "غير موجود (غير معروف)";
 "rpki.noroas" = "لا توجد ROAs تغطّي هذه البادئة.";
 "rpki.note" = "يتحقق إن كان AS المصدر مخوّلاً بالإعلان عن البادئة وفق تفويضات أصل المسار (ROAs) في RPKI، عبر واجهة RIPEstat العامة.";
+
+// Certificate expiry monitor
+"tool.certexp.title" = "مراقب انتهاء الشهادات";
+"tool.certexp.subtitle" = "تتبّع انتهاء شهادات TLS عبر المضيفات";
+"certexp.input.title" = "إضافة مضيف";
+"certexp.input.host" = "اسم المضيف (مثل example.com)";
+"certexp.action.add" = "أضف مضيفاً";
+"certexp.action.refresh" = "تحديث الكل";
+"certexp.section.hosts" = "المضيفات المُراقَبة";
+"certexp.days" = "%d يوماً";
+"certexp.expired" = "منتهية";
+"certexp.note" = "يفتح مصافحة TLS لكل مضيف على المنفذ 443 ويعرض الأيام حتى انتهاء الشهادة. كهرماني تحت 30 يوماً، أحمر تحت 15 أو منتهية.";

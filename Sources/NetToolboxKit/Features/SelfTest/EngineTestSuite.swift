@@ -772,6 +772,15 @@ struct EngineTestSuite: Sendable {
                 expect(RPKIStatus.from("weird"), equals: .unknown, "unknown")
             )
         },
+        Case(name: "Certificate expiry buckets") {
+            return firstFailure(
+                expect(CertExpiryEngine.level(days: 90), equals: .ok, "healthy"),
+                expect(CertExpiryEngine.level(days: 20), equals: .warning, "warning"),
+                expect(CertExpiryEngine.level(days: 5), equals: .critical, "critical"),
+                expect(CertExpiryEngine.level(days: -1), equals: .expired, "expired"),
+                expect(CertExpiryEngine.level(days: nil), equals: .unknown, "unknown")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

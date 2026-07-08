@@ -53,6 +53,7 @@ enum ToolRegistry {
         BannerGrabTool(),
         HTTPTimingTool(),
         UptimeTool(),
+        CertExpiryTool(),
         NSLookupTool(),
         SSLCheckerTool(),
         HTTPHeadersTool(),
