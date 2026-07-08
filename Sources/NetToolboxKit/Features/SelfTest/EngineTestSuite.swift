@@ -458,6 +458,21 @@ struct EngineTestSuite: Sendable {
                 )
             } catch { return "unexpected error: \(error)" }
         },
+        Case(name: "iperf3 protocol framing") {
+            var counter: UInt8 = 0
+            let cookie = IPerf3Protocol.makeCookie { counter &+= 1; return counter }
+            let alphabet = Set("abcdefghijklmnopqrstuvwxyz234567".utf8)
+            let bodyValid = cookie.dropLast().allSatisfy { alphabet.contains($0) }
+            let framed = IPerf3Protocol.lengthPrefixed(Data([0xDE, 0xAD, 0xBE, 0xEF]))
+            return firstFailure(
+                expect(cookie.count, equals: 37, "cookie length"),
+                expect(cookie.last ?? 0xFF, equals: UInt8(0), "cookie NUL terminator"),
+                expect(bodyValid, equals: true, "cookie alphabet"),
+                expect([UInt8](framed.prefix(4)), equals: [0, 0, 0, 4], "4-byte length prefix"),
+                expect(IPerf3Protocol.decodeLength([0, 0, 1, 0]), equals: 256, "length decode"),
+                expect(IPerf3Protocol.megabitsPerSecond(bytes: 125_000_000, seconds: 1), equals: 1000, "1 Gbit/s")
+            )
+        },
         Case(name: "Telnet option negotiation") {
             let doEcho = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.doo, 1, 0x68, 0x69])
             let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])

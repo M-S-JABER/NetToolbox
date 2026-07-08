@@ -90,6 +90,7 @@ enum ToolRegistry {
         SNMPTrapTool(),
         MikroTikAPITool(),
         SNMPTool(),
+        IPerf3Tool(),
         // BGP / global routing (RIPEstat)
         ASNInfoTool(),
         IPBGPTool(),
