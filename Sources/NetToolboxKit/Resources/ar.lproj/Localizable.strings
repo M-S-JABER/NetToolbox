@@ -1212,3 +1212,18 @@
 "dnshealth.consistent" = "متسق عبر المحلّلات";
 "dnshealth.inconsistent" = "الإجابات تختلف بين المحلّلات";
 "dnshealth.note" = "يستعلم عدة محلّلات عامة دفعة واحدة لرصد السجلات غير المتسقة أو التي لا تزال تنتشر، ويتحقق إن كان النطاق موقّعاً بـ DNSSEC وصحيحاً.";
+
+// RPKI validation
+"tool.rpki.title" = "مُدقّق RPKI";
+"tool.rpki.subtitle" = "تحقّق من بادئة + AS المصدر مقابل RPKI (RIPEstat)";
+"rpki.input.title" = "المسار";
+"rpki.input.asn" = "AS المصدر (مثل AS13335)";
+"rpki.input.prefix" = "البادئة (مثل 104.16.0.0/12)";
+"rpki.action.check" = "تحقّق";
+"rpki.error.input" = "أدخل AS المصدر والبادئة معاً.";
+"rpki.section.result" = "حالة RPKI";
+"rpki.status.valid" = "صالح";
+"rpki.status.invalid" = "غير صالح";
+"rpki.status.unknown" = "غير موجود (غير معروف)";
+"rpki.noroas" = "لا توجد ROAs تغطّي هذه البادئة.";
+"rpki.note" = "يتحقق إن كان AS المصدر مخوّلاً بالإعلان عن البادئة وفق تفويضات أصل المسار (ROAs) في RPKI، عبر واجهة RIPEstat العامة.";

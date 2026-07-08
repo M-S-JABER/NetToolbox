@@ -762,6 +762,16 @@ struct EngineTestSuite: Sendable {
                 expect(SecurityGrade.letter(10), equals: "F", "f grade")
             )
         },
+        Case(name: "RPKI ASN + status parsing") {
+            return firstFailure(
+                expect(RPKIEngine.normalizeASN("AS13335"), equals: "13335", "strip AS"),
+                expect(RPKIEngine.normalizeASN("as 7018"), equals: "7018", "lowercase + space"),
+                expect(RPKIEngine.normalizeASN("15169"), equals: "15169", "digits only"),
+                expect(RPKIStatus.from("valid"), equals: .valid, "valid"),
+                expect(RPKIStatus.from("invalid_asn"), equals: .invalid, "invalid asn"),
+                expect(RPKIStatus.from("weird"), equals: .unknown, "unknown")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

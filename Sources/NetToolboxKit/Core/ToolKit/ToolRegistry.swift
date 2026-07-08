@@ -90,6 +90,7 @@ enum ToolRegistry {
         // BGP / global routing (RIPEstat)
         ASNInfoTool(),
         IPBGPTool(),
+        RPKITool(),
     ]
 
     static func tools(in category: ToolCategory) -> [any NetworkTool] {

@@ -1212,3 +1212,18 @@
 "dnshealth.consistent" = "Consistent across resolvers";
 "dnshealth.inconsistent" = "Answers differ between resolvers";
 "dnshealth.note" = "Queries several public resolvers at once to spot inconsistent or still-propagating records, and checks whether the zone is DNSSEC-signed and validates.";
+
+// RPKI validation
+"tool.rpki.title" = "RPKI Validator";
+"tool.rpki.subtitle" = "Check a prefix + origin AS against RPKI (RIPEstat)";
+"rpki.input.title" = "Route";
+"rpki.input.asn" = "Origin AS (e.g. AS13335)";
+"rpki.input.prefix" = "Prefix (e.g. 104.16.0.0/12)";
+"rpki.action.check" = "Validate";
+"rpki.error.input" = "Enter both an origin AS and a prefix.";
+"rpki.section.result" = "RPKI status";
+"rpki.status.valid" = "Valid";
+"rpki.status.invalid" = "Invalid";
+"rpki.status.unknown" = "Not found (unknown)";
+"rpki.noroas" = "No covering ROAs found for this prefix.";
+"rpki.note" = "Validates whether the origin AS is authorized to announce the prefix by the Route Origin Authorizations (ROAs) in the RPKI, via the public RIPEstat API.";
