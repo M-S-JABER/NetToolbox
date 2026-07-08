@@ -29,6 +29,7 @@ public struct NetToolboxRootView: View {
     @State private var speedHistory = SpeedHistoryStore()
     @State private var activity = ActivityCenter()
     @State private var appLock = AppLock()
+    @State private var cloudSync = CloudSync()
     @Environment(\.scenePhase) private var scenePhase
     private let toolSessions = ToolSessions()
 
@@ -55,11 +56,13 @@ public struct NetToolboxRootView: View {
             .environment(speedHistory)
             .environment(activity)
             .environment(appLock)
+            .environment(cloudSync)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)
             // Native iOS look: follow the system Light/Dark appearance.
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])
             .task { status.start() }
+            .task { cloudSync.start() }
             // Biometric app lock: cover the UI while locked and re-lock when
             // the app leaves the foreground.
             .overlay {
@@ -71,7 +74,10 @@ public struct NetToolboxRootView: View {
             }
             .animation(.easeInOut, value: appLock.isLocked)
             .onChange(of: scenePhase) { _, phase in
-                if phase != .active { appLock.lockIfEnabled() }
+                if phase != .active {
+                    appLock.lockIfEnabled()
+                    cloudSync.pushAll()
+                }
             }
     }
 }

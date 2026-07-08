@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
     @Environment(AppLock.self) private var appLock
+    @Environment(CloudSync.self) private var cloudSync
 
     @Binding var themeSelection: String
 
@@ -84,6 +85,20 @@ struct SettingsView: View {
             .disabled(!appLock.isAvailable)
 
             Text(L10n(appLock.isAvailable ? "settings.applock.hint" : "settings.applock.unavailable"))
+                .font(AppTypography.caption)
+                .foregroundStyle(theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Divider().overlay(theme.separator)
+
+            Toggle(isOn: Binding(
+                get: { cloudSync.isEnabled },
+                set: { cloudSync.setEnabled($0) }
+            )) {
+                Label(L10nString("settings.icloud"), systemImage: "icloud")
+                    .font(AppTypography.body)
+            }
+            Text(L10n("settings.icloud.hint"))
                 .font(AppTypography.caption)
                 .foregroundStyle(theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)

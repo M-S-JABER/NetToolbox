@@ -17,6 +17,16 @@ final class SavedHostsStore {
     private let key = "nettoolbox.hosts.v1"
 
     init() {
+        load()
+        // Reload when iCloud sync pulls newer values into UserDefaults.
+        NotificationCenter.default.addObserver(
+            forName: .cloudSyncDidPull, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.load() }
+        }
+    }
+
+    private func load() {
         if let data = UserDefaults.standard.data(forKey: key),
            let decoded = try? JSONDecoder().decode([Host].self, from: data) {
             hosts = decoded

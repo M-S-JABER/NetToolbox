@@ -840,6 +840,8 @@
 "settings.applock" = "Require Face ID / passcode";
 "settings.applock.hint" = "Locks the app when it leaves the foreground. Your saved hosts, SSH profiles and cameras stay hidden until you authenticate.";
 "settings.applock.unavailable" = "Set up Face ID, Touch ID or a passcode on this device to use this.";
+"settings.icloud" = "Sync settings via iCloud";
+"settings.icloud.hint" = "Syncs your theme, saved hosts and speed-test history across your devices through your private iCloud. SSH and camera secrets are never synced — they stay in this device's Keychain.";
 "applock.title" = "NetToolbox is locked";
 "applock.subtitle" = "Authenticate to continue.";
 "applock.unlock" = "Unlock";

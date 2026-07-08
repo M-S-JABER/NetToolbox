@@ -838,6 +838,8 @@
 "settings.applock" = "طلب Face ID / رمز الدخول";
 "settings.applock.hint" = "يقفل التطبيق عند مغادرة الواجهة. تبقى المضيفات المحفوظة وملفات SSH والكاميرات مخفية حتى توثّق هويتك.";
 "settings.applock.unavailable" = "أعدّ Face ID أو Touch ID أو رمز دخول على هذا الجهاز لاستخدام هذه الميزة.";
+"settings.icloud" = "مزامنة الإعدادات عبر iCloud";
+"settings.icloud.hint" = "تزامن السمة والمضيفات المحفوظة وتاريخ اختبار السرعة بين أجهزتك عبر iCloud الخاص بك. أسرار SSH والكاميرات لا تُزامن أبداً — تبقى في Keychain هذا الجهاز.";
 "applock.title" = "NetToolbox مقفل";
 "applock.subtitle" = "وثّق هويتك للمتابعة.";
 "applock.unlock" = "فتح القفل";
