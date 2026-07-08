@@ -1,10 +1,14 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
-/// Settings sheet: pick an accent theme and see app info.
+/// Settings sheet: appearance, permissions, security and app info.
 @MainActor
 struct SettingsView: View {
     @Environment(\.theme) private var theme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Environment(AppLock.self) private var appLock
     @Environment(CloudSync.self) private var cloudSync
 
@@ -17,6 +21,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
                     themeCard
+                    permissionsCard
                     securityCard
                     aboutCard
                 }
@@ -73,6 +78,53 @@ struct SettingsView: View {
         .buttonStyle(.plain)
     }
 
+    private var permissionsCard: some View {
+        SectionCard(title: L10n("settings.permissions"), systemImage: "hand.raised") {
+            Text(L10n("settings.permissions.hint"))
+                .font(AppTypography.caption)
+                .foregroundStyle(theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            permissionRow("network", L10n("perm.localNetwork.title"), L10n("perm.localNetwork.detail"))
+            permissionRow("camera", L10n("perm.camera.title"), L10n("perm.camera.detail"))
+            permissionRow("photo", L10n("perm.photos.title"), L10n("perm.photos.detail"))
+            permissionRow("faceid", L10n("perm.faceid.title"), L10n("perm.faceid.detail"))
+            permissionRow("location", L10n("perm.location.title"), L10n("perm.location.detail"))
+
+            #if canImport(UIKit)
+            Button {
+                if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+            } label: {
+                Label(L10nString("settings.permissions.open"), systemImage: "arrow.up.forward.app")
+                    .font(AppTypography.headline)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.top, Spacing.xs)
+            #endif
+        }
+    }
+
+    private func permissionRow(_ symbol: String, _ title: LocalizedStringResource, _ detail: LocalizedStringResource) -> some View {
+        HStack(alignment: .top, spacing: Spacing.md) {
+            Image(systemName: symbol)
+                .font(.body)
+                .foregroundStyle(theme.accent)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(AppTypography.body)
+                    .foregroundStyle(theme.textPrimary)
+                Text(detail)
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var securityCard: some View {
         SectionCard(title: L10n("settings.security"), systemImage: "lock.shield") {
             Toggle(isOn: Binding(
@@ -108,11 +160,17 @@ struct SettingsView: View {
     private var aboutCard: some View {
         SectionCard(title: L10n("settings.about"), systemImage: "info.circle") {
             ResultRow(label: L10n("settings.tools"), value: "\(ToolRegistry.all.count)")
-            ResultRow(label: L10n("settings.version"), value: "1.4.0")
+            ResultRow(label: L10n("settings.version"), value: appVersion)
             Text(L10n("settings.tagline"))
                 .font(AppTypography.footnote)
                 .foregroundStyle(theme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    /// Reads the app's marketing version from the bundle so it never drifts
+    /// from the release the user actually installed.
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.6.0"
     }
 }
