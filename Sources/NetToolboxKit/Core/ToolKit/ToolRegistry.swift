@@ -38,6 +38,7 @@ enum ToolRegistry {
         PingTool(),
         WorldPingTool(),
         TracerouteTool(),
+        MTRTool(),
         PortScannerTool(),
         DNSLookupTool(),
         DoHTool(),

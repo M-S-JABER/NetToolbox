@@ -1156,3 +1156,22 @@
 "dnsrel.section.recent" = "Recent lookups";
 "dnsrel.drop" = "no response";
 "dnsrel.note" = "Repeatedly resolves the hostname against the chosen DNS server and flags timeouts (drops) and latency spikes — useful for catching intermittent DNS problems.";
+
+// MTR / path analysis
+"tool.mtr.title" = "MTR Path Analysis";
+"tool.mtr.subtitle" = "Continuous traceroute with per-hop loss and latency";
+"mtr.input.title" = "Target";
+"mtr.input.host" = "Host or IP (e.g. apple.com)";
+"mtr.opt.maxhops" = "Max hops";
+"mtr.opt.timeout" = "Timeout (s)";
+"mtr.opt.asn" = "Look up ASN per hop";
+"mtr.action.start" = "Start";
+"mtr.rounds" = "Round %d";
+"mtr.section.hops" = "Hops";
+"mtr.cell.loss" = "loss %.0f%%";
+"mtr.cell.last" = "last";
+"mtr.cell.avg" = "avg";
+"mtr.cell.best" = "best";
+"mtr.cell.worst" = "worst";
+"mtr.error.host" = "Enter a host or IP to analyze.";
+"mtr.note" = "Sends probes to every hop each round and tracks packet loss, last/avg/best/worst latency, and the origin AS. A hop with high loss but low loss downstream is usually just rate-limiting its own replies, not dropping traffic.";

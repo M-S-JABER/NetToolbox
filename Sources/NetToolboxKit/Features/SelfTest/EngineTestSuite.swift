@@ -689,6 +689,23 @@ struct EngineTestSuite: Sendable {
                 expect(thresholded.slowCount, equals: 2, "slow over 25ms")
             )
         },
+        Case(name: "MTR hop aggregation + Cymru ASN") {
+            var hop = MTRHop(ttl: 3)
+            MTREngine.record(&hop, address: "10.0.0.1", rttMs: 10, reached: false)
+            MTREngine.record(&hop, address: "10.0.0.1", rttMs: nil, reached: false)   // a drop
+            MTREngine.record(&hop, address: "10.0.0.1", rttMs: 30, reached: false)
+            return firstFailure(
+                expect(hop.sent, equals: 3, "sent"),
+                expect(hop.received, equals: 2, "received"),
+                expect(Int(hop.lossPercent.rounded()), equals: 33, "loss"),
+                expect(hop.best ?? -1, equals: 10, "best"),
+                expect(hop.worst ?? -1, equals: 30, "worst"),
+                expect(hop.avg ?? -1, equals: 20, "avg"),
+                expect(MTREngine.cymruQuery(for: "1.2.3.4"), equals: "4.3.2.1.origin.asn.cymru.com", "cymru query"),
+                expect(MTREngine.cymruQuery(for: "apple.com"), equals: nil, "cymru non-ip"),
+                expect(MTREngine.parseASN("13335 | 104.16.0.0/12 | US | arin | 2011"), equals: "AS13335", "parse asn")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

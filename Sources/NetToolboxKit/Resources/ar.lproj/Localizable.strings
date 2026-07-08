@@ -1156,3 +1156,22 @@
 "dnsrel.section.recent" = "أحدث الاستعلامات";
 "dnsrel.drop" = "لا استجابة";
 "dnsrel.note" = "يكرّر تحليل اسم المضيف عبر خادم DNS المختار ويرصد المهل (الانقطاعات) وقفزات زمن الاستجابة — مفيد لالتقاط مشاكل DNS المتقطّعة.";
+
+// MTR / path analysis
+"tool.mtr.title" = "تحليل المسار MTR";
+"tool.mtr.subtitle" = "تتبّع مستمر مع فقد وزمن استجابة لكل قفزة";
+"mtr.input.title" = "الهدف";
+"mtr.input.host" = "مضيف أو IP (مثل apple.com)";
+"mtr.opt.maxhops" = "أقصى قفزات";
+"mtr.opt.timeout" = "المهلة (ث)";
+"mtr.opt.asn" = "جلب ASN لكل قفزة";
+"mtr.action.start" = "ابدأ";
+"mtr.rounds" = "الجولة %d";
+"mtr.section.hops" = "القفزات";
+"mtr.cell.loss" = "فقد %.0f%%";
+"mtr.cell.last" = "الأخير";
+"mtr.cell.avg" = "المتوسط";
+"mtr.cell.best" = "الأفضل";
+"mtr.cell.worst" = "الأسوأ";
+"mtr.error.host" = "أدخل مضيفاً أو IP للتحليل.";
+"mtr.note" = "يرسل نبضات لكل قفزة في كل جولة ويتتبّع فقد الحزم وزمن الاستجابة (الأخير/المتوسط/الأفضل/الأسوأ) ورقم AS. القفزة ذات الفقد العالي بينما ما بعدها سليم غالباً تُقيّد ردودها فقط ولا تُسقط المرور.";
