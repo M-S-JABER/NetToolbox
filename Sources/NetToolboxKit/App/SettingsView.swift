@@ -46,7 +46,12 @@ struct SettingsView: View {
         SectionCard(title: L10n("settings.appearance"), systemImage: "circle.lefthalf.filled") {
             Picker(L10nString("settings.appearance"), selection: $appearanceSelection) {
                 ForEach(AppearanceOption.allCases) { option in
-                    Label(option.labelKey, systemImage: option.symbol).tag(option.rawValue)
+                    Label {
+                        Text(option.labelKey)
+                    } icon: {
+                        Image(systemName: option.symbol)
+                    }
+                    .tag(option.rawValue)
                 }
             }
             .pickerStyle(.segmented)

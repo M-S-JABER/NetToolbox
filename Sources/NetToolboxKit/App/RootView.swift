@@ -16,6 +16,8 @@ struct RootView: View {
     @State private var search = ""
     @State private var selectedToolID: String?
     @State private var showSettings = false
+    @AppStorage("nettoolbox.onboarded") private var onboarded = false
+    @State private var showOnboarding = false
 
     var body: some View {
         NavigationSplitView {
@@ -65,6 +67,12 @@ struct RootView: View {
         .navigationSplitViewStyle(.balanced)
         .onChange(of: selectedToolID) { _, newValue in
             if let newValue { recentTools.record(newValue) }
+        }
+        .task {
+            if !onboarded { showOnboarding = true }
+        }
+        .sheet(isPresented: $showOnboarding) {
+            OnboardingView { onboarded = true; showOnboarding = false }
         }
     }
 

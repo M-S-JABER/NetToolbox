@@ -867,6 +867,15 @@
 "dashboard.asn" = "رقم النظام (ASN)";
 "dashboard.ipUnavailable" = "تعذّر جلب IP العام — تحقق من اتصالك.";
 "dashboard.overview" = "كل الأدوات";
+"onboarding.tagline" = "صندوق أدوات شبكي متكامل — تشخيص واكتشاف وبروتوكولات، كلها على جهازك.";
+"onboarding.f.tools.title" = "45 أداة في تطبيق واحد";
+"onboarding.f.tools.detail" = "Ping و traceroute و DNS و SSL ومسح المنافذ واختبار السرعة و SSH وأكثر.";
+"onboarding.f.local.title" = "استكشف شبكتك";
+"onboarding.f.local.detail" = "اكتشف الأجهزة وامسح الشبكة الفرعية وافحص كاميرات IP على Wi-Fi لديك.";
+"onboarding.f.privacy.title" = "خصوصية بالتصميم";
+"onboarding.f.privacy.detail" = "بلا حسابات وبلا تتبّع. بياناتك تبقى على جهازك.";
+"onboarding.permissions" = "أدوات الشبكة المحلية تحتاج إذن الشبكة المحلية. يمكنك منحه الآن أو لاحقاً من الإعدادات.";
+"onboarding.start" = "لنبدأ";
 "home.smart.title" = "اقتراح ذكي";
 "home.unfavorite" = "إزالة من المفضّلة";
 "home.favorites.caption" = "أدواتك المميّزة بنجمة";

@@ -869,6 +869,15 @@
 "dashboard.asn" = "ASN";
 "dashboard.ipUnavailable" = "Public IP unavailable — check your connection.";
 "dashboard.overview" = "All tools";
+"onboarding.tagline" = "A complete network toolkit — diagnostics, discovery and protocols, all on device.";
+"onboarding.f.tools.title" = "45 tools in one app";
+"onboarding.f.tools.detail" = "Ping, traceroute, DNS, SSL, port scan, speed test, SSH and much more.";
+"onboarding.f.local.title" = "Explore your network";
+"onboarding.f.local.detail" = "Discover devices, scan the subnet and inspect IP cameras on your Wi-Fi.";
+"onboarding.f.privacy.title" = "Private by design";
+"onboarding.f.privacy.detail" = "No accounts, no tracking. Your data stays on your device.";
+"onboarding.permissions" = "The local tools need the Local Network permission. You can grant it now or later in Settings.";
+"onboarding.start" = "Get started";
 "home.smart.title" = "Smart suggestion";
 "home.unfavorite" = "Unfavorite";
 "home.favorites.caption" = "Your starred tools";
