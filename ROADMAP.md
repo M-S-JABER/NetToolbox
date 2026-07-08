@@ -4,7 +4,12 @@
 
 Repo: `M-S-JABER/NetToolbox` · Branch: `claude/nettoolbox-ios-app-maqgmi`
 Consumed as a Swift package (`NetToolboxKit`) added by URL in Swift Playgrounds.
-Latest working tag: **1.47.0** · Tools: **76** · Localization: **en/ar at parity (1084 keys)**
+Latest working tag: **1.47.0** · Tools: **76** · Localization: **en/ar at parity (1101 keys + stringsdict plurals)**
+
+**Hardening milestone (this branch, all green on CI):**
+- **CI** — `.github/workflows/ci.yml` builds the whole package for iOS (`xcodebuild`, macOS runner) and runs the full `EngineTestSuite` on a simulator on every push. This first real iOS compile surfaced and fixed a class of bugs the Playgrounds toolchain hid: main-actor isolation across all 97 SwiftUI views, `self` capture in concurrent callbacks, and a genuine CRLF parsing bug (`\r\n` is one Swift grapheme — broke HIBP/WHOIS/HTTP line splitting, now `Character.isNewline`).
+- **Security** — SSH/camera secrets moved from clear-text `UserDefaults` to the **Keychain** (`KeychainStore`, auto-migrating); optional **passphrase-encrypted backups** (AES-256-GCM + PBKDF2); optional **Face ID / Touch ID / passcode app lock** (`AppLock`); **PrivacyInfo.xcprivacy**; Info.plist usage descriptions declared in the app playground's `capabilities`.
+- **Accessibility/UX** — haptics on copy + PTZ (`.sensoryFeedback`), real plural rules (`Localizable.stringsdict`, full Arabic categories); Dynamic Type and VoiceOver already covered.
 
 ---
 
