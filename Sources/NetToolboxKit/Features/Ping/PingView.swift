@@ -156,6 +156,7 @@ struct PingView: View {
             ResultRow(label: L10n("ping.result.min"), value: format(summary.minMs))
             ResultRow(label: L10n("ping.result.avg"), value: format(summary.avgMs))
             ResultRow(label: L10n("ping.result.max"), value: format(summary.maxMs))
+            ResultRow(label: L10n("ping.result.mdev"), value: format(summary.mdevMs))
 
             let series = viewModel.attempts.compactMap(\.milliseconds)
             if series.count > 1 {

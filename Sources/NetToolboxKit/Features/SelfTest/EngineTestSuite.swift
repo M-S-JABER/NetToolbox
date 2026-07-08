@@ -744,6 +744,24 @@ struct EngineTestSuite: Sendable {
                 expect(signedQuery.count > plainQuery.count, equals: true, "EDNS OPT appended")
             )
         },
+        Case(name: "Ping stddev + security grade") {
+            let summary = TCPPingService.summarize([
+                PingAttempt(sequence: 1, milliseconds: 10),
+                PingAttempt(sequence: 2, milliseconds: 20),
+                PingAttempt(sequence: 3, milliseconds: nil),
+                PingAttempt(sequence: 4, milliseconds: 30),
+            ])
+            return firstFailure(
+                expect(summary.sent, equals: 4, "sent"),
+                expect(summary.received, equals: 3, "received"),
+                expect(summary.lossPercent, equals: 25, "loss"),
+                expect(summary.avgMs ?? -1, equals: 20, "avg"),
+                expect(Int((summary.mdevMs ?? -1).rounded()), equals: 8, "stddev"),
+                expect(SecurityGrade.letter(100), equals: "A+", "perfect"),
+                expect(SecurityGrade.letter(72), equals: "B", "b grade"),
+                expect(SecurityGrade.letter(10), equals: "F", "f grade")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

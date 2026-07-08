@@ -508,6 +508,7 @@
 "ping.note" = "A real ICMP (or ICMPv6) echo ping over the unprivileged datagram socket — no port needed. Tune the count / period / timeout / payload size / TTL, prefer IPv6, or run continuously until you stop it.";
 "ping.result.avg" = "Average";
 "ping.result.max" = "Maximum";
+"ping.result.mdev" = "Std deviation";
 "ping.result.min" = "Minimum";
 "ping.section.attempts" = "Attempts";
 "ping.section.summary" = "Summary";

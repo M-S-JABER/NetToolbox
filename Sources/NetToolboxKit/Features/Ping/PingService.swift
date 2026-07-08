@@ -17,6 +17,7 @@ struct PingSummary: Equatable, Sendable {
     let minMs: Double?
     let avgMs: Double?
     let maxMs: Double?
+    var mdevMs: Double?   // standard deviation of the round-trip times
 
     var lossPercent: Int {
         guard sent > 0 else { return 0 }
@@ -47,12 +48,19 @@ struct TCPPingService: PingProviding {
     /// Combines attempts into summary statistics.
     static func summarize(_ attempts: [PingAttempt]) -> PingSummary {
         let times = attempts.compactMap(\.milliseconds)
+        let avg = times.isEmpty ? nil : times.reduce(0, +) / Double(times.count)
+        var mdev: Double?
+        if let avg, times.count > 1 {
+            let variance = times.reduce(0) { $0 + ($1 - avg) * ($1 - avg) } / Double(times.count)
+            mdev = variance.squareRoot()
+        }
         return PingSummary(
             sent: attempts.count,
             received: times.count,
             minMs: times.min(),
-            avgMs: times.isEmpty ? nil : times.reduce(0, +) / Double(times.count),
-            maxMs: times.max()
+            avgMs: avg,
+            maxMs: times.max(),
+            mdevMs: mdev
         )
     }
 }

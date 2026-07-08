@@ -508,6 +508,7 @@
 "ping.note" = "نبض ICMP (أو ICMPv6) حقيقي عبر مقبس البيانات غير المميّز — بلا منفذ. اضبط العدد / الفترة / المهلة / حجم الحمولة / TTL، أو فضّل IPv6، أو شغّله باستمرار حتى توقفه.";
 "ping.result.avg" = "المتوسط";
 "ping.result.max" = "الأعلى";
+"ping.result.mdev" = "الانحراف المعياري";
 "ping.result.min" = "الأدنى";
 "ping.section.attempts" = "المحاولات";
 "ping.section.summary" = "الملخص";

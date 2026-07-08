@@ -1,6 +1,20 @@
 import SwiftUI
 import Observation
 
+/// Maps a security-headers score (0–100) to a letter grade.
+enum SecurityGrade {
+    static func letter(_ score: Int) -> String {
+        switch score {
+        case 100: "A+"
+        case 85...: "A"
+        case 70...: "B"
+        case 50...: "C"
+        case 30...: "D"
+        default: "F"
+        }
+    }
+}
+
 struct SecurityHeaderCheck: Identifiable, Sendable {
     let id: String
     let name: String
@@ -117,11 +131,16 @@ struct SecurityHeadersView: View {
     }
 
     private var scoreCard: some View {
-        SectionCard(title: L10n("secheaders.section.score"), systemImage: "gauge") {
-            HStack {
+        let color = viewModel.score >= 67 ? theme.success : (viewModel.score >= 34 ? theme.warning : theme.danger)
+        return SectionCard(title: L10n("secheaders.section.score"), systemImage: "gauge") {
+            HStack(alignment: .center, spacing: Spacing.md) {
+                Text(SecurityGrade.letter(viewModel.score))
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .foregroundStyle(color)
+                    .frame(minWidth: 72)
                 Text("\(viewModel.score)%")
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
-                    .foregroundStyle(viewModel.score >= 67 ? theme.success : (viewModel.score >= 34 ? theme.warning : theme.danger))
+                    .font(.system(size: 32, weight: .semibold, design: .rounded))
+                    .foregroundStyle(theme.textPrimary)
                     .environment(\.layoutDirection, .leftToRight)
                 Spacer()
             }
