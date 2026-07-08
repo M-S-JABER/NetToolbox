@@ -51,6 +51,7 @@ enum ToolRegistry {
         WhoisTool(),
         RDAPTool(),
         BannerGrabTool(),
+        FingerprintTool(),
         HTTPTimingTool(),
         UptimeTool(),
         CertExpiryTool(),

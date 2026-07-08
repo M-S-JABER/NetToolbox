@@ -1239,3 +1239,16 @@
 "certexp.days" = "%d days";
 "certexp.expired" = "Expired";
 "certexp.note" = "Opens a TLS handshake to each host on port 443 and reports days until the leaf certificate expires. Amber under 30 days, red under 15 or expired.";
+
+// Service fingerprint
+"tool.fingerprint.title" = "Service Fingerprint";
+"tool.fingerprint.subtitle" = "Identify the service behind a host:port from its banner";
+"fingerprint.input.title" = "Target";
+"fingerprint.input.host" = "Host or IP";
+"fingerprint.action.scan" = "Identify";
+"fingerprint.error.port" = "Enter a valid port.";
+"fingerprint.section.result" = "Identification";
+"fingerprint.service" = "Service";
+"fingerprint.product" = "Product / version";
+"fingerprint.banner" = "Raw banner";
+"fingerprint.note" = "Connects, reads the greeting (or an HTTP response), and identifies the service and software from well-known banner patterns. A best-effort heuristic, not a full port scan.";

@@ -781,6 +781,20 @@ struct EngineTestSuite: Sendable {
                 expect(CertExpiryEngine.level(days: nil), equals: .unknown, "unknown")
             )
         },
+        Case(name: "Service fingerprint heuristics") {
+            let ssh = ServiceFingerprint.identify(banner: "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3", port: 22)
+            let http = ServiceFingerprint.identify(banner: "HTTP/1.1 200 OK\r\nServer: nginx/1.25.3\r\n", port: 80)
+            let ftp = ServiceFingerprint.identify(banner: "220 (vsFTPd 3.0.5)", port: 21)
+            let pop = ServiceFingerprint.identify(banner: "+OK Dovecot ready.", port: 110)
+            return firstFailure(
+                expect(ssh.service, equals: "SSH", "ssh service"),
+                expect(ssh.product, equals: "OpenSSH_8.9p1 Ubuntu-3", "ssh product"),
+                expect(http.service, equals: "HTTP", "http service"),
+                expect(http.product, equals: "nginx/1.25.3", "http server"),
+                expect(ftp.service, equals: "FTP", "ftp service"),
+                expect(pop.service, equals: "POP3", "pop3 service")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

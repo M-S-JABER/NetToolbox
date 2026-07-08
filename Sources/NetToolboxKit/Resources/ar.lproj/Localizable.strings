@@ -1239,3 +1239,16 @@
 "certexp.days" = "%d يوماً";
 "certexp.expired" = "منتهية";
 "certexp.note" = "يفتح مصافحة TLS لكل مضيف على المنفذ 443 ويعرض الأيام حتى انتهاء الشهادة. كهرماني تحت 30 يوماً، أحمر تحت 15 أو منتهية.";
+
+// Service fingerprint
+"tool.fingerprint.title" = "بصمة الخدمة";
+"tool.fingerprint.subtitle" = "تعرّف على الخدمة خلف مضيف:منفذ من رايتها";
+"fingerprint.input.title" = "الهدف";
+"fingerprint.input.host" = "مضيف أو IP";
+"fingerprint.action.scan" = "تعرّف";
+"fingerprint.error.port" = "أدخل منفذاً صحيحاً.";
+"fingerprint.section.result" = "التعرّف";
+"fingerprint.service" = "الخدمة";
+"fingerprint.product" = "المنتج / الإصدار";
+"fingerprint.banner" = "الراية الخام";
+"fingerprint.note" = "يتصل ويقرأ التحية (أو استجابة HTTP) ويحدّد الخدمة والبرنامج من أنماط الرايات المعروفة. استدلال تقريبي، وليس مسحاً كاملاً للمنافذ.";
