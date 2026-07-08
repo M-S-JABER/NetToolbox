@@ -804,6 +804,23 @@ struct EngineTestSuite: Sendable {
                 expect(CSV.table(header: ["x"], rows: [["1"], ["2"]]), equals: "x\n1\n2", "table")
             )
         },
+        Case(name: "IPv6 subnet math") {
+            guard let global = IPv6Engine.calculate("2001:db8::/32"),
+                  let loop = IPv6Engine.calculate("::1/128") else {
+                return "calculate returned nil"
+            }
+            return firstFailure(
+                expect(global.networkCompressed, equals: "2001:db8::", "compressed"),
+                expect(global.prefixLength, equals: 32, "prefix"),
+                expect(global.addressCount, equals: "2^96", "count"),
+                expect(global.kind, equals: "Global Unicast", "kind"),
+                expect(global.lastAddress, equals: "2001:db8:ffff:ffff:ffff:ffff:ffff:ffff", "last"),
+                expect(loop.networkCompressed, equals: "::1", "loopback"),
+                expect(loop.kind, equals: "Loopback", "loopback kind"),
+                expect(IPv6Engine.compress(IPv6Engine.parseAddress("fe80:0:0:0:0:0:0:1") ?? []), equals: "fe80::1", "compress"),
+                expect(IPv6Engine.calculate("nonsense"), equals: nil, "invalid")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),
