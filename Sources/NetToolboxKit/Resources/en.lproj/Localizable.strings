@@ -1191,3 +1191,23 @@
 "speed.metric.bufferbloat" = "Bufferbloat";
 "speed.metric.loss" = "Packet loss";
 "speed.unit.percent" = "%";
+
+// DNS health (DNSSEC + propagation)
+"tool.dnshealth.title" = "DNS Health";
+"tool.dnshealth.subtitle" = "DNSSEC validation and propagation across resolvers";
+"dnshealth.input.title" = "Domain";
+"dnshealth.input.host" = "Domain (e.g. cloudflare.com)";
+"dnshealth.opt.type" = "Record";
+"dnshealth.action.check" = "Check";
+"dnshealth.error.host" = "Enter a domain to check.";
+"dnshealth.noanswer" = "no answer";
+"dnshealth.section.dnssec" = "DNSSEC";
+"dnshealth.dnssec.signed" = "Signed and validated";
+"dnshealth.dnssec.unsigned" = "Not signed (no DNSSEC)";
+"dnshealth.dnssec.bogus" = "Validation failed (bogus)";
+"dnshealth.dnssec.unknown" = "Unknown";
+"dnshealth.dnssec.note" = "Queried through a validating resolver (Cloudflare) with the DO bit; a signed, valid zone sets the AD flag.";
+"dnshealth.section.propagation" = "Propagation";
+"dnshealth.consistent" = "Consistent across resolvers";
+"dnshealth.inconsistent" = "Answers differ between resolvers";
+"dnshealth.note" = "Queries several public resolvers at once to spot inconsistent or still-propagating records, and checks whether the zone is DNSSEC-signed and validates.";

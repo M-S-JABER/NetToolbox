@@ -730,6 +730,20 @@ struct EngineTestSuite: Sendable {
                 expect(BufferbloatGrade.grade(increaseMs: 400), equals: "F", "bad")
             )
         },
+        Case(name: "DNS propagation consistency + DNSSEC query") {
+            let a = DNSResolverResult(name: "A", server: "1.1.1.1", values: ["1.2.3.4"])
+            let b = DNSResolverResult(name: "B", server: "8.8.8.8", values: ["1.2.3.4"])
+            let c = DNSResolverResult(name: "C", server: "9.9.9.9", values: ["9.9.9.9"])
+            var d = DNSResolverResult(name: "D", server: "4.2.2.2"); d.error = "timeout"
+            let signedQuery = (try? DNSMessage.encodeQuery(name: "cloudflare.com", type: .a, id: 1, dnssecOK: true)) ?? Data()
+            let plainQuery = (try? DNSMessage.encodeQuery(name: "cloudflare.com", type: .a, id: 1)) ?? Data()
+            return firstFailure(
+                expect(DNSHealthEngine.consistent([a, b]), equals: true, "same answers"),
+                expect(DNSHealthEngine.consistent([a, c]), equals: false, "different answers"),
+                expect(DNSHealthEngine.consistent([a, b, d]), equals: true, "errors ignored"),
+                expect(signedQuery.count > plainQuery.count, equals: true, "EDNS OPT appended")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

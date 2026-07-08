@@ -1191,3 +1191,23 @@
 "speed.metric.bufferbloat" = "تضخّم التخزين المؤقت";
 "speed.metric.loss" = "فقد الحزم";
 "speed.unit.percent" = "%";
+
+// DNS health (DNSSEC + propagation)
+"tool.dnshealth.title" = "صحّة DNS";
+"tool.dnshealth.subtitle" = "التحقق من DNSSEC والانتشار عبر المحلّلات";
+"dnshealth.input.title" = "النطاق";
+"dnshealth.input.host" = "النطاق (مثل cloudflare.com)";
+"dnshealth.opt.type" = "السجل";
+"dnshealth.action.check" = "افحص";
+"dnshealth.error.host" = "أدخل نطاقاً للفحص.";
+"dnshealth.noanswer" = "لا إجابة";
+"dnshealth.section.dnssec" = "DNSSEC";
+"dnshealth.dnssec.signed" = "موقّع ومُتحقَّق منه";
+"dnshealth.dnssec.unsigned" = "غير موقّع (بلا DNSSEC)";
+"dnshealth.dnssec.bogus" = "فشل التحقق (تالف)";
+"dnshealth.dnssec.unknown" = "غير معروف";
+"dnshealth.dnssec.note" = "يُستعلَم عبر محلّل مُتحقِّق (Cloudflare) مع بِت DO؛ النطاق الموقّع الصحيح يضبط راية AD.";
+"dnshealth.section.propagation" = "الانتشار";
+"dnshealth.consistent" = "متسق عبر المحلّلات";
+"dnshealth.inconsistent" = "الإجابات تختلف بين المحلّلات";
+"dnshealth.note" = "يستعلم عدة محلّلات عامة دفعة واحدة لرصد السجلات غير المتسقة أو التي لا تزال تنتشر، ويتحقق إن كان النطاق موقّعاً بـ DNSSEC وصحيحاً.";

@@ -44,6 +44,7 @@ enum ToolRegistry {
         DoHTool(),
         DNSCompareTool(),
         DNSReliabilityTool(),
+        DNSHealthTool(),
         EmailSecurityTool(),
         PwnedCheckTool(),
         CertTransparencyTool(),

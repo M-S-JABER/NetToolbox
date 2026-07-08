@@ -58,7 +58,9 @@ enum DNSMessage {
     // MARK: Query encoding
 
     /// Builds a standard recursive query for `name`/`type` with the given ID.
-    static func encodeQuery(name: String, type: DNSRecordType, id: UInt16) throws -> Data {
+    /// When `dnssecOK` is set, an EDNS0 OPT record with the DO bit is added so
+    /// the resolver returns DNSSEC data and sets the AD flag when validated.
+    static func encodeQuery(name: String, type: DNSRecordType, id: UInt16, dnssecOK: Bool = false) throws -> Data {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { throw DNSError.emptyName }
 
@@ -68,11 +70,26 @@ enum DNSMessage {
         data.appendUInt16(1)               // QDCOUNT
         data.appendUInt16(0)               // ANCOUNT
         data.appendUInt16(0)               // NSCOUNT
-        data.appendUInt16(0)               // ARCOUNT
+        data.appendUInt16(dnssecOK ? 1 : 0) // ARCOUNT (EDNS OPT below)
         data.append(encodeName(trimmed))
         data.appendUInt16(type.rawValue)   // QTYPE
         data.appendUInt16(1)               // QCLASS = IN
+        if dnssecOK {
+            data.append(0)                 // OPT name = root
+            data.appendUInt16(41)          // TYPE = OPT
+            data.appendUInt16(4096)        // CLASS = UDP payload size
+            data.appendUInt16(0x0000)      // TTL hi: ext-rcode + version
+            data.appendUInt16(0x8000)      // TTL lo: DO bit set
+            data.appendUInt16(0)           // RDLENGTH = 0
+        }
         return data
+    }
+
+    /// Reads the AD (authenticated data) flag and RCODE from a response header.
+    static func responseFlags(_ data: Data) -> (authenticated: Bool, rcode: Int) {
+        let bytes = [UInt8](data)
+        guard bytes.count >= 4 else { return (false, -1) }
+        return ((bytes[3] & 0x20) != 0, Int(bytes[3] & 0x0F))
     }
 
     /// Encodes a domain name as a sequence of length-prefixed labels.
