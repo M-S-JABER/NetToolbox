@@ -168,8 +168,12 @@ struct SSLInspector: SSLInspecting {
     func probeProtocols(host: String, port: UInt16) async -> [String] {
         let cleanHost = host.trimmingCharacters(in: .whitespaces)
         guard NWEndpoint.Port(rawValue: port) != nil, !cleanHost.isEmpty else { return [] }
+        // TLS 1.0/1.1 are referenced by their wire raw values (0x0301/0x0302)
+        // rather than the `.TLSv10`/`.TLSv11` constants, which are deprecated —
+        // probing for the legacy versions is exactly the point of this audit.
         let versions: [(String, tls_protocol_version_t)] = [
-            ("TLS 1.0", .TLSv10), ("TLS 1.1", .TLSv11),
+            ("TLS 1.0", tls_protocol_version_t(rawValue: 0x0301) ?? .TLSv12),
+            ("TLS 1.1", tls_protocol_version_t(rawValue: 0x0302) ?? .TLSv12),
             ("TLS 1.2", .TLSv12), ("TLS 1.3", .TLSv13),
         ]
         let supported = await withTaskGroup(of: (Int, String)?.self) { group in

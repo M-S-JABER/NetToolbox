@@ -3,7 +3,7 @@ import Observation
 
 /// Validates and pretty-prints / minifies JSON via Foundation's parser.
 enum JSONTools {
-    static func transform(_ text: String, minify: Bool) -> Result<String, String> {
+    static func transform(_ text: String, minify: Bool) -> Result<String, EngineError> {
         let data = Data(text.utf8)
         do {
             let object = try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])
@@ -13,7 +13,7 @@ enum JSONTools {
             let output = try JSONSerialization.data(withJSONObject: object, options: options)
             return .success(String(decoding: output, as: UTF8.self))
         } catch {
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
     }
 }
@@ -24,7 +24,7 @@ final class JSONFormatterViewModel {
     var input = ""
     var minify = false
 
-    var output: Result<String, String>? {
+    var output: Result<String, EngineError>? {
         input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : JSONTools.transform(input, minify: minify)
     }
 }
@@ -84,7 +84,7 @@ struct JSONFormatterView: View {
             }
         case .failure(let message):
             SectionCard(title: L10n("json.invalid"), systemImage: "exclamationmark.triangle") {
-                Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)
+                Text(message.description).font(AppTypography.footnote).foregroundStyle(theme.danger)
             }
         }
     }

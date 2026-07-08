@@ -5,13 +5,13 @@ import Observation
 /// SMTP banners) — or the response to an optional probe line (e.g. an HTTP
 /// request). Uses the shared `TCPConnection`.
 struct BannerGrabService: Sendable {
-    func grab(host: String, port: UInt16, probe: String, tls: Bool, timeout: Double) async -> Result<String, String> {
+    func grab(host: String, port: UInt16, probe: String, tls: Bool, timeout: Double) async -> Result<String, EngineError> {
         guard let connection = TCPConnection(host: host, port: port, tls: tls) else {
-            return .failure(L10nString("banner.error.host"))
+            return .failure(EngineError(L10nString("banner.error.host")))
         }
         if case .failure(let error) = await connection.open(timeout: timeout) {
             connection.cancel()
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
         let trimmedProbe = probe.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmedProbe.isEmpty {
@@ -22,9 +22,9 @@ struct BannerGrabService: Sendable {
         switch result {
         case .success(let data):
             let text = String(decoding: data, as: UTF8.self)
-            return text.isEmpty ? .failure(L10nString("banner.empty")) : .success(text)
+            return text.isEmpty ? .failure(EngineError(L10nString("banner.empty"))) : .success(text)
         case .failure(let error):
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
     }
 }
@@ -51,7 +51,7 @@ final class BannerGrabViewModel {
         let result = await service.grab(host: target, port: port, probe: probe, tls: tls, timeout: 5)
         switch result {
         case .success(let text): output = text
-        case .failure(let message): errorMessage = message
+        case .failure(let message): errorMessage = message.description
         }
         isRunning = false
     }

@@ -4,13 +4,13 @@ import Observation
 /// Connects to an SMTP server and runs a short EHLO handshake, showing the
 /// banner and advertised capabilities — a quick server health / capability probe.
 struct SMTPService: Sendable {
-    func probe(host: String, port: UInt16, tls: Bool) async -> Result<String, String> {
+    func probe(host: String, port: UInt16, tls: Bool) async -> Result<String, EngineError> {
         guard let connection = TCPConnection(host: host, port: port, tls: tls) else {
-            return .failure(L10nString("banner.error.host"))
+            return .failure(EngineError(L10nString("banner.error.host")))
         }
         if case .failure(let error) = await connection.open(timeout: 6) {
             connection.cancel()
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
         var log = ""
         func read() async {
@@ -30,7 +30,7 @@ struct SMTPService: Sendable {
         await send("QUIT")
         await read()
         connection.cancel()
-        return log.isEmpty ? .failure(L10nString("banner.empty")) : .success(log)
+        return log.isEmpty ? .failure(EngineError(L10nString("banner.empty"))) : .success(log)
     }
 }
 
@@ -55,7 +55,7 @@ final class SMTPViewModel {
         let result = await service.probe(host: target, port: port, tls: tls)
         switch result {
         case .success(let text): output = text
-        case .failure(let message): errorMessage = message
+        case .failure(let message): errorMessage = message.description
         }
         isRunning = false
     }

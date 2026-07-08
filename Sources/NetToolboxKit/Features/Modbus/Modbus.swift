@@ -35,13 +35,13 @@ enum Modbus {
 }
 
 struct ModbusService: Sendable {
-    func read(host: String, port: UInt16, unit: UInt8, function: UInt8, address: UInt16, quantity: UInt16) async -> Result<[UInt16], String> {
+    func read(host: String, port: UInt16, unit: UInt8, function: UInt8, address: UInt16, quantity: UInt16) async -> Result<[UInt16], EngineError> {
         guard let connection = TCPConnection(host: host, port: port) else {
-            return .failure(L10nString("banner.error.host"))
+            return .failure(EngineError(L10nString("banner.error.host")))
         }
         if case .failure(let error) = await connection.open(timeout: 6) {
             connection.cancel()
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
         _ = await connection.send(Modbus.request(transaction: 1, unit: unit, function: function, address: address, quantity: quantity))
         let result = await connection.receive()
@@ -50,11 +50,11 @@ struct ModbusService: Sendable {
         case .success(let data):
             switch Modbus.parse(data) {
             case .registers(let regs): return .success(regs)
-            case .exception(let code): return .failure(String(format: L10nString("modbus.exception"), Int(code)))
-            case .none: return .failure(L10nString("modbus.badResponse"))
+            case .exception(let code): return .failure(EngineError(String(format: L10nString("modbus.exception"), Int(code))))
+            case .none: return .failure(EngineError(L10nString("modbus.badResponse")))
             }
         case .failure(let error):
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
     }
 }
@@ -89,7 +89,7 @@ final class ModbusViewModel {
         )
         switch result {
         case .success(let regs): registers = regs
-        case .failure(let message): errorMessage = message
+        case .failure(let message): errorMessage = message.description
         }
         isRunning = false
     }

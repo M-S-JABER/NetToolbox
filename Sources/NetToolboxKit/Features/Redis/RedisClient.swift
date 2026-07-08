@@ -59,13 +59,13 @@ enum RESP {
 }
 
 struct RedisService: Sendable {
-    func run(host: String, port: UInt16, password: String, command: String, tls: Bool) async -> Result<String, String> {
+    func run(host: String, port: UInt16, password: String, command: String, tls: Bool) async -> Result<String, EngineError> {
         guard let connection = TCPConnection(host: host, port: port, tls: tls) else {
-            return .failure(L10nString("banner.error.host"))
+            return .failure(EngineError(L10nString("banner.error.host")))
         }
         if case .failure(let error) = await connection.open(timeout: 6) {
             connection.cancel()
-            return .failure(error.localizedDescription)
+            return .failure(EngineError(error.localizedDescription))
         }
         if !password.isEmpty {
             _ = await connection.send(RESP.encode(command: "AUTH \(password)"))
@@ -76,7 +76,7 @@ struct RedisService: Sendable {
         connection.cancel()
         switch result {
         case .success(let data): return .success(RESP.format(data))
-        case .failure(let error): return .failure(error.localizedDescription)
+        case .failure(let error): return .failure(EngineError(error.localizedDescription))
         }
     }
 }
@@ -104,7 +104,7 @@ final class RedisViewModel {
         let result = await service.run(host: target, port: port, password: password, command: command, tls: tls)
         switch result {
         case .success(let text): output = text
-        case .failure(let message): errorMessage = message
+        case .failure(let message): errorMessage = message.description
         }
         isRunning = false
     }

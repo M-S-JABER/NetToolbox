@@ -19,7 +19,7 @@ struct TFTPClient: Sendable {
         return bytes
     }
 
-    func download(host: String, port: UInt16, filename: String, maxBytes: Int) async -> Result<Data, String> {
+    func download(host: String, port: UInt16, filename: String, maxBytes: Int) async -> Result<Data, EngineError> {
         await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
                 continuation.resume(returning: Self.transfer(host: host, port: port, filename: filename, maxBytes: maxBytes))
@@ -28,13 +28,13 @@ struct TFTPClient: Sendable {
     }
 
     #if canImport(Darwin)
-    private static func transfer(host: String, port: UInt16, filename: String, maxBytes: Int) -> Result<Data, String> {
+    private static func transfer(host: String, port: UInt16, filename: String, maxBytes: Int) -> Result<Data, EngineError> {
         var hints = addrinfo()
         hints.ai_family = AF_INET
         hints.ai_socktype = SOCK_DGRAM
         var info: UnsafeMutablePointer<addrinfo>?
         guard getaddrinfo(host, String(port), &hints, &info) == 0, let info else {
-            return .failure(L10nString("tftp.error.resolve"))
+            return .failure(EngineError(L10nString("tftp.error.resolve")))
         }
         defer { freeaddrinfo(info) }
 
@@ -43,7 +43,7 @@ struct TFTPClient: Sendable {
         let serverLen = info.pointee.ai_addrlen
 
         let fd = socket(AF_INET, SOCK_DGRAM, 0)
-        guard fd >= 0 else { return .failure(L10nString("tftp.error.socket")) }
+        guard fd >= 0 else { return .failure(EngineError(L10nString("tftp.error.socket"))) }
         defer { close(fd) }
         var tv = timeval(tv_sec: 5, tv_usec: 0)
         setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, socklen_t(MemoryLayout<timeval>.size))
@@ -56,7 +56,7 @@ struct TFTPClient: Sendable {
                 }
             }
         }
-        guard sent >= 0 else { return .failure(L10nString("tftp.error.socket")) }
+        guard sent >= 0 else { return .failure(EngineError(L10nString("tftp.error.socket"))) }
 
         var data = Data()
         var expected: UInt16 = 1
@@ -70,13 +70,13 @@ struct TFTPClient: Sendable {
                     recvfrom(fd, &buffer, buffer.count, 0, sa, &fromLen)
                 }
             }
-            if n < 0 { return data.isEmpty ? .failure(L10nString("tftp.error.timeout")) : .success(data) }
+            if n < 0 { return data.isEmpty ? .failure(EngineError(L10nString("tftp.error.timeout"))) : .success(data) }
             if n < 4 { continue }
 
             let opcode = Int(buffer[0]) << 8 | Int(buffer[1])
             if opcode == 5 { // ERROR
                 let message = n > 5 ? String(decoding: buffer[4..<(n - 1)], as: UTF8.self) : L10nString("tftp.error.server")
-                return .failure(message)
+                return .failure(EngineError(message))
             }
             if opcode != 3 { continue } // only DATA
 
@@ -96,12 +96,12 @@ struct TFTPClient: Sendable {
                 data.append(contentsOf: chunk)
                 expected = expected &+ 1
                 if chunk.count < 512 { return .success(data) }
-                if data.count > maxBytes { return .failure(L10nString("tftp.error.tooLarge")) }
+                if data.count > maxBytes { return .failure(EngineError(L10nString("tftp.error.tooLarge"))) }
             }
         }
     }
     #else
-    private static func transfer(host: String, port: UInt16, filename: String, maxBytes: Int) -> Result<Data, String> {
+    private static func transfer(host: String, port: UInt16, filename: String, maxBytes: Int) -> Result<Data, EngineError> {
         .failure("Unsupported platform")
     }
     #endif
@@ -143,7 +143,7 @@ final class TFTPViewModel {
                 savedURL = url
             }
         case .failure(let message):
-            errorMessage = message
+            errorMessage = message.description
         }
         isRunning = false
     }

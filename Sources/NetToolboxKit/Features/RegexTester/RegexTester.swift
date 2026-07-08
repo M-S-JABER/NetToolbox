@@ -9,12 +9,12 @@ struct RegexMatch: Identifiable, Sendable, Equatable {
 
 /// Tests an NSRegularExpression pattern against a string. Pure logic.
 enum RegexTools {
-    static func matches(pattern: String, text: String, caseInsensitive: Bool) -> Result<[RegexMatch], String> {
+    static func matches(pattern: String, text: String, caseInsensitive: Bool) -> Result<[RegexMatch], EngineError> {
         guard !pattern.isEmpty else { return .success([]) }
         var options: NSRegularExpression.Options = []
         if caseInsensitive { options.insert(.caseInsensitive) }
         guard let regex = try? NSRegularExpression(pattern: pattern, options: options) else {
-            return .failure(L10nString("regex.invalid"))
+            return .failure(EngineError(L10nString("regex.invalid")))
         }
         let nsText = text as NSString
         let range = NSRange(location: 0, length: nsText.length)
@@ -42,7 +42,7 @@ final class RegexTesterViewModel {
     var text = ""
     var caseInsensitive = false
 
-    var result: Result<[RegexMatch], String>? {
+    var result: Result<[RegexMatch], EngineError>? {
         pattern.isEmpty ? nil : RegexTools.matches(pattern: pattern, text: text, caseInsensitive: caseInsensitive)
     }
 }
@@ -100,7 +100,7 @@ struct RegexTesterView: View {
             EmptyView()
         case .failure(let message):
             SectionCard(title: L10n("regex.invalid"), systemImage: "exclamationmark.triangle") {
-                Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)
+                Text(message.description).font(AppTypography.footnote).foregroundStyle(theme.danger)
             }
         case .success(let matches):
             SectionCard(title: L10n("regex.section.matches"), systemImage: "text.magnifyingglass") {
