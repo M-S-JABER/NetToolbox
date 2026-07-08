@@ -106,6 +106,9 @@ struct IPv6SubnetResult: Sendable, Equatable {
     let addressType: IPv6AddressType
     /// Host bits (128 - prefix); total addresses = 2^hostBits.
     let hostBits: Int
+    /// First and last address of the prefix range (compressed form).
+    var firstAddress: String = ""
+    var lastAddress: String = ""
 
     var cidrNotation: String { "\(networkPrefix)/\(prefix)" }
     /// Human-friendly total ("2^64" for large values, exact number otherwise).
@@ -375,6 +378,14 @@ enum SubnetEngine {
 
         let groups = try parseIPv6(addressText)
         let network = applyPrefix(prefix, to: groups)
+        // Last address: set every host bit to 1.
+        let last = network.enumerated().map { index, group -> UInt16 in
+            let bitsBefore = index * 16
+            let keep = max(0, min(16, prefix - bitsBefore))
+            if keep >= 16 { return group }
+            if keep <= 0 { return 0xFFFF }
+            return group | (UInt16.max >> UInt16(keep))
+        }
 
         return IPv6SubnetResult(
             compressed: compressed(ipv6: groups),
@@ -382,7 +393,9 @@ enum SubnetEngine {
             networkPrefix: compressed(ipv6: network),
             prefix: prefix,
             addressType: addressType(of: groups),
-            hostBits: 128 - prefix
+            hostBits: 128 - prefix,
+            firstAddress: compressed(ipv6: network),
+            lastAddress: compressed(ipv6: last)
         )
     }
 

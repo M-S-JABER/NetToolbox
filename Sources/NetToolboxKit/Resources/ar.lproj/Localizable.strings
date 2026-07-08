@@ -386,6 +386,8 @@
 "subnet.result.maskBinary" = "القناع (ثنائي)";
 "subnet.result.network" = "عنوان الشبكة";
 "subnet.result.networkPrefix" = "بادئة الشبكة";
+"subnet.result.firstAddress" = "أول عنوان";
+"subnet.result.lastAddress" = "آخر عنوان";
 "subnet.result.prefixLength" = "طول البادئة";
 "subnet.result.subnetMask" = "قناع الشبكة";
 "subnet.result.totalAddresses" = "إجمالي العناوين";
@@ -1254,17 +1256,3 @@
 "fingerprint.banner" = "الراية الخام";
 "fingerprint.note" = "يتصل ويقرأ التحية (أو استجابة HTTP) ويحدّد الخدمة والبرنامج من أنماط الرايات المعروفة. استدلال تقريبي، وليس مسحاً كاملاً للمنافذ.";
 
-// IPv6 subnet calculator
-"tool.ipv6.title" = "شبكة IPv6";
-"tool.ipv6.subtitle" = "تحليل وتوسيع بادئة IPv6";
-"ipv6.input.title" = "بادئة IPv6";
-"ipv6.input.placeholder" = "مثل 2001:db8::1/64";
-"ipv6.section.result" = "النتيجة";
-"ipv6.kind" = "النوع";
-"ipv6.network" = "الشبكة";
-"ipv6.expanded" = "الموسّعة";
-"ipv6.first" = "أول عنوان";
-"ipv6.last" = "آخر عنوان";
-"ipv6.count" = "العناوين";
-"ipv6.error" = "ليس عنوان أو بادئة IPv6 صالحة.";
-"ipv6.note" = "يطبّق البادئة لاشتقاق الشبكة والصيغتين الموسّعة والمضغوطة (RFC 5952) ونطاق العناوين وعددها.";

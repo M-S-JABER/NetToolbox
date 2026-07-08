@@ -386,6 +386,8 @@
 "subnet.result.maskBinary" = "Mask (binary)";
 "subnet.result.network" = "Network address";
 "subnet.result.networkPrefix" = "Network prefix";
+"subnet.result.firstAddress" = "First address";
+"subnet.result.lastAddress" = "Last address";
 "subnet.result.prefixLength" = "Prefix length";
 "subnet.result.subnetMask" = "Subnet mask";
 "subnet.result.totalAddresses" = "Total addresses";
@@ -1254,17 +1256,3 @@
 "fingerprint.banner" = "Raw banner";
 "fingerprint.note" = "Connects, reads the greeting (or an HTTP response), and identifies the service and software from well-known banner patterns. A best-effort heuristic, not a full port scan.";
 
-// IPv6 subnet calculator
-"tool.ipv6.title" = "IPv6 Subnet";
-"tool.ipv6.subtitle" = "Parse and expand an IPv6 prefix";
-"ipv6.input.title" = "IPv6 prefix";
-"ipv6.input.placeholder" = "e.g. 2001:db8::1/64";
-"ipv6.section.result" = "Result";
-"ipv6.kind" = "Type";
-"ipv6.network" = "Network";
-"ipv6.expanded" = "Expanded";
-"ipv6.first" = "First address";
-"ipv6.last" = "Last address";
-"ipv6.count" = "Addresses";
-"ipv6.error" = "Not a valid IPv6 address or prefix.";
-"ipv6.note" = "Applies the prefix to derive the network, expanded and compressed (RFC 5952) forms, address range, and address count.";

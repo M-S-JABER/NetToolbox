@@ -183,6 +183,8 @@ struct SubnetCalculatorView: View {
                 ("subnet.result.expanded", result.expanded),
                 ("subnet.result.networkPrefix", result.networkPrefix),
                 ("subnet.result.prefixLength", "/\(result.prefix)"),
+                ("subnet.result.firstAddress", result.firstAddress),
+                ("subnet.result.lastAddress", result.lastAddress),
                 ("subnet.result.totalAddresses", result.totalAddressesDescription),
             ])
         }

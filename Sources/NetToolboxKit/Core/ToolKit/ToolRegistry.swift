@@ -9,7 +9,6 @@ enum ToolRegistry {
         // Phase 1 — calculators & reference
         SubnetCalculatorTool(),
         SubnetMembershipTool(),
-        IPv6SubnetTool(),
         VLSMTool(),
         MACLookupTool(),
         PortReferenceTool(),
