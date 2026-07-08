@@ -858,6 +858,15 @@
 "common.export" = "تصدير";
 "home.favorite" = "تفضيل";
 "home.favorites" = "المفضّلة";
+"dashboard.tagline" = "صندوق أدوات شبكتك";
+"dashboard.recent" = "الأخيرة";
+"dashboard.connection" = "الاتصال";
+"dashboard.publicIP" = "IP العام";
+"dashboard.isp" = "مزود الخدمة";
+"dashboard.location" = "الموقع";
+"dashboard.asn" = "رقم النظام (ASN)";
+"dashboard.ipUnavailable" = "تعذّر جلب IP العام — تحقق من اتصالك.";
+"dashboard.overview" = "كل الأدوات";
 "home.smart.title" = "اقتراح ذكي";
 "home.unfavorite" = "إزالة من المفضّلة";
 "home.favorites.caption" = "أدواتك المميّزة بنجمة";

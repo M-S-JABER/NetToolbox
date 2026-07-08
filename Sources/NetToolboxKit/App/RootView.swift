@@ -9,6 +9,7 @@ struct RootView: View {
     @Environment(\.theme) private var theme
     @Environment(NetworkStatusMonitor.self) private var status
     @Environment(FavoritesStore.self) private var favorites
+    @Environment(RecentToolsStore.self) private var recentTools
     @Environment(ActivityCenter.self) private var activity
 
     @Binding var themeSelection: String
@@ -62,6 +63,9 @@ struct RootView: View {
             }
         }
         .navigationSplitViewStyle(.balanced)
+        .onChange(of: selectedToolID) { _, newValue in
+            if let newValue { recentTools.record(newValue) }
+        }
     }
 
     // MARK: Detail
@@ -72,30 +76,8 @@ struct RootView: View {
             tool.makeView()
                 .background(theme.background)
         } else {
-            welcome
+            DashboardView(onOpen: { selectedToolID = $0 })
         }
-    }
-
-    private var welcome: some View {
-        VStack(spacing: Spacing.md) {
-            Image(systemName: "point.3.connected.trianglepath.dotted")
-                .font(.system(size: 52))
-                .foregroundStyle(theme.accent)
-            Text(L10n("app.title"))
-                .font(AppTypography.largeTitle)
-                .foregroundStyle(theme.textPrimary)
-            HStack(spacing: Spacing.sm) {
-                Image(systemName: status.connection.symbol)
-                    .foregroundStyle(status.connection.isOnline ? theme.success : theme.danger)
-                Text(L10n(status.connection.labelKey))
-                    .foregroundStyle(theme.textSecondary)
-                Text("· \(ToolRegistry.all.count) \(L10nString("home.toolsCount"))")
-                    .foregroundStyle(theme.textSecondary)
-            }
-            .font(AppTypography.footnote)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(theme.background)
     }
 
     // MARK: Data
@@ -156,7 +138,7 @@ struct RootView: View {
                     .foregroundStyle(theme.textPrimary)
             } icon: {
                 Image(systemName: tool.systemImage)
-                    .foregroundStyle(theme.accent)
+                    .foregroundStyle(tool.category.tint)
             }
             if activity.running.contains(tool.id) {
                 Spacer()

@@ -22,6 +22,7 @@ public struct NetToolboxRootView: View {
     @AppStorage("nettoolbox.theme") private var themeSelection = ThemeOption.teal.rawValue
     @State private var status = NetworkStatusMonitor()
     @State private var favorites = FavoritesStore()
+    @State private var recentTools = RecentToolsStore()
     @State private var history = HistoryStore()
     @State private var savedHosts = SavedHostsStore()
     @State private var sshProfiles = SSHProfilesStore()
@@ -49,6 +50,7 @@ public struct NetToolboxRootView: View {
             .environment(\.theme, activeTheme)
             .environment(status)
             .environment(favorites)
+            .environment(recentTools)
             .environment(history)
             .environment(savedHosts)
             .environment(sshProfiles)

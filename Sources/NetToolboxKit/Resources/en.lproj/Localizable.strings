@@ -860,6 +860,15 @@
 "common.export" = "Export";
 "home.favorite" = "Favorite";
 "home.favorites" = "Favorites";
+"dashboard.tagline" = "Your network toolkit";
+"dashboard.recent" = "Recent";
+"dashboard.connection" = "Connection";
+"dashboard.publicIP" = "Public IP";
+"dashboard.isp" = "ISP";
+"dashboard.location" = "Location";
+"dashboard.asn" = "ASN";
+"dashboard.ipUnavailable" = "Public IP unavailable — check your connection.";
+"dashboard.overview" = "All tools";
 "home.smart.title" = "Smart suggestion";
 "home.unfavorite" = "Unfavorite";
 "home.favorites.caption" = "Your starred tools";

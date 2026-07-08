@@ -29,6 +29,19 @@ enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
         case .bgp: "arrow.triangle.branch"
         }
     }
+
+    /// A distinct accent hue per category, used to colour sidebar icons and
+    /// dashboard cards. Fixed hues (not theme-derived) so categories stay
+    /// recognisable at a glance, and each reads on both light and dark.
+    var tint: Color {
+        switch self {
+        case .calculators: Color(red: 0.46, green: 0.42, blue: 0.95)  // indigo
+        case .diagnostics: Color(red: 0.11, green: 0.66, blue: 0.56)  // teal
+        case .localNetwork: Color(red: 0.16, green: 0.56, blue: 0.96) // blue
+        case .professional: Color(red: 0.95, green: 0.55, blue: 0.21) // orange
+        case .bgp: Color(red: 0.91, green: 0.31, blue: 0.51)          // pink
+        }
+    }
 }
 
 /// Contract every tool implements.
