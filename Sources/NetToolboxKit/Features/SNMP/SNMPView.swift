@@ -62,6 +62,12 @@ final class SNMPViewModel {
         var labelKey: String { "snmp.mode.\(rawValue)" }
     }
 
+    enum Version: String, CaseIterable, Identifiable {
+        case v2c, v3
+        var id: String { rawValue }
+        var label: String { self == .v2c ? "v2c" : "v3" }
+    }
+
     enum Output: Equatable {
         case idle, loading
         case get(SNMPVarbind)
@@ -74,9 +80,15 @@ final class SNMPViewModel {
     var oid = "1.3.6.1.2.1.1.1.0"
     var portText = "161"
     var mode: Mode = .get
+    var version: Version = .v2c
+    // v3 (USM authNoPriv) parameters
+    var username = ""
+    var authPassword = ""
+    var authProtocol: SNMPv3Auth = .sha
     private(set) var output: Output = .idle
 
     private let service: any SNMPQuerying
+    private let v3Service = SNMPv3Service()
 
     init(service: any SNMPQuerying = SNMPService()) {
         self.service = service
@@ -86,10 +98,22 @@ final class SNMPViewModel {
         let target = host.trimmingCharacters(in: .whitespaces)
         guard !target.isEmpty else { output = .idle; return }
         let port = UInt16(portText.trimmingCharacters(in: .whitespaces)) ?? 161
-        let community = community.trimmingCharacters(in: .whitespaces)
         let oid = oid.trimmingCharacters(in: .whitespaces)
         output = .loading
         do {
+            if version == .v3 {
+                let user = username.trimmingCharacters(in: .whitespaces)
+                guard !user.isEmpty, !authPassword.isEmpty else {
+                    output = .failure(L10nString("snmp.v3.needCredentials")); return
+                }
+                let varbind = try await v3Service.get(
+                    host: target, port: port, user: user,
+                    password: authPassword, auth: authProtocol, oid: oid
+                )
+                output = .get(varbind)
+                return
+            }
+            let community = community.trimmingCharacters(in: .whitespaces)
             switch mode {
             case .get:
                 output = .get(try await service.get(host: target, community: community, oid: oid, port: port))
@@ -135,6 +159,13 @@ struct SNMPView: View {
 
     private var inputSection: some View {
         SectionCard(title: L10n("snmp.input.title"), systemImage: "chart.bar.doc.horizontal") {
+            Picker(L10nString("snmp.version.title"), selection: $viewModel.version) {
+                ForEach(SNMPViewModel.Version.allCases) { version in
+                    Text(version.label).tag(version)
+                }
+            }
+            .pickerStyle(.segmented)
+
             HStack(spacing: Spacing.md) {
                 TextField(L10nString("snmp.input.host"), text: $viewModel.host)
                     .textFieldStyle(.roundedBorder)
@@ -151,12 +182,18 @@ struct SNMPView: View {
                     .frame(maxWidth: 70)
                     .environment(\.layoutDirection, .leftToRight)
             }
-            TextField(L10nString("snmp.input.community"), text: $viewModel.community)
-                .textFieldStyle(.roundedBorder)
-                .font(AppTypography.monoBody)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .environment(\.layoutDirection, .leftToRight)
+
+            if viewModel.version == .v2c {
+                TextField(L10nString("snmp.input.community"), text: $viewModel.community)
+                    .textFieldStyle(.roundedBorder)
+                    .font(AppTypography.monoBody)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .environment(\.layoutDirection, .leftToRight)
+            } else {
+                v3CredentialFields
+            }
+
             TextField(L10nString("snmp.input.oid"), text: $viewModel.oid)
                 .textFieldStyle(.roundedBorder)
                 .font(AppTypography.monoBody)
@@ -165,21 +202,55 @@ struct SNMPView: View {
                 .textInputAutocapitalization(.never)
                 .environment(\.layoutDirection, .leftToRight)
 
-            Picker(L10nString("snmp.mode.title"), selection: $viewModel.mode) {
-                ForEach(SNMPViewModel.Mode.allCases) { mode in
-                    Text(L10n(mode.labelKey)).tag(mode)
+            if viewModel.version == .v2c {
+                Picker(L10nString("snmp.mode.title"), selection: $viewModel.mode) {
+                    ForEach(SNMPViewModel.Mode.allCases) { mode in
+                        Text(L10n(mode.labelKey)).tag(mode)
+                    }
                 }
+                .pickerStyle(.segmented)
             }
-            .pickerStyle(.segmented)
 
             Button {
                 Task { await viewModel.run() }
             } label: {
-                Label(L10nString(viewModel.mode == .walk ? "snmp.action.walk" : "snmp.action.get"),
+                Label(L10nString(viewModel.version == .v2c && viewModel.mode == .walk ? "snmp.action.walk" : "snmp.action.get"),
                       systemImage: "arrow.down.doc")
                     .font(AppTypography.headline)
             }
             .buttonStyle(.borderedProminent)
+        }
+    }
+
+    private var v3CredentialFields: some View {
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            HStack(spacing: Spacing.sm) {
+                Text(L10n("snmp.v3.beta"))
+                    .font(AppTypography.caption.weight(.semibold))
+                    .foregroundStyle(theme.background)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(theme.accent, in: Capsule())
+                Text(L10n("snmp.v3.authNoPriv"))
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
+            TextField(L10nString("snmp.v3.username"), text: $viewModel.username)
+                .textFieldStyle(.roundedBorder)
+                .font(AppTypography.monoBody)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .environment(\.layoutDirection, .leftToRight)
+            SecureField(L10nString("snmp.v3.authPassword"), text: $viewModel.authPassword)
+                .textFieldStyle(.roundedBorder)
+                .font(AppTypography.monoBody)
+                .environment(\.layoutDirection, .leftToRight)
+            Picker(L10nString("snmp.v3.authProtocol"), selection: $viewModel.authProtocol) {
+                ForEach(SNMPv3Auth.allCases) { proto in
+                    Text(proto.displayName).tag(proto)
+                }
+            }
+            .pickerStyle(.segmented)
         }
     }
 

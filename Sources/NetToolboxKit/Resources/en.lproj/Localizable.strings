@@ -455,6 +455,7 @@
 "error.snmp.invalidOID" = "Invalid OID";
 "error.snmp.malformed" = "Malformed SNMP response";
 "error.snmp.noVarbind" = "No variable binding in response";
+"error.snmpv3.auth" = "Authentication failed — check the username, password, and auth protocol";
 "error.wol.invalidMAC" = "Invalid MAC address";
 "error.wol.send" = "Failed to send magic packet";
 "error.wol.socket" = "Could not open UDP socket";
@@ -536,6 +537,13 @@
 "snmp.result.type" = "Type";
 "snmp.section.presets" = "Common OIDs";
 "snmp.section.result" = "Result";
+"snmp.version.title" = "Version";
+"snmp.v3.beta" = "BETA";
+"snmp.v3.authNoPriv" = "USM authNoPriv (no encryption)";
+"snmp.v3.username" = "Username";
+"snmp.v3.authPassword" = "Auth password";
+"snmp.v3.authProtocol" = "Auth protocol";
+"snmp.v3.needCredentials" = "Enter a username and auth password for SNMPv3";
 "ssl.action.check" = "Check certificate";
 "ssl.empty.description" = "Enter a host to inspect its TLS certificate.";
 "ssl.empty.title" = "Inspect a certificate";

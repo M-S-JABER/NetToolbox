@@ -425,6 +425,39 @@ struct EngineTestSuite: Sendable {
                 )
             } catch { return "unexpected error: \(error)" }
         },
+        Case(name: "SNMPv3 USM key derivation (RFC 3414)") {
+            // Test vectors from RFC 3414 appendices A.3.1 (MD5) and A.3.2 (SHA).
+            let engineID: [UInt8] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]
+            let md5Ku = SNMPv3USM.passwordToKey(password: "maplesyrup", auth: .md5)
+            let md5Kul = SNMPv3USM.localizedKey(password: "maplesyrup", engineID: engineID, auth: .md5)
+            let shaKul = SNMPv3USM.localizedKey(password: "maplesyrup", engineID: engineID, auth: .sha)
+            return firstFailure(
+                expect(md5Ku, equals: [0x9f, 0xaf, 0x32, 0x83, 0x88, 0x4e, 0x92, 0x83,
+                                       0x4e, 0xbc, 0x98, 0x47, 0xd8, 0xed, 0xd9, 0x63], "MD5 Ku"),
+                expect(md5Kul, equals: [0x52, 0x6f, 0x5e, 0xed, 0x9f, 0xcc, 0xe2, 0x6f,
+                                        0x89, 0x64, 0xc2, 0x93, 0x07, 0x87, 0xd8, 0x2b], "MD5 localized"),
+                expect(shaKul, equals: [0x66, 0x95, 0xfe, 0xbc, 0x92, 0x88, 0xe3, 0x62, 0x82, 0x23,
+                                        0x5f, 0xc7, 0x15, 0x1f, 0x12, 0x84, 0x97, 0xb3, 0x8f, 0x3f], "SHA localized")
+            )
+        },
+        Case(name: "SNMPv3 authNoPriv message framing") {
+            let engine = SNMPv3Message.Engine(id: [0x80, 0x00, 0x1f, 0x88, 0x01], boots: 5, time: 1234)
+            let key = SNMPv3USM.localizedKey(password: "maplesyrup", engineID: engine.id, auth: .sha)
+            do {
+                let data = try SNMPv3Message.encodeAuthGet(
+                    msgID: 2, oid: "1.3.6.1.2.1.1.5.0", user: "netops",
+                    engine: engine, authKey: key, auth: .sha
+                )
+                // Round-trips through the decoder and recovers the engine params.
+                let decoded = try SNMPv3Message.decode(data)
+                return firstFailure(
+                    expect([UInt8](data).first ?? 0, equals: UInt8(0x30), "outer SEQUENCE tag"),
+                    expect(decoded.engine.id, equals: engine.id, "engine id round-trip"),
+                    expect(decoded.engine.boots, equals: 5, "engine boots"),
+                    expect(decoded.engine.time, equals: 1234, "engine time")
+                )
+            } catch { return "unexpected error: \(error)" }
+        },
         Case(name: "Telnet option negotiation") {
             let doEcho = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.doo, 1, 0x68, 0x69])
             let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])

@@ -455,6 +455,7 @@
 "error.snmp.invalidOID" = "OID غير صالح";
 "error.snmp.malformed" = "رد SNMP غير صحيح";
 "error.snmp.noVarbind" = "لا يوجد ربط متغير في الرد";
+"error.snmpv3.auth" = "فشل المصادقة — تحقق من اسم المستخدم وكلمة المرور وبروتوكول المصادقة";
 "error.wol.invalidMAC" = "عنوان MAC غير صالح";
 "error.wol.send" = "فشل إرسال الحزمة السحرية";
 "error.wol.socket" = "تعذّر فتح مقبس UDP";
@@ -536,6 +537,13 @@
 "snmp.result.type" = "النوع";
 "snmp.section.presets" = "OIDs شائعة";
 "snmp.section.result" = "النتيجة";
+"snmp.version.title" = "الإصدار";
+"snmp.v3.beta" = "تجريبي";
+"snmp.v3.authNoPriv" = "USM authNoPriv (بدون تشفير)";
+"snmp.v3.username" = "اسم المستخدم";
+"snmp.v3.authPassword" = "كلمة مرور المصادقة";
+"snmp.v3.authProtocol" = "بروتوكول المصادقة";
+"snmp.v3.needCredentials" = "أدخل اسم مستخدم وكلمة مرور مصادقة لـ SNMPv3";
 "ssl.action.check" = "افحص الشهادة";
 "ssl.empty.description" = "أدخل مضيفاً لفحص شهادة TLS الخاصة به.";
 "ssl.empty.title" = "افحص شهادة";
