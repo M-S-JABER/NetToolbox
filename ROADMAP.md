@@ -60,6 +60,19 @@ Latest working tag: **1.47.0** · Tools: **76** · Localization: **en/ar at pari
 
 ---
 
+## 3b) Open product decisions (awaiting a call) / قرارات منتج مفتوحة
+
+- **iCloud sync** — deferred by default. The app is deliberately local-first
+  (secrets in Keychain, `PrivacyInfo` says "Data Not Collected", no tracking).
+  If wanted later, the privacy-preserving option is **settings-only** sync
+  (theme / saved hosts / speed history) via `NSUbiquitousKeyValueStore`, with
+  secrets staying on-device. Full CloudKit sync (incl. SSH/camera secrets)
+  would change the privacy nutrition label and needs entitlements CI can't test.
+- **More languages** — the app is fully localizable (every string via `L10n`
+  + `.strings`/`.stringsdict`, en/ar at parity). Adding a language = one new
+  `<code>.lproj/Localizable.strings` (+ `.stringsdict`) at key parity. Held
+  pending a choice of which languages (fr/es/de/…).
+
 ## 4) Shipped from the previous suggestion list (1.14.0)
 
 Subnet Membership · WHOIS field parsing · Saved Hosts · HTTP Request builder · DNS-over-HTTPS · Ping sparkline · History JSON export/import · SSL SANs · Bonjour TXT. (Router vendor via ARP was attempted but removed — the routing/ARP tables are macOS-only; see section 3.) Next ideas below.
