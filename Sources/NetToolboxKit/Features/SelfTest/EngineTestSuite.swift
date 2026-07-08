@@ -706,6 +706,20 @@ struct EngineTestSuite: Sendable {
                 expect(MTREngine.parseASN("13335 | 104.16.0.0/12 | US | arin | 2011"), equals: "AS13335", "parse asn")
             )
         },
+        Case(name: "TLS grade heuristics") {
+            let modern = TLSAudit.grade(protocols: ["TLS 1.2", "TLS 1.3"], daysRemaining: 200, trusted: true, keyBits: 256, keyType: "EC")
+            let legacy = TLSAudit.grade(protocols: ["TLS 1.0", "TLS 1.1", "TLS 1.2"], daysRemaining: 200, trusted: true, keyBits: 2048, keyType: "RSA")
+            let expired = TLSAudit.grade(protocols: ["TLS 1.3"], daysRemaining: -1, trusted: true, keyBits: 2048, keyType: "RSA")
+            let weak = TLSAudit.grade(protocols: ["TLS 1.2"], daysRemaining: 100, trusted: true, keyBits: 1024, keyType: "RSA")
+            let untrusted = TLSAudit.grade(protocols: ["TLS 1.3"], daysRemaining: 100, trusted: false, keyBits: 2048, keyType: "RSA")
+            return firstFailure(
+                expect(modern.grade, equals: "A+", "modern EC"),
+                expect(legacy.grade, equals: "C", "legacy downgrade"),
+                expect(expired.grade, equals: "F", "expired"),
+                expect(weak.grade, equals: "F", "weak RSA key"),
+                expect(untrusted.grade, equals: "T", "untrusted")
+            )
+        },
         Case(name: "Hash identifier heuristics") {
             return firstFailure(
                 expect(HashID.identify("5f4dcc3b5aa765d61d8327deb882cf99").contains("MD5"), equals: true, "MD5 length"),

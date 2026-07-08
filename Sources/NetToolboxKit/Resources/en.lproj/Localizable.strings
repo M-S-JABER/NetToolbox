@@ -1175,3 +1175,14 @@
 "mtr.cell.worst" = "worst";
 "mtr.error.host" = "Enter a host or IP to analyze.";
 "mtr.note" = "Sends probes to every hop each round and tracks packet loss, last/avg/best/worst latency, and the origin AS. A hop with high loss but low loss downstream is usually just rate-limiting its own replies, not dropping traffic.";
+
+// TLS grade audit
+"ssl.section.grade" = "TLS grade";
+"ssl.grade.protocols" = "Supported protocols";
+"ssl.result.key" = "Public key";
+"ssl.note.expired" = "The certificate has expired.";
+"ssl.note.noModern" = "No modern TLS (1.2/1.3) offered.";
+"ssl.note.legacy" = "Obsolete TLS 1.0/1.1 is still enabled.";
+"ssl.note.weakKey" = "The public key is below the recommended strength.";
+"ssl.note.expiring" = "The certificate expires soon (under 15 days).";
+"ssl.note.untrusted" = "The chain is not trusted by the system.";

@@ -14,11 +14,52 @@ struct SSLCertInfo: Equatable, Sendable {
     let chainLength: Int
     let systemTrusted: Bool
     var subjectAltNames: [String] = []
+    var keyBits: Int?
+    var keyType: String?
+}
+
+/// Pure TLS "grade" from the negotiated protocols and certificate — mirrors
+/// the spirit of SSL Labs, scoped to what iOS can observe natively.
+enum TLSAudit {
+    static func grade(protocols: [String], daysRemaining: Int?, trusted: Bool,
+                      keyBits: Int?, keyType: String?) -> (grade: String, notes: [String]) {
+        if let days = daysRemaining, days < 0 {
+            return ("F", ["ssl.note.expired"])
+        }
+        let hasLegacy = protocols.contains("TLS 1.0") || protocols.contains("TLS 1.1")
+        let hasModern = protocols.contains("TLS 1.2") || protocols.contains("TLS 1.3")
+        let has13 = protocols.contains("TLS 1.3")
+        guard hasModern else { return ("F", ["ssl.note.noModern"]) }
+
+        var notes: [String] = []
+        let weakKey: Bool = {
+            guard let bits = keyBits else { return false }
+            return keyType == "EC" ? bits < 256 : bits < 2048
+        }()
+        if weakKey { notes.append("ssl.note.weakKey") }
+
+        var letter = has13 ? "A" : "B"
+        if hasLegacy { letter = "C"; notes.append("ssl.note.legacy") }
+        if weakKey { letter = "F" }
+        if let days = daysRemaining, days < 15 { notes.append("ssl.note.expiring") }
+        if !trusted { notes.append("ssl.note.untrusted"); return ("T", notes) }
+        if letter == "A", !hasLegacy, (daysRemaining ?? 999) > 15,
+           (keyBits ?? 4096) >= (keyType == "EC" ? 256 : 2048) {
+            letter = "A+"
+        }
+        return (letter, notes)
+    }
 }
 
 /// Opens a TLS connection and inspects the presented certificate chain.
 protocol SSLInspecting: Sendable {
     func inspect(host: String, port: UInt16) async -> Result<SSLCertInfo, NetProbeError>
+    /// Which of TLS 1.0–1.3 the server completes a handshake with.
+    func probeProtocols(host: String, port: UInt16) async -> [String]
+}
+
+extension SSLInspecting {
+    func probeProtocols(host: String, port: UInt16) async -> [String] { [] }
 }
 
 struct SSLInspector: SSLInspecting {
@@ -90,6 +131,18 @@ struct SSLInspector: SSLInspecting {
         let (notBefore, notAfter) = X509.validity(fromDER: der)
         let sans = X509.subjectAltNames(fromDER: der)
 
+        var keyBits: Int?
+        var keyType: String?
+        if let key = SecCertificateCopyKey(leaf),
+           let attrs = SecKeyCopyAttributes(key) as? [String: Any] {
+            keyBits = attrs[kSecAttrKeySizeInBits as String] as? Int
+            if let type = attrs[kSecAttrKeyType as String] as? String {
+                if type == (kSecAttrKeyTypeRSA as String) { keyType = "RSA" }
+                else if type == (kSecAttrKeyTypeECSECPrimeRandom as String) { keyType = "EC" }
+                else { keyType = type }
+            }
+        }
+
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -103,8 +156,58 @@ struct SSLInspector: SSLInspecting {
             daysRemaining: notAfter.map { Int($0.timeIntervalSinceNow / 86_400) },
             chainLength: chain.count,
             systemTrusted: trusted,
-            subjectAltNames: sans
+            subjectAltNames: sans,
+            keyBits: keyBits,
+            keyType: keyType
         )
+    }
+
+    /// Probes TLS 1.0–1.3 concurrently and returns the versions that complete
+    /// a handshake. Certificate trust is ignored here — only version support
+    /// matters.
+    func probeProtocols(host: String, port: UInt16) async -> [String] {
+        let cleanHost = host.trimmingCharacters(in: .whitespaces)
+        guard NWEndpoint.Port(rawValue: port) != nil, !cleanHost.isEmpty else { return [] }
+        let versions: [(String, tls_protocol_version_t)] = [
+            ("TLS 1.0", .TLSv10), ("TLS 1.1", .TLSv11),
+            ("TLS 1.2", .TLSv12), ("TLS 1.3", .TLSv13),
+        ]
+        let supported = await withTaskGroup(of: (Int, String)?.self) { group in
+            for (index, entry) in versions.enumerated() {
+                group.addTask {
+                    await Self.supports(host: cleanHost, port: port, version: entry.1) ? (index, entry.0) : nil
+                }
+            }
+            var found: [(Int, String)] = []
+            for await result in group { if let result { found.append(result) } }
+            return found
+        }
+        return supported.sorted { $0.0 < $1.0 }.map(\.1)
+    }
+
+    private static func supports(host: String, port: UInt16, version: tls_protocol_version_t) async -> Bool {
+        await withCheckedContinuation { continuation in
+            let shot = OneShot(continuation)
+            guard let nwPort = NWEndpoint.Port(rawValue: port) else { shot.resume(false); return }
+            let queue = DispatchQueue(label: "net.probe.tlsver")
+            let tls = NWProtocolTLS.Options()
+            sec_protocol_options_set_min_tls_protocol_version(tls.securityProtocolOptions, version)
+            sec_protocol_options_set_max_tls_protocol_version(tls.securityProtocolOptions, version)
+            sec_protocol_options_set_verify_block(
+                tls.securityProtocolOptions, { _, _, complete in complete(true) }, queue
+            )
+            let connection = NWConnection(host: NWEndpoint.Host(host), port: nwPort,
+                                          using: NWParameters(tls: tls))
+            connection.stateUpdateHandler = { state in
+                switch state {
+                case .ready: connection.cancel(); shot.resume(true)
+                case .failed, .waiting: connection.cancel(); shot.resume(false)
+                default: break
+                }
+            }
+            connection.start(queue: queue)
+            queue.asyncAfter(deadline: .now() + 8) { connection.cancel(); shot.resume(false) }
+        }
     }
 }
 
@@ -117,9 +220,16 @@ final class SSLCheckerViewModel {
         case failure(String)
     }
 
+    struct AuditResult: Equatable, Sendable {
+        let grade: String
+        let protocols: [String]
+        let notes: [String]
+    }
+
     var host = ""
     var portText = "443"
     private(set) var output: Output = .idle
+    private(set) var audit: AuditResult?
 
     private let inspector: any SSLInspecting
 
@@ -135,10 +245,19 @@ final class SSLCheckerViewModel {
             return
         }
         output = .loading
+        audit = nil
         let result = await inspector.inspect(host: trimmed, port: port)
         switch result {
-        case .success(let info): output = .success(info)
-        case .failure(let error): output = .failure(error.localizedDescription)
+        case .success(let info):
+            output = .success(info)
+            let protocols = await inspector.probeProtocols(host: trimmed, port: port)
+            let graded = TLSAudit.grade(
+                protocols: protocols, daysRemaining: info.daysRemaining,
+                trusted: info.systemTrusted, keyBits: info.keyBits, keyType: info.keyType
+            )
+            audit = AuditResult(grade: graded.grade, protocols: protocols, notes: graded.notes)
+        case .failure(let error):
+            output = .failure(error.localizedDescription)
         }
     }
 }
@@ -221,7 +340,47 @@ struct SSLCheckerView: View {
                 Text(message).font(AppTypography.body).foregroundStyle(theme.danger)
             }
         case .success(let info):
+            if let audit = viewModel.audit {
+                gradeCard(audit)
+            }
             resultCard(info)
+        }
+    }
+
+    private func gradeColor(_ grade: String) -> Color {
+        switch grade {
+        case "A+", "A": theme.success
+        case "B", "C": theme.warning
+        default: theme.danger   // F, T
+        }
+    }
+
+    private func gradeCard(_ audit: SSLCheckerViewModel.AuditResult) -> some View {
+        SectionCard(title: L10n("ssl.section.grade"), systemImage: "rosette") {
+            HStack(alignment: .center, spacing: Spacing.md) {
+                Text(audit.grade)
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .foregroundStyle(gradeColor(audit.grade))
+                    .frame(minWidth: 72)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n("ssl.grade.protocols"))
+                        .font(AppTypography.caption)
+                        .foregroundStyle(theme.textSecondary)
+                    Text(audit.protocols.isEmpty ? "—" : audit.protocols.joined(separator: " · "))
+                        .font(AppTypography.monoBody)
+                        .foregroundStyle(theme.textPrimary)
+                        .environment(\.layoutDirection, .leftToRight)
+                }
+                Spacer()
+            }
+            ForEach(audit.notes, id: \.self) { note in
+                HStack(spacing: Spacing.sm) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(theme.warning).font(.caption)
+                    Text(L10n(note)).font(AppTypography.footnote).foregroundStyle(theme.textSecondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 
@@ -250,6 +409,9 @@ struct SSLCheckerView: View {
             ResultRow(label: L10n("ssl.result.notBefore"), value: info.notBefore)
             ResultRow(label: L10n("ssl.result.notAfter"), value: info.notAfter)
             ResultRow(label: L10n("ssl.result.chain"), value: String(info.chainLength))
+            if let bits = info.keyBits {
+                ResultRow(label: L10n("ssl.result.key"), value: "\(info.keyType ?? "?") \(bits)-bit")
+            }
             if !info.subjectAltNames.isEmpty {
                 Divider().overlay(theme.separator)
                 Text(L10n("ssl.result.sans"))
