@@ -21,8 +21,8 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "com.aswaralmudun.nettoolbox",
             teamIdentifier: "",
-            displayVersion: "1.8.0",
-            bundleVersion: "5",
+            displayVersion: "1.8.1",
+            bundleVersion: "6",
             appIcon: .placeholder(icon: .earth),
             accentColor: .presetColor(.teal),
             supportedDeviceFamilies: [
@@ -54,7 +54,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.60.0")
+        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.61.0")
     ],
     targets: [
         .executableTarget(
