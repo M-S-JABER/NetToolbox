@@ -833,6 +833,11 @@
 "traceroute.input.host" = "Host or IP";
 "traceroute.input.title" = "Target";
 "traceroute.note" = "Uses ICMP echo with increasing TTL. Some routers don't reply (shown as *), and a few networks block ICMP entirely.";
+"traceroute.tcp.title" = "TCP reachability";
+"traceroute.tcp.reachable" = "Host reachable";
+"traceroute.tcp.hops" = "Hop distance";
+"traceroute.tcp.rtt" = "Round-trip time";
+"traceroute.tcp.note" = "ICMP was filtered, so a TCP probe measured the path instead. iOS can't name intermediate routers (it grants apps no raw sockets), but this confirms the host is reachable and how many hops away it is.";
 "traceroute.reached" = "destination";
 "traceroute.section.hops" = "Hops";
 "wifiqr.hidden" = "Hidden network";

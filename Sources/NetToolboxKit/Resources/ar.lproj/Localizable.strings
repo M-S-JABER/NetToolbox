@@ -831,6 +831,11 @@
 "traceroute.input.host" = "المضيف أو IP";
 "traceroute.input.title" = "الهدف";
 "traceroute.note" = "يستخدم ICMP مع زيادة TTL. بعض الموجّهات لا تردّ (تظهر كـ *)، وبعض الشبكات تحجب ICMP كلياً.";
+"traceroute.tcp.title" = "الوصول عبر TCP";
+"traceroute.tcp.reachable" = "المضيف قابل للوصول";
+"traceroute.tcp.hops" = "عدد القفزات";
+"traceroute.tcp.rtt" = "زمن الذهاب والإياب";
+"traceroute.tcp.note" = "ICMP محجوب، لذلك تم قياس المسار عبر TCP بدلاً منه. لا يستطيع iOS تسمية الموجّهات الوسيطة (لا يمنح التطبيقات سوكِت خام)، لكن هذا يؤكد أن المضيف قابل للوصول وعلى بُعد كم قفزة.";
 "traceroute.reached" = "الوجهة";
 "traceroute.section.hops" = "القفزات";
 "wifiqr.hidden" = "شبكة مخفية";

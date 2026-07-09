@@ -135,6 +135,9 @@ final class TracerouteViewModel {
         }
     }
     private(set) var errorMessage: String?
+    /// Set when ICMP found nothing but a TCP probe still reached the host —
+    /// gives a real hop-distance + RTT when routers can't be named.
+    private(set) var tcpSummary: TCPTraceProbe.Result?
     private(set) var history: [String] = []
     var activity: ActivityCenter?
     var toolID = ""
@@ -155,6 +158,7 @@ final class TracerouteViewModel {
 
         isRunning = true
         errorMessage = nil
+        tcpSummary = nil
         hops = []
 
         // Probe every TTL at once instead of walking them one-by-one: a
@@ -181,11 +185,17 @@ final class TracerouteViewModel {
             }
         }
 
-        isRunning = false
         let reached = hops.contains { $0.reached }
-        if !reached, hops.allSatisfy({ $0.address == nil }) {
-            errorMessage = L10nString("traceroute.error.noResponse")
+        // ICMP produced nothing usable — fall back to a TCP reach test so the
+        // user still learns whether the host is reachable and how far away.
+        if isRunning, !reached, hops.allSatisfy({ $0.address == nil }) {
+            tcpSummary = await TCPTraceProbe.trace(host: target, maxHops: maxHops, timeout: timeout)
+            if tcpSummary == nil {
+                errorMessage = L10nString("traceroute.error.noResponse")
+            }
         }
+
+        isRunning = false
         history.insert("\(target) — \(hops.count) hops\(reached ? " ✓" : "")", at: 0)
         if history.count > 10 { history.removeLast() }
     }
@@ -234,6 +244,9 @@ struct TracerouteView: View {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 inputSection
                 optionsSection
+                if let tcp = viewModel.tcpSummary {
+                    tcpSummarySection(tcp)
+                }
                 if !viewModel.hops.isEmpty {
                     hopsSection
                 }
@@ -287,6 +300,33 @@ struct TracerouteView: View {
             if let message = viewModel.errorMessage {
                 Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)
             }
+        }
+    }
+
+    private func tcpSummarySection(_ result: TCPTraceProbe.Result) -> some View {
+        SectionCard(title: L10n("traceroute.tcp.title"), systemImage: "checkmark.seal") {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(theme.success)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n("traceroute.tcp.reachable"))
+                        .font(AppTypography.headline)
+                        .foregroundStyle(theme.textPrimary)
+                    Text("TCP :\(String(result.port))")
+                        .font(AppTypography.monoCaption)
+                        .foregroundStyle(theme.textSecondary)
+                        .environment(\.layoutDirection, .leftToRight)
+                }
+                Spacer()
+            }
+            Divider().overlay(theme.separator)
+            ResultRow(label: L10n("traceroute.tcp.hops"), value: "\(result.hops)")
+            ResultRow(label: L10n("traceroute.tcp.rtt"), value: String(format: "%.0f ms", result.rttMs))
+            Text(L10n("traceroute.tcp.note"))
+                .font(AppTypography.caption)
+                .foregroundStyle(theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
