@@ -23,6 +23,31 @@ struct RootView: View {
     @AppStorage("nettoolbox.showHidden") private var showHidden = false
     @AppStorage("nettoolbox.onboarded") private var onboarded = false
     @State private var showOnboarding = false
+    /// Which category groups are expanded in the sidebar (persisted). Keeping
+    /// them collapsed by default turns 45 tools into a short, scannable list.
+    @State private var expandedCategories: Set<String> = RootView.loadExpandedCategories()
+
+    private static let expandedKey = "nettoolbox.expandedCategories"
+
+    private static func loadExpandedCategories() -> Set<String> {
+        guard let raw = UserDefaults.standard.string(forKey: expandedKey) else {
+            return [ToolCategory.diagnostics.rawValue]   // first launch: open the busiest group
+        }
+        return Set(raw.split(separator: ",").map(String.init))
+    }
+
+    private func categoryExpansion(_ category: ToolCategory) -> Binding<Bool> {
+        Binding(
+            get: { expandedCategories.contains(category.rawValue) },
+            set: { isOn in
+                if isOn { expandedCategories.insert(category.rawValue) }
+                else { expandedCategories.remove(category.rawValue) }
+                UserDefaults.standard.set(
+                    expandedCategories.sorted().joined(separator: ","), forKey: Self.expandedKey
+                )
+            }
+        )
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -161,13 +186,19 @@ struct RootView: View {
     }
 
     private func categorySection(_ category: ToolCategory) -> some View {
-        Section {
+        DisclosureGroup(isExpanded: categoryExpansion(category)) {
             ForEach(visibleTools(in: category), id: \.id) { row($0) }
-        } header: {
+        } label: {
             HStack(spacing: Spacing.sm) {
                 Image(systemName: category.systemImage)
                     .foregroundStyle(category.tint)
                 Text(category.titleKey)
+                    .foregroundStyle(theme.textPrimary)
+                Spacer()
+                Text("\(visibleTools(in: category).count)")
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+                    .environment(\.layoutDirection, .leftToRight)
             }
         }
     }
