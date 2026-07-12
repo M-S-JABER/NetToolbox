@@ -1004,6 +1004,44 @@ struct EngineTestSuite: Sendable {
             )
             return expect(seconds, equals: 80, "1GB over 100Mbps = 80s")
         },
+        Case(name: "Duration formatting + overflow clamp") {
+            return firstFailure(
+                expect(DataCalc.humanDuration(0), equals: "—", "zero"),
+                expect(DataCalc.humanDuration(0.25), equals: "250 ms", "sub-second"),
+                expect(DataCalc.humanDuration(3661), equals: "1h 1m 1s", "hours"),
+                expect(DataCalc.humanDuration(90), equals: "1m 30s", "minutes"),
+                // A near-infinite duration must clamp, not trap on Int().
+                expect(DataCalc.humanDuration(1e30), equals: "∞", "overflow clamp")
+            )
+        },
+        Case(name: "Timestamp epoch second/millisecond detection") {
+            guard let secs = TimestampTools.date(fromEpoch: "0"),
+                  let ms = TimestampTools.date(fromEpoch: "1000000000000") else {
+                return "valid epochs should parse"
+            }
+            return firstFailure(
+                expect(secs.timeIntervalSince1970, equals: 0, "epoch zero"),
+                expect(ms.timeIntervalSince1970, equals: 1_000_000_000, "ms scaled to s"),
+                TimestampTools.date(fromEpoch: "not-a-number") == nil ? nil : "garbage should be nil"
+            )
+        },
+        Case(name: "CIDR aggregate merges + rejects bad prefix") {
+            let merged = CIDRAggregate.aggregate("192.168.0.0/24\n192.168.1.0/24")
+            return firstFailure(
+                expect(merged, equals: ["192.168.0.0/23"], "adjacent /24s merge"),
+                CIDRAggregate.parse("10.0.0.0/xyz") == nil ? nil : "bad prefix should be nil",
+                CIDRAggregate.parse("10.0.0.0/33") == nil ? nil : "out-of-range prefix should be nil"
+            )
+        },
+        Case(name: "Port reference query matching") {
+            let ssh = PortEntry(port: 22, protocols: [.tcp], service: "SSH", summary: "Secure Shell")
+            return firstFailure(
+                ssh.matches(query: "  22 ") ? nil : "trimmed numeric query should match",
+                ssh.matches(query: "ssh") ? nil : "service name should match",
+                ssh.matches(query: "") ? nil : "empty query matches all",
+                ssh.matches(query: "80") ? "wrong port should not match" : nil
+            )
+        },
         Case(name: "TFTP read request") {
             let rrq = TFTPClient.rrqPacket(filename: "boot.cfg")
             var expected: [UInt8] = [0x00, 0x01]
