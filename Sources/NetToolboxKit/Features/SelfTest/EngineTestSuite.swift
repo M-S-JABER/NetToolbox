@@ -1016,12 +1016,12 @@ struct EngineTestSuite: Sendable {
         },
         Case(name: "Timestamp epoch second/millisecond detection") {
             guard let secs = TimestampTools.date(fromEpoch: "0"),
-                  let ms = TimestampTools.date(fromEpoch: "1000000000000") else {
+                  let ms = TimestampTools.date(fromEpoch: "1700000000000") else {
                 return "valid epochs should parse"
             }
             return firstFailure(
                 expect(secs.timeIntervalSince1970, equals: 0, "epoch zero"),
-                expect(ms.timeIntervalSince1970, equals: 1_000_000_000, "ms scaled to s"),
+                expect(ms.timeIntervalSince1970, equals: 1_700_000_000, "ms scaled to s"),
                 TimestampTools.date(fromEpoch: "not-a-number") == nil ? nil : "garbage should be nil"
             )
         },
