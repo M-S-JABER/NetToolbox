@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.0
 
 // NetToolbox — network tools for iPad as an importable Swift package.
 //

@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.0
 
 // NetToolbox — thin app playground for Swift Playgrounds on iPad.
 //
@@ -21,8 +21,8 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "com.aswaralmudun.nettoolbox",
             teamIdentifier: "",
-            displayVersion: "2.0.2",
-            bundleVersion: "9",
+            displayVersion: "2.0.3",
+            bundleVersion: "10",
             appIcon: .placeholder(icon: .earth),
             accentColor: .presetColor(.teal),
             supportedDeviceFamilies: [
@@ -54,7 +54,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.64.0")
+        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.65.0")
     ],
     targets: [
         .executableTarget(
