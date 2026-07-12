@@ -71,7 +71,7 @@ struct EmailValidatorTool: NetworkTool {
     let titleKey = L10n("tool.email.title")
     let subtitleKey = L10n("tool.email.subtitle")
     let systemImage = "envelope.badge.shield.half.filled"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(EmailValidatorView()) }
 }

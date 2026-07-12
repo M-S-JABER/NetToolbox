@@ -1,6 +1,6 @@
 # Email Security · فحص أمان البريد الإلكتروني
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `email-security`
 
 ---

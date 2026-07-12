@@ -94,7 +94,7 @@ struct CertExpiryTool: NetworkTool {
     let titleKey = L10n("tool.certexp.title")
     let subtitleKey = L10n("tool.certexp.subtitle")
     let systemImage = "calendar.badge.clock"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(CertExpiryView()) }
 }

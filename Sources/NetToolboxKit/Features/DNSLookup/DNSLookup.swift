@@ -64,7 +64,7 @@ struct DNSLookupTool: NetworkTool {
     let titleKey = L10n("tool.dns.title")
     let subtitleKey = L10n("tool.dns.subtitle")
     let systemImage = "at"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(DNSLookupView()) }
 }

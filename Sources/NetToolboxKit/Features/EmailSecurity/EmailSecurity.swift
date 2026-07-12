@@ -73,7 +73,7 @@ struct EmailSecurityTool: NetworkTool {
     let titleKey = L10n("tool.emailsec.title")
     let subtitleKey = L10n("tool.emailsec.subtitle")
     let systemImage = "envelope.badge"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(EmailSecurityView()) }
 }

@@ -105,7 +105,7 @@ struct RDAPTool: NetworkTool {
     let titleKey = L10n("tool.rdap.title")
     let subtitleKey = L10n("tool.rdap.subtitle")
     let systemImage = "doc.text.magnifyingglass"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(RDAPView()) }
 }

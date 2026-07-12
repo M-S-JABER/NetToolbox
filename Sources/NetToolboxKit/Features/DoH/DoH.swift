@@ -63,7 +63,7 @@ struct DoHTool: NetworkTool {
     let titleKey = L10n("tool.doh.title")
     let subtitleKey = L10n("tool.doh.subtitle")
     let systemImage = "lock.doc"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(DoHView()) }
 }

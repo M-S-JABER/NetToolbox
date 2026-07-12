@@ -1,6 +1,6 @@
 # DNS Compare · مقارنة مُحلِّلات DNS
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** DNS & Domains / DNS والنطاقات  
 > **Tool ID:** `dns-compare`
 
 ---

@@ -80,6 +80,8 @@
 "onvif.section" = "إعداد ONVIF التلقائي";
 "category.calculators" = "حاسبات";
 "category.diagnostics" = "تشخيص";
+"category.dns" = "DNS والنطاقات";
+"category.security" = "الأمان";
 "category.localNetwork" = "الشبكة المحلية";
 "category.professional" = "احترافي";
 "category.bgp" = "BGP";
@@ -851,7 +853,9 @@
 
 /* Redesign: dashboard, themes, status */
 "category.caption.calculators" = "الشبكات الفرعية و MAC والمنافذ والمحوّلات";
-"category.caption.diagnostics" = "الوصول و DNS و TLS والاستعلامات";
+"category.caption.diagnostics" = "الوصول والمنافذ وتوقيت HTTP";
+"category.caption.dns" = "سجلات DNS و WHOIS و RDAP";
+"category.caption.security" = "TLS والشهادات والبريد والتسريبات";
 "category.caption.localNetwork" = "إيقاظ الأجهزة ومشاركة الواي فاي";
 "category.caption.professional" = "إدارة الموجّهات والأجهزة";
 "category.caption.bgp" = "التوجيه العالمي (منظار)";
@@ -886,6 +890,7 @@
 "home.unfavorite" = "إزالة من المفضّلة";
 "home.hide" = "إخفاء الأداة";
 "home.unhide" = "إظهار الأداة";
+"settings.data" = "البيانات والأدوات";
 "settings.general" = "عام";
 "settings.showHidden" = "إظهار الأدوات المخفية";
 "settings.unhideAll" = "إظهار كل الأدوات";

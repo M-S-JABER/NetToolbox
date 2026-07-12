@@ -80,6 +80,8 @@
 "onvif.section" = "ONVIF auto-setup";
 "category.calculators" = "Calculators";
 "category.diagnostics" = "Diagnostics";
+"category.dns" = "DNS & Domains";
+"category.security" = "Security";
 "category.localNetwork" = "Local Network";
 "category.professional" = "Professional";
 "category.bgp" = "BGP";
@@ -853,7 +855,9 @@
 
 /* Redesign: dashboard, themes, status */
 "category.caption.calculators" = "Subnetting, MAC, ports & encoders";
-"category.caption.diagnostics" = "Reachability, DNS, TLS & lookups";
+"category.caption.diagnostics" = "Reachability, ports & HTTP timing";
+"category.caption.dns" = "DNS records, WHOIS & RDAP";
+"category.caption.security" = "TLS, certificates, email & breaches";
 "category.caption.localNetwork" = "Wake devices & share Wi-Fi";
 "category.caption.professional" = "Router & device management";
 "category.caption.bgp" = "Global routing (looking glass)";
@@ -888,6 +892,7 @@
 "home.unfavorite" = "Unfavorite";
 "home.hide" = "Hide tool";
 "home.unhide" = "Unhide tool";
+"settings.data" = "Data & Tools";
 "settings.general" = "General";
 "settings.showHidden" = "Show hidden tools";
 "settings.unhideAll" = "Unhide all tools";

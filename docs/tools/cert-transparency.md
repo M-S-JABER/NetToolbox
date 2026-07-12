@@ -1,6 +1,6 @@
 # Certificate Transparency · شفافية الشهادات
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `cert-transparency`
 
 ---

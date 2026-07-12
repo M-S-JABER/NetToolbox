@@ -179,7 +179,7 @@ struct DNSReliabilityTool: NetworkTool {
     let titleKey = L10n("tool.dnsrel.title")
     let subtitleKey = L10n("tool.dnsrel.subtitle")
     let systemImage = "waveform.path.badge.minus"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(DNSReliabilityView()) }
 }

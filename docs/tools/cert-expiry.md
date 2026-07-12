@@ -1,6 +1,6 @@
 # Certificate Expiry · انتهاء صلاحية الشهادة
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `cert-expiry`
 
 ---

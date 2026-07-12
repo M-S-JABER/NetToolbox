@@ -32,12 +32,11 @@ enum ToolRegistry {
         CryptoToolboxTool(),
         HashIDTool(),
 
-        // MARK: Diagnostics — addressing → reachability → DNS → web → TLS/cert
-        //        → email/identity → whois → utilities
+        // MARK: Diagnostics — addressing → reachability → ports → HTTP → speed
+        GuideTool(),
         PublicIPTool(),
         IPInfoTool(),
         HostToIPTool(),
-        NSLookupTool(),
         PingTool(),
         TracerouteTool(),
         MTRTool(),
@@ -45,30 +44,31 @@ enum ToolRegistry {
         PortScannerTool(),
         BannerGrabTool(),
         FingerprintTool(),
-        DNSLookupTool(),
-        DoHTool(),
-        DNSCompareTool(),
-        DNSReliabilityTool(),
-        DNSHealthTool(),
         HTTPRequestTool(),
         HTTPHeadersTool(),
         HTTPTimingTool(),
         SpeedTestTool(),
         UptimeTool(),
+        NTPTool(),
+
+        // MARK: DNS & Domains — resolution → comparison → health → registration
+        DNSLookupTool(),
+        NSLookupTool(),
+        DoHTool(),
+        DNSCompareTool(),
+        DNSReliabilityTool(),
+        DNSHealthTool(),
+        WhoisTool(),
+        RDAPTool(),
+
+        // MARK: Security — TLS/certificates → email authenticity → reputation
         SSLCheckerTool(),
         CertExpiryTool(),
         CertTransparencyTool(),
-        WhoisTool(),
-        RDAPTool(),
         EmailSecurityTool(),
         EmailValidatorTool(),
         RBLCheckTool(),
         PwnedCheckTool(),
-        NTPTool(),
-        GuideTool(),
-        HistoryTool(),
-        BackupTool(),
-        SelfTestTool(),
 
         // MARK: Local Network — overview → discovery → wake → hosts → camera → QR
         NetworkOverviewTool(),

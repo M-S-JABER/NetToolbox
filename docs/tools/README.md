@@ -46,37 +46,44 @@ This directory holds a **standalone page for every one of NetToolbox's 84 tools*
 | [Public IP & ISP · العنوان العام والمزوّد](public-ip.md) | عنوانك العام ومزوّد الخدمة |
 | [IP Info Lookup · معلومات عنوان IP](ip-info.md) | الموقع الجغرافي و ASN لأي IP |
 | [Host → IP · اسم المضيف إلى IP](host-to-ip.md) | تحليل اسم النطاق إلى عنوان |
-| [Speed Test · اختبار السرعة](speed-test.md) | تحميل/رفع/زمن استجابة/تذبذب |
-| [HTTP Request · طلب HTTP](http-request.md) | إرسال طلبات HTTP مخصّصة |
-| [History · السجل](history.md) | سجل عمليات الأدوات |
-| [Backup & Restore · النسخ والاستعادة](backup.md) | تصدير/استيراد بيانات التطبيق |
 | [Ping (TCP) · بينغ](ping.md) | فحص الوصول وزمن الاستجابة |
-| [World Ping · بينغ عالمي](world-ping.md) | بينغ من مواقع حول العالم |
 | [Traceroute · تتبّع المسار](traceroute.md) | مسار الحزم حتى الوجهة |
 | [MTR Path Analysis · تحليل المسار MTR](mtr.md) | فقد/زمن لكل قفزة |
+| [World Ping · بينغ عالمي](world-ping.md) | بينغ من مواقع حول العالم |
 | [Port Scanner · ماسح المنافذ](port-scanner.md) | فحص المنافذ المفتوحة |
+| [Banner Grab · التقاط اللافتة](banner-grab.md) | لافتة الخدمة على المنفذ |
+| [Service Fingerprint · بصمة الخدمة](fingerprint.md) | تخمين الخدمة من الاستجابة |
+| [HTTP Request · طلب HTTP](http-request.md) | إرسال طلبات HTTP مخصّصة |
+| [HTTP Headers · ترويسات HTTP](http-headers.md) | عرض ترويسات الاستجابة |
+| [HTTP Timing · توقيت HTTP](http-timing.md) | تفصيل مراحل طلب HTTP |
+| [Speed Test · اختبار السرعة](speed-test.md) | تحميل/رفع/زمن استجابة/تذبذب |
+| [Uptime Check · فحص التوفّر](uptime.md) | فحص توفّر عدة روابط |
+| [NTP Time · وقت NTP](ntp.md) | مزامنة الوقت عبر SNTP |
+
+## 🌐 DNS والنطاقات · DNS & Domains
+
+| الأداة · Tool | الوصف · Description |
+|---|---|
 | [DNS Lookup · استعلام DNS](dns-lookup.md) | استعلام سجلات DNS |
+| [nslookup](nslookup.md) | تحليل أمامي/عكسي عبر النظام |
 | [DNS over HTTPS · DNS عبر HTTPS](doh.md) | استعلام DoH مشفّر |
 | [DNS Compare · مقارنة DNS](dns-compare.md) | مقارنة عدة مُحلّلات |
 | [DNS Stability · استقرار DNS](dns-reliability.md) | موثوقية زمن استجابة DNS |
 | [DNS Health · صحة DNS](dns-health.md) | فحوص صحّة النطاق |
-| [Email Security · أمان البريد](email-security.md) | SPF / DKIM / DMARC |
-| [Pwned Password · كلمة مرور مسرّبة](pwned-check.md) | فحص تسريب كلمة المرور |
-| [Cert Transparency · شفافية الشهادات](cert-transparency.md) | سجلّات شهادات النطاق |
 | [WHOIS](whois.md) | بيانات تسجيل النطاق |
 | [RDAP Lookup · استعلام RDAP](rdap.md) | بديل WHOIS المُهيكل |
-| [Banner Grab · التقاط اللافتة](banner-grab.md) | لافتة الخدمة على المنفذ |
-| [Service Fingerprint · بصمة الخدمة](fingerprint.md) | تخمين الخدمة من الاستجابة |
-| [HTTP Timing · توقيت HTTP](http-timing.md) | تفصيل مراحل طلب HTTP |
-| [Uptime Check · فحص التوفّر](uptime.md) | فحص توفّر عدة روابط |
-| [Cert Expiry Monitor · مراقبة انتهاء الشهادة](cert-expiry.md) | تاريخ انتهاء شهادة TLS |
-| [nslookup](nslookup.md) | تحليل أمامي/عكسي عبر النظام |
+
+## 🔒 الأمان · Security
+
+| الأداة · Tool | الوصف · Description |
+|---|---|
 | [SSL/TLS Checker · فاحص SSL/TLS](ssl-checker.md) | فحص الشهادة وبروتوكولات TLS |
-| [HTTP Headers · ترويسات HTTP](http-headers.md) | عرض ترويسات الاستجابة |
+| [Cert Expiry Monitor · مراقبة انتهاء الشهادة](cert-expiry.md) | تاريخ انتهاء شهادة TLS |
+| [Cert Transparency · شفافية الشهادات](cert-transparency.md) | سجلّات شهادات النطاق |
+| [Email Security · أمان البريد](email-security.md) | SPF / DKIM / DMARC |
 | [Email Validator · مُدقّق البريد](email-validator.md) | التحقق من صيغة البريد |
 | [Blacklist Check · فحص القوائم السوداء](rbl-check.md) | فحص RBL/DNSBL |
-| [NTP Time · وقت NTP](ntp.md) | مزامنة الوقت عبر SNTP |
-| [Engine Self-Tests · الاختبارات الذاتية](self-test.md) | تشغيل اختبارات المحرّكات |
+| [Pwned Password · كلمة مرور مسرّبة](pwned-check.md) | فحص تسريب كلمة المرور |
 
 ## 🖧 الشبكة المحلية · Local Network
 
@@ -122,6 +129,20 @@ This directory holds a **standalone page for every one of NetToolbox's 84 tools*
 | [ASN Info · معلومات ASN](bgp-asn.md) | بيانات نظام مستقل عبر RIPEstat |
 | [IP → BGP](bgp-ip.md) | بادئة/ASN لعنوان عبر RIPEstat |
 | [RPKI Validator · مُدقّق RPKI](rpki.md) | حالة RPKI للبادئة/ASN |
+
+## ⚙️ داخل الإعدادات · In Settings
+
+<div dir="rtl">
+
+الأدوات التالية تُدير التطبيق نفسه (لا تفحص الشبكة)، لذا نُقلت من قائمة الأدوات إلى شاشة **الإعدادات**:
+
+</div>
+
+| الأداة · Tool | الوصف · Description |
+|---|---|
+| [History · السجل](history.md) | سجل عمليات الأدوات |
+| [Backup & Restore · النسخ والاستعادة](backup.md) | تصدير/استيراد بيانات التطبيق |
+| [Engine Self-Tests · الاختبارات الذاتية](self-test.md) | تشغيل اختبارات المحرّكات |
 
 ---
 

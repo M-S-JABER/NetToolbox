@@ -82,7 +82,7 @@ struct PwnedCheckTool: NetworkTool {
     let titleKey = L10n("tool.pwned.title")
     let subtitleKey = L10n("tool.pwned.subtitle")
     let systemImage = "lock.trianglebadge.exclamationmark"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(PwnedCheckView()) }
 }

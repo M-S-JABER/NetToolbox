@@ -26,6 +26,7 @@ struct SettingsView: View {
                     appearanceCard
                     themeCard
                     permissionsCard
+                    dataCard
                     generalCard
                     securityCard
                     aboutCard
@@ -144,6 +145,43 @@ struct SettingsView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// History, backup and self-tests live here rather than in the tool list —
+    /// they manage the app itself instead of probing the network.
+    private var dataCard: some View {
+        SectionCard(title: L10n("settings.data"), systemImage: "internaldrive") {
+            dataLink(L10n("tool.history.title"), "clock.arrow.circlepath") { HistoryView() }
+            Divider().overlay(theme.separator)
+            dataLink(L10n("tool.backup.title"), "arrow.up.arrow.down.circle") { BackupView() }
+            Divider().overlay(theme.separator)
+            dataLink(L10n("tool.selftest.title"), "checkmark.seal") { SelfTestView() }
+        }
+    }
+
+    private func dataLink<Destination: View>(
+        _ title: LocalizedStringResource, _ symbol: String,
+        @ViewBuilder destination: @escaping () -> Destination
+    ) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: symbol)
+                    .font(.body)
+                    .foregroundStyle(theme.accent)
+                    .frame(width: 26)
+                Text(title)
+                    .font(AppTypography.body)
+                    .foregroundStyle(theme.textPrimary)
+                Spacer()
+                Image(systemName: "chevron.forward")
+                    .font(.caption)
+                    .foregroundStyle(theme.textSecondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private var generalCard: some View {

@@ -1,6 +1,6 @@
 # SSL/TLS Checker · فاحص SSL/TLS
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `ssl-checker`
 
 ---

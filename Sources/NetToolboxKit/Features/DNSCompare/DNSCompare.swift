@@ -78,7 +78,7 @@ struct DNSCompareTool: NetworkTool {
     let titleKey = L10n("tool.dnscompare.title")
     let subtitleKey = L10n("tool.dnscompare.subtitle")
     let systemImage = "arrow.left.arrow.right"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(DNSCompareView()) }
 }

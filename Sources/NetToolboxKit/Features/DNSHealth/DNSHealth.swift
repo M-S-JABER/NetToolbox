@@ -118,7 +118,7 @@ struct DNSHealthTool: NetworkTool {
     let titleKey = L10n("tool.dnshealth.title")
     let subtitleKey = L10n("tool.dnshealth.subtitle")
     let systemImage = "checkmark.shield.fill"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(DNSHealthView()) }
 }

@@ -11,6 +11,10 @@ extension ToolCategory {
             [Color(hex: 0x2DD4BF), Color(hex: 0x0EA5E9)]   // teal → sky
         case .diagnostics:
             [Color(hex: 0x6366F1), Color(hex: 0x8B5CF6)]   // indigo → violet
+        case .dns:
+            [Color(hex: 0x38BDF8), Color(hex: 0x2563EB)]   // sky → blue
+        case .security:
+            [Color(hex: 0xF87171), Color(hex: 0xDC2626)]   // red
         case .localNetwork:
             [Color(hex: 0x34D399), Color(hex: 0x10B981)]   // emerald
         case .professional:
@@ -36,6 +40,8 @@ extension ToolCategory {
         switch self {
         case .calculators: "category.caption.calculators"
         case .diagnostics: "category.caption.diagnostics"
+        case .dns: "category.caption.dns"
+        case .security: "category.caption.security"
         case .localNetwork: "category.caption.localNetwork"
         case .professional: "category.caption.professional"
         case .bgp: "category.caption.bgp"

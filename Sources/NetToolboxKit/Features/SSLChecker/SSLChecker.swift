@@ -274,7 +274,7 @@ struct SSLCheckerTool: NetworkTool {
     let titleKey = L10n("tool.ssl.title")
     let subtitleKey = L10n("tool.ssl.subtitle")
     let systemImage = "lock.shield"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(SSLCheckerView()) }
 }

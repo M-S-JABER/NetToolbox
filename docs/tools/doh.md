@@ -1,6 +1,6 @@
 # DNS-over-HTTPS (DoH) · استعلام DNS المشفّر
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** DNS & Domains / DNS والنطاقات  
 > **Tool ID:** `doh`
 
 ---

@@ -1,6 +1,6 @@
 # Email Validator · مُدقّق البريد الإلكتروني
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `email-validator`
 
 ---

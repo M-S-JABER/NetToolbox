@@ -83,7 +83,7 @@ struct NSLookupTool: NetworkTool {
     let titleKey = L10n("tool.nslookup.title")
     let subtitleKey = L10n("tool.nslookup.subtitle")
     let systemImage = "magnifyingglass.circle"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(NSLookupView()) }
 }

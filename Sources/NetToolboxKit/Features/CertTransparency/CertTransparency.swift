@@ -112,7 +112,7 @@ struct CertTransparencyTool: NetworkTool {
     let titleKey = L10n("tool.ct.title")
     let subtitleKey = L10n("tool.ct.subtitle")
     let systemImage = "checkmark.shield"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(CertTransparencyView()) }
 }

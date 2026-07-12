@@ -4,6 +4,8 @@ import SwiftUI
 enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
     case calculators
     case diagnostics
+    case dns
+    case security
     case localNetwork
     case professional
     case bgp
@@ -14,6 +16,8 @@ enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .calculators: L10n("category.calculators")
         case .diagnostics: L10n("category.diagnostics")
+        case .dns: L10n("category.dns")
+        case .security: L10n("category.security")
         case .localNetwork: L10n("category.localNetwork")
         case .professional: L10n("category.professional")
         case .bgp: L10n("category.bgp")
@@ -24,6 +28,8 @@ enum ToolCategory: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .calculators: "function"
         case .diagnostics: "waveform.path.ecg"
+        case .dns: "globe"
+        case .security: "lock.shield"
         case .localNetwork: "wifi.router"
         case .professional: "terminal"
         case .bgp: "arrow.triangle.branch"

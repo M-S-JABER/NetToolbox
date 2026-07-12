@@ -71,7 +71,7 @@ struct RBLCheckTool: NetworkTool {
     let titleKey = L10n("tool.rbl.title")
     let subtitleKey = L10n("tool.rbl.subtitle")
     let systemImage = "hand.raised.slash"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .security
 
     func makeView() -> AnyView { AnyView(RBLCheckView()) }
 }

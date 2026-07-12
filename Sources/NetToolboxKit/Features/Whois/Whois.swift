@@ -89,7 +89,7 @@ struct WhoisTool: NetworkTool {
     let titleKey = L10n("tool.whois.title")
     let subtitleKey = L10n("tool.whois.subtitle")
     let systemImage = "doc.text.magnifyingglass"
-    let category: ToolCategory = .diagnostics
+    let category: ToolCategory = .dns
 
     func makeView() -> AnyView { AnyView(WhoisView()) }
 }

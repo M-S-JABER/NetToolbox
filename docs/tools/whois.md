@@ -1,6 +1,6 @@
 # WHOIS · استعلام WHOIS
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** DNS & Domains / DNS والنطاقات  
 > **Tool ID:** `whois`
 
 ---

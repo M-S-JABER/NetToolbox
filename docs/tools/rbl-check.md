@@ -1,6 +1,6 @@
 # RBL / DNSBL Check · فحص القوائم السوداء
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `rbl-check`
 
 ---

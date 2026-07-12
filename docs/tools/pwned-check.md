@@ -1,6 +1,6 @@
 # Pwned Password Check · فحص كلمة المرور المُخترَقة
 
-> **Category / التصنيف:** Diagnostics / التشخيص  
+> **Category / التصنيف:** Security / الأمان  
 > **Tool ID:** `pwned-check`
 
 ---
