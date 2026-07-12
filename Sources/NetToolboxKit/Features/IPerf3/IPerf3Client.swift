@@ -267,6 +267,9 @@ final class IPerf3Client: @unchecked Sendable {
             guard let self else { return }
             if let error { self.fail(error.localizedDescription); return }
             let got = data?.count ?? 0
+            // No bytes means the peer closed mid-body: stop rather than spin
+            // re-requesting the same `remaining` forever.
+            guard got > 0 else { self.fail("Truncated results body"); return }
             let left = remaining - got
             if left > 0 { self.readServerResultsBody(remaining: left); return }
             // Server results parsed only for completeness; local byte count drives display.

@@ -125,7 +125,11 @@ enum SFTPProtocol {
         if flags & 0x0000_0004 != 0 { permissions = reader.readUInt32() }
         if flags & 0x0000_0008 != 0 { _ = reader.readUInt32(); _ = reader.readUInt32() }   // atime, mtime
         if flags & 0x8000_0000 != 0, let extCount = reader.readUInt32() {
-            for _ in 0..<extCount { _ = reader.readString(); _ = reader.readString() }
+            // `extCount` is attacker-controlled: bound it and stop the moment
+            // the wire runs out so a bogus count can't spin.
+            for _ in 0..<min(extCount, 256) {
+                guard reader.readString() != nil, reader.readString() != nil else { break }
+            }
         }
         return (size, permissions)
     }

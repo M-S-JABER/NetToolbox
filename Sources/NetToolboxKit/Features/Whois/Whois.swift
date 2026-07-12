@@ -31,6 +31,7 @@ struct WhoisService: WhoisQuerying {
             throw NetProbeError.invalidHost
         }
         if case .failure(let error) = await connection.open(timeout: 8) {
+            connection.cancel()
             throw error
         }
         guard let payload = "\(clean)\r\n".data(using: .utf8) else {

@@ -10,7 +10,9 @@ enum SyslogParse {
               let pri = Int(message[message.index(after: message.startIndex)..<close]) else {
             return nil
         }
-        return severities[pri % 8]
+        // `%` keeps the sign in Swift, so a hostile "<-1>" would index out of
+        // bounds — normalize into 0..<8.
+        return severities[((pri % 8) + 8) % 8]
     }
 }
 

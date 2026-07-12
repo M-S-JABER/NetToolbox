@@ -83,7 +83,10 @@ struct SSLInspector: SSLInspecting {
                     let secTrust = sec_trust_copy_ref(trustRef).takeRetainedValue()
                     let info = Self.extract(host: cleanHost, trust: secTrust)
                     complete(true)
+                    // Resolve on both branches: a nil chain must fail fast
+                    // rather than stall until the 10s timeout fires.
                     if let info { shot.resume(.success(info)) }
+                    else { shot.resume(.failure(.noData)) }
                 },
                 queue
             )

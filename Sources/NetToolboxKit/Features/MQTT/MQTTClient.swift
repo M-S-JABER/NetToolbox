@@ -156,6 +156,13 @@ final class MQTTClient: @unchecked Sendable {
             guard let (remaining, lengthBytes) = MQTTClient.decodeRemainingLength(buffer, from: 1) else { return }
             let headerLength = 1 + lengthBytes
             let total = headerLength + remaining
+            // MQTT's varint length allows up to 256 MB; refuse an oversized
+            // frame instead of buffering toward it.
+            guard total <= 1_048_576 else {
+                onEvent?(.error("Oversized MQTT packet (\(total) bytes)"))
+                buffer.removeAll()
+                return
+            }
             guard buffer.count >= total else { return }
             let packet = buffer.subdata(in: 0 ..< total)
             buffer.removeSubrange(0 ..< total)

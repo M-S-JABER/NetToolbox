@@ -44,10 +44,14 @@ final class UptimeViewModel {
     private let service = UptimeService()
 
     func run() async {
-        let urls = input
+        let parsed = input
             .split(whereSeparator: { $0.isNewline || $0 == "," || $0 == " " })
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
+        // Row id is the URL, so a duplicated entry would collide in ForEach —
+        // keep the first occurrence of each, preserving order.
+        var seen = Set<String>()
+        let urls = parsed.filter { seen.insert($0).inserted }
         guard !urls.isEmpty else { return }
         isRunning = true
         rows = []

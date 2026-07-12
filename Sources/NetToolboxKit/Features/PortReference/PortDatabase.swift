@@ -18,8 +18,8 @@ struct PortEntry: Identifiable, Sendable {
     var id: String { "\(port)-\(service)" }
 
     func matches(query: String) -> Bool {
-        guard !query.isEmpty else { return true }
-        let q = query.lowercased()
+        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
+        guard !q.isEmpty else { return true }
         return String(port).hasPrefix(q)
             || service.lowercased().contains(q)
             || summary.lowercased().contains(q)

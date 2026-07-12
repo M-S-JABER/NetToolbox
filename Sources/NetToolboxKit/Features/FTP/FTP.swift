@@ -46,12 +46,18 @@ final class FTPClient: @unchecked Sendable {
     }
 
     func list(user: String, password: String, path: String) async -> Result<String, FTPError> {
-        if case .failure = await control.open(timeout: 8) { return .failure(.connectionFailed) }
+        if case .failure = await control.open(timeout: 8) {
+            control.cancel()   // release the half-open control socket
+            return .failure(.connectionFailed)
+        }
         _ = await readReply()                                   // 220 greeting
 
         _ = await command("USER \(user)")
         let passReply = await command("PASS \(password)")
-        if let code = FTP.replyCode(passReply), code >= 500 { return .failure(.loginFailed) }
+        if let code = FTP.replyCode(passReply), code >= 500 {
+            control.cancel()
+            return .failure(.loginFailed)
+        }
 
         _ = await command("TYPE A")
         let pasvReply = await command("PASV")

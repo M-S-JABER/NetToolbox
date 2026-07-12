@@ -52,7 +52,9 @@ struct CertTransparencyService: Sendable {
             guard !seen.contains(key) else { continue }
             seen.insert(key)
             entries.append(CTEntry(
-                id: Int(row.id ?? Int64(entries.count)),
+                // Position-based id: guaranteed unique for ForEach even when
+                // crt.sh omits (or repeats) its own row id.
+                id: entries.count,
                 commonName: row.common_name ?? (names.first ?? "—"),
                 names: Array(Set(names)).sorted(),
                 issuer: Self.shortIssuer(row.issuer_name ?? "—"),

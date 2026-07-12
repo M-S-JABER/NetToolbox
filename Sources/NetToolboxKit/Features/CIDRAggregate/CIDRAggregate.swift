@@ -30,7 +30,15 @@ enum CIDRAggregate {
     static func parse(_ line: String) -> (UInt64, UInt64)? {
         let parts = line.split(separator: "/")
         guard let first = parts.first, let ip = try? SubnetEngine.parseIPv4(String(first)) else { return nil }
-        let prefix = parts.count > 1 ? (Int(parts[1]) ?? 32) : 32
+        // A garbage prefix ("10.0.0.0/xyz") is a malformed line, not a /32 —
+        // reject it instead of silently widening to a host route.
+        let prefix: Int
+        if parts.count > 1 {
+            guard let parsed = Int(parts[1]) else { return nil }
+            prefix = parsed
+        } else {
+            prefix = 32
+        }
         guard (0...32).contains(prefix) else { return nil }
         let mask: UInt64 = prefix == 0 ? 0 : (~UInt64(0) << (32 - prefix)) & 0xFFFF_FFFF
         let network = UInt64(ip) & mask

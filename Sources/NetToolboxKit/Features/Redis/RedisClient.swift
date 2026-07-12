@@ -19,6 +19,9 @@ enum RESP {
     }
 
     private static func parse(_ bytes: [UInt8], _ start: Int, depth: Int) -> (String, Int)? {
+        // Bound nesting so a hostile stream of "*1\r\n*1\r\n…" can't recurse
+        // the parser into a stack overflow.
+        guard depth < 32 else { return nil }
         guard start < bytes.count, let lineEnd = crlf(bytes, from: start + 1) else { return nil }
         let header = String(decoding: bytes[(start + 1)..<lineEnd], as: UTF8.self)
         let after = lineEnd + 2

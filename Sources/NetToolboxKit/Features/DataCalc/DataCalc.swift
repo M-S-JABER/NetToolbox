@@ -35,7 +35,11 @@ enum DataCalc {
     static func humanDuration(_ seconds: Double) -> String {
         guard seconds > 0 else { return "—" }
         if seconds < 1 { return String(format: "%.0f ms", seconds * 1000) }
-        let s = Int(seconds.rounded())
+        // A tiny transfer rate can push `seconds` past Int.max, where the
+        // conversion would trap — clamp before narrowing.
+        let rounded = seconds.rounded()
+        guard rounded < Double(Int.max) else { return "∞" }
+        let s = Int(rounded)
         let h = s / 3600, m = (s % 3600) / 60, sec = s % 60
         if h > 0 { return "\(h)h \(m)m \(sec)s" }
         if m > 0 { return "\(m)m \(sec)s" }
