@@ -47,7 +47,7 @@ let package = Package(
             name: "NetToolboxKitTests",
             dependencies: ["NetToolboxKit"],
             swiftSettings: [
-                .swiftLanguageMode(.v5)
+                .swiftLanguageMode(.v6)
             ]
         )
     ]

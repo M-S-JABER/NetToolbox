@@ -10,8 +10,13 @@ import UIKit
 /// view-models here (keyed by tool id) keeps a running ping/scan alive and its
 /// per-tool history intact until you stop it yourself. Plain (non-Observable)
 /// on purpose: the dictionary must not invalidate views when it mutates.
+/// Main-actor isolated — it's only ever touched from SwiftUI view bodies —
+/// which also makes it `Sendable` for the environment default under Swift 6.
+@MainActor
 final class ToolSessions {
     private var storage: [String: AnyObject] = [:]
+
+    nonisolated init() {}
 
     /// Returns the retained view-model for `id`, creating it once on first use.
     func session<T: AnyObject>(_ id: String, _ make: () -> T) -> T {
