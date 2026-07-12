@@ -865,6 +865,7 @@
 "common.export" = "Export";
 "home.favorite" = "Favorite";
 "home.favorites" = "Favorites";
+"dashboard.home" = "Dashboard";
 "dashboard.tagline" = "Your network toolkit";
 "dashboard.recent" = "Recent";
 "dashboard.connection" = "Connection";

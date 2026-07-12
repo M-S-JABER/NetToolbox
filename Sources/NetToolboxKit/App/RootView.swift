@@ -13,9 +13,12 @@ struct RootView: View {
     @Environment(HiddenToolsStore.self) private var hiddenTools
     @Environment(ActivityCenter.self) private var activity
 
+    /// Sentinel selection that shows the dashboard instead of a tool.
+    static let dashboardID = "__dashboard__"
+
     @Binding var themeSelection: String
     @State private var search = ""
-    @State private var selectedToolID: String?
+    @State private var selectedToolID: String? = RootView.dashboardID
     @State private var showSettings = false
     @AppStorage("nettoolbox.showHidden") private var showHidden = false
     @AppStorage("nettoolbox.onboarded") private var onboarded = false
@@ -25,6 +28,7 @@ struct RootView: View {
         NavigationSplitView {
             List(selection: $selectedToolID) {
                 if searchQuery.isEmpty {
+                    dashboardRow
                     if !favoriteTools.isEmpty { favoritesSection }
                     ForEach(ToolRegistry.activeCategories) { category in
                         if !visibleTools(in: category).isEmpty {
@@ -70,7 +74,7 @@ struct RootView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .onChange(of: selectedToolID) { _, newValue in
-            if let newValue { recentTools.record(newValue) }
+            if let newValue, newValue != Self.dashboardID { recentTools.record(newValue) }
         }
         .task {
             if !onboarded { showOnboarding = true }
@@ -84,12 +88,24 @@ struct RootView: View {
 
     @ViewBuilder
     private var detailView: some View {
-        if let id = selectedToolID, let tool = ToolRegistry.tool(withID: id) {
+        if let id = selectedToolID, id != Self.dashboardID, let tool = ToolRegistry.tool(withID: id) {
             tool.makeView()
                 .background(theme.background)
         } else {
             DashboardView(onOpen: { selectedToolID = $0 })
         }
+    }
+
+    /// A pinned sidebar row that always returns to the dashboard.
+    private var dashboardRow: some View {
+        Label {
+            Text(L10n("dashboard.home"))
+                .foregroundStyle(theme.textPrimary)
+        } icon: {
+            Image(systemName: "house")
+                .foregroundStyle(theme.accent)
+        }
+        .tag(Self.dashboardID)
     }
 
     // MARK: Data

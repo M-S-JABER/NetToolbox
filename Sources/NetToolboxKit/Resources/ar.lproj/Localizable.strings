@@ -863,6 +863,7 @@
 "common.export" = "تصدير";
 "home.favorite" = "تفضيل";
 "home.favorites" = "المفضّلة";
+"dashboard.home" = "الرئيسية";
 "dashboard.tagline" = "صندوق أدوات شبكتك";
 "dashboard.recent" = "الأخيرة";
 "dashboard.connection" = "الاتصال";
