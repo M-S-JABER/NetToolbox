@@ -20,6 +20,7 @@ struct RootView: View {
     @State private var search = ""
     @State private var selectedToolID: String? = RootView.dashboardID
     @State private var showSettings = false
+    @State private var helpTarget: HelpTarget?
     @AppStorage("nettoolbox.showHidden") private var showHidden = false
     @AppStorage("nettoolbox.onboarded") private var onboarded = false
     @State private var showOnboarding = false
@@ -127,11 +128,29 @@ struct RootView: View {
 
     // MARK: Detail
 
+    /// Identifiable wrapper so `sheet(item:)` can present help for a tool id.
+    private struct HelpTarget: Identifiable { let id: String }
+
     @ViewBuilder
     private var detailView: some View {
         if let id = selectedToolID, id != Self.dashboardID, let tool = ToolRegistry.tool(withID: id) {
             tool.makeView()
                 .background(theme.background)
+                .toolbar {
+                    // A central "?" button in every tool's nav bar — no need to
+                    // touch the 84 individual tool views.
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            helpTarget = HelpTarget(id: tool.id)
+                        } label: {
+                            Image(systemName: "questionmark.circle")
+                        }
+                        .accessibilityLabel(Text(L10n("help.button")))
+                    }
+                }
+                .sheet(item: $helpTarget) { target in
+                    ToolHelpView(toolID: target.id)
+                }
         } else {
             DashboardView(onOpen: { selectedToolID = $0 })
         }

@@ -1344,3 +1344,12 @@
 "ssdp.section.devices" = "Devices";
 "ssdp.empty" = "No devices answered. On iOS this needs the local-network permission and the multicast entitlement.";
 "ssdp.note" = "Sends an SSDP M-SEARCH to the multicast group and lists responders (address, server, location, type). Requires the local-network permission and Apple's multicast entitlement to work on device.";
+
+/* In-app tool help */
+"help.title" = "How this tool works";
+"help.button" = "Help";
+"help.none" = "No help available for this tool yet.";
+"help.section.overview" = "Overview";
+"help.section.howItWorks" = "How it works";
+"help.section.example" = "Example";
+"help.section.notes" = "Notes & limitations";

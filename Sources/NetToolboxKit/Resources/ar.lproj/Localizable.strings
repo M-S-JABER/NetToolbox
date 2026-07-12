@@ -1344,3 +1344,12 @@
 "ssdp.section.devices" = "الأجهزة";
 "ssdp.empty" = "لم يستجب أي جهاز. على iOS يتطلب هذا إذن الشبكة المحلية وصلاحية multicast.";
 "ssdp.note" = "يرسل SSDP M-SEARCH إلى مجموعة multicast ويعرض المستجيبين (العنوان، الخادم، الموقع، النوع). يتطلب إذن الشبكة المحلية وصلاحية multicast من Apple ليعمل على الجهاز.";
+
+/* شرح الأداة داخل التطبيق */
+"help.title" = "كيف تعمل هذه الأداة";
+"help.button" = "شرح";
+"help.none" = "لا يوجد شرح لهذه الأداة بعد.";
+"help.section.overview" = "نظرة عامة";
+"help.section.howItWorks" = "كيف تعمل";
+"help.section.example" = "مثال";
+"help.section.notes" = "ملاحظات وقيود";
