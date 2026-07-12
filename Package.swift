@@ -37,12 +37,10 @@ let package = Package(
             resources: [
                 .process("Resources")
             ],
-            // Phase 1 of the Swift 6.3 / iOS 26.5 migration: build with the new
-            // toolchain and SDK while the code is still in Swift 5 language
-            // mode. Phase 2 flips this to `.v6` and resolves strict-concurrency
-            // diagnostics across the package.
+            // Phase 2 of the Swift 6.3 / iOS 26.5 migration: full Swift 6
+            // language mode with strict concurrency checking.
             swiftSettings: [
-                .swiftLanguageMode(.v5)
+                .swiftLanguageMode(.v6)
             ]
         ),
         .testTarget(
