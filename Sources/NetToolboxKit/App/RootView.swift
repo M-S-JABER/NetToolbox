@@ -28,7 +28,7 @@ struct RootView: View {
         NavigationSplitView {
             List(selection: $selectedToolID) {
                 if searchQuery.isEmpty {
-                    dashboardRow
+                    Section { dashboardRow }
                     if !favoriteTools.isEmpty { favoritesSection }
                     ForEach(ToolRegistry.activeCategories) { category in
                         if !visibleTools(in: category).isEmpty {
@@ -55,6 +55,14 @@ struct RootView: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        selectedToolID = Self.dashboardID
+                    } label: {
+                        Image(systemName: "house")
+                    }
+                    .accessibilityLabel(Text(L10n("dashboard.home")))
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showSettings = true
