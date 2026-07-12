@@ -40,7 +40,7 @@ struct SystemHostResolver: HostResolving {
                 sa, socklen_t(pointer.pointee.ai_addrlen),
                 &buffer, socklen_t(buffer.count), nil, 0, NI_NUMERICHOST
             ) == 0 {
-                let address = String(cString: buffer)
+                let address = String(cBuffer: buffer)
                 if !addresses.contains(address) { addresses.append(address) }
             }
         }

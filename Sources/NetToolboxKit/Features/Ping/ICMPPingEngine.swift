@@ -35,7 +35,7 @@ enum ICMPPingEngine {
             guard let addr = info.pointee.ai_addr else { continue }
             var buffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
             if getnameinfo(addr, info.pointee.ai_addrlen, &buffer, socklen_t(buffer.count), nil, 0, NI_NUMERICHOST) == 0 {
-                return Target(ip: String(cString: buffer), isIPv6: family == AF_INET6)
+                return Target(ip: String(cBuffer: buffer), isIPv6: family == AF_INET6)
             }
         }
         #endif

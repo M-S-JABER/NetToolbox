@@ -242,7 +242,12 @@ final class RTSPClient: @unchecked Sendable {
                 }
                 self.responseWaiter = { finish($0) }
                 self.writeRequest(method, url: url, headers: headers)
-                self.queue.asyncAfter(deadline: .now() + 10) { finish(nil) }
+                // Fire the timeout through the stored waiter (which itself calls
+                // `finish`) so this @Sendable closure captures only `self`, not
+                // the non-Sendable `finish` closure.
+                self.queue.asyncAfter(deadline: .now() + 10) { [weak self] in
+                    self?.responseWaiter?(nil)
+                }
             }
         }
     }

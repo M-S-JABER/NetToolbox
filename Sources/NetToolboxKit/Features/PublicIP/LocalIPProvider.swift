@@ -49,7 +49,7 @@ struct SystemLocalIPProvider: LocalIPProviding {
                 NI_NUMERICHOST
             ) == 0 else { continue }
 
-            var address = String(cString: host)
+            var address = String(cBuffer: host)
             // Strip IPv6 scope suffix ("fe80::1%en0" → "fe80::1").
             if let percent = address.firstIndex(of: "%") {
                 address = String(address[..<percent])

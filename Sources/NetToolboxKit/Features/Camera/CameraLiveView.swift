@@ -48,7 +48,7 @@ final class CameraSession {
         self.camera = camera
         phase = .connecting
         activity?.start(toolID)
-        displayLayer?.flushAndRemoveImage()
+        displayLayer?.sampleBufferRenderer.flush(removingDisplayedImage: true, completionHandler: nil)
 
         let port = UInt16(camera.rtspPort.trimmingCharacters(in: .whitespaces)) ?? 554
         let client = RTSPClient(
@@ -81,7 +81,7 @@ final class CameraSession {
         client = nil
         if isActive { phase = .stopped }
         activity?.stop(toolID)
-        displayLayer?.flushAndRemoveImage()
+        displayLayer?.sampleBufferRenderer.flush(removingDisplayedImage: true, completionHandler: nil)
     }
 
     func retry() {
@@ -120,8 +120,9 @@ final class CameraSession {
     private func enqueue(_ sample: CMSampleBuffer) {
         if recorder.isRecording { recorder.append(sample) }
         guard let layer = displayLayer else { return }
-        if layer.status == .failed { layer.flush() }
-        layer.enqueue(sample)
+        let renderer = layer.sampleBufferRenderer
+        if renderer.status == .failed { renderer.flush() }
+        renderer.enqueue(sample)
         if phase == .connecting { phase = .playing }
     }
 }

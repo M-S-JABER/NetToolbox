@@ -97,7 +97,7 @@ struct ICMPTraceroute: TracerouteProbing {
 
         var addressBuffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
         inet_ntop(AF_INET, &source.sin_addr, &addressBuffer, socklen_t(INET_ADDRSTRLEN))
-        let address = String(cString: addressBuffer)
+        let address = String(cBuffer: addressBuffer)
 
         // On a DGRAM ICMP socket echo replies arrive with the IP header
         // stripped, but Time Exceeded errors are sometimes delivered *with*

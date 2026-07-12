@@ -112,7 +112,7 @@ enum SSDPEngine {
             let text = String(decoding: buffer[0..<received], as: UTF8.self)
             var addressBuffer = [CChar](repeating: 0, count: Int(INET_ADDRSTRLEN))
             inet_ntop(AF_INET, &source.sin_addr, &addressBuffer, socklen_t(INET_ADDRSTRLEN))
-            let device = parse(text, address: String(cString: addressBuffer))
+            let device = parse(text, address: String(cBuffer: addressBuffer))
             devices[device.id] = device
         }
         return Array(devices.values).sorted { $0.address < $1.address }

@@ -31,7 +31,7 @@ enum ReverseDNS {
             }
         }
         guard result == 0 else { return nil }
-        let name = String(cString: host)
+        let name = String(cBuffer: host)
         return name.isEmpty ? nil : name
     }
     #else
