@@ -116,6 +116,7 @@ final class TCPConnection: @unchecked Sendable {
     func open(timeout: Double) async -> Result<Void, NetProbeError> {
         await withCheckedContinuation { continuation in
             let shot = OneShot(continuation)
+            let connection = self.connection
             connection.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
@@ -128,6 +129,7 @@ final class TCPConnection: @unchecked Sendable {
             }
             connection.start(queue: queue)
             queue.asyncAfter(deadline: .now() + timeout) {
+                connection.cancel()   // don't leave a half-open NWConnection dialing
                 shot.resume(.failure(.timeout))
             }
         }
@@ -168,21 +170,21 @@ final class TCPConnection: @unchecked Sendable {
 
     /// Reads until the peer closes the connection, accumulating all bytes.
     func receiveAll(timeout: Double) async -> Result<Data, NetProbeError> {
+        // A per-call `receive()` has no timeout of its own, so bound the whole
+        // read by cancelling the connection at the deadline — that unblocks a
+        // pending `receive()` against a peer that neither sends nor closes.
+        let connection = self.connection
+        queue.asyncAfter(deadline: .now() + timeout) { connection.cancel() }
         var accumulated = Data()
-        let clock = ContinuousClock()
-        let deadline = clock.now.advanced(by: .seconds(timeout))
-        while clock.now < deadline {
-            let result = await receive()
-            switch result {
+        while true {
+            switch await receive() {
             case .success(let chunk):
                 if chunk.isEmpty { return .success(accumulated) }
                 accumulated.append(chunk)
             case .failure(let error):
-                if !accumulated.isEmpty { return .success(accumulated) }
-                return .failure(error)
+                return accumulated.isEmpty ? .failure(error) : .success(accumulated)
             }
         }
-        return .success(accumulated)
     }
 
     func cancel() {

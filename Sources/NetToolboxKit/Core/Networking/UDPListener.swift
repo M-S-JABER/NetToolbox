@@ -39,10 +39,16 @@ final class UDPListener: @unchecked Sendable {
     }
 
     func stop() {
-        listener?.cancel()
-        connections.forEach { $0.cancel() }
-        connections = []
-        listener = nil
+        // Serialize teardown on the same queue the listener/connection
+        // callbacks mutate `connections` on, so the array is never touched
+        // from two threads at once.
+        queue.async { [weak self] in
+            guard let self else { return }
+            self.listener?.cancel()
+            self.connections.forEach { $0.cancel() }
+            self.connections = []
+            self.listener = nil
+        }
     }
 
     private func receive(on connection: NWConnection) {
