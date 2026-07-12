@@ -36,16 +36,24 @@ struct RootView: View {
         return Set(raw.split(separator: ",").map(String.init))
     }
 
-    private func categoryExpansion(_ category: ToolCategory) -> Binding<Bool> {
-        Binding(
-            get: { expandedCategories.contains(category.rawValue) },
-            set: { isOn in
-                if isOn { expandedCategories.insert(category.rawValue) }
-                else { expandedCategories.remove(category.rawValue) }
-                UserDefaults.standard.set(
-                    expandedCategories.sorted().joined(separator: ","), forKey: Self.expandedKey
-                )
+    private func isExpanded(_ category: ToolCategory) -> Bool {
+        expandedCategories.contains(category.rawValue)
+    }
+
+    /// Toggles a category group open/closed and persists the choice. Driven by
+    /// the section header button below — a plain button in a `List` section
+    /// header reliably receives the tap, unlike a `DisclosureGroup` label whose
+    /// tap the selectable list row swallows.
+    private func toggleCategory(_ category: ToolCategory) {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            if expandedCategories.contains(category.rawValue) {
+                expandedCategories.remove(category.rawValue)
+            } else {
+                expandedCategories.insert(category.rawValue)
             }
+        }
+        UserDefaults.standard.set(
+            expandedCategories.sorted().joined(separator: ","), forKey: Self.expandedKey
         )
     }
 
@@ -185,21 +193,41 @@ struct RootView: View {
         ToolRegistry.tools(in: category).filter { showHidden || !hiddenTools.isHidden($0.id) }
     }
 
+    /// A collapsible category group rendered as a `Section` with a tappable
+    /// header. Tapping the header toggles the group; the tool rows only exist
+    /// in the hierarchy while expanded, keeping the sidebar short.
+    @ViewBuilder
     private func categorySection(_ category: ToolCategory) -> some View {
-        DisclosureGroup(isExpanded: categoryExpansion(category)) {
-            ForEach(visibleTools(in: category), id: \.id) { row($0) }
-        } label: {
-            HStack(spacing: Spacing.sm) {
-                Image(systemName: category.systemImage)
-                    .foregroundStyle(category.tint)
-                Text(category.titleKey)
-                    .foregroundStyle(theme.textPrimary)
-                Spacer()
-                Text("\(visibleTools(in: category).count)")
-                    .font(AppTypography.caption)
-                    .foregroundStyle(theme.textSecondary)
-                    .environment(\.layoutDirection, .leftToRight)
+        let tools = visibleTools(in: category)
+        let expanded = isExpanded(category)
+        Section {
+            if expanded {
+                ForEach(tools, id: \.id) { row($0) }
             }
+        } header: {
+            Button {
+                toggleCategory(category)
+            } label: {
+                HStack(spacing: Spacing.sm) {
+                    Image(systemName: category.systemImage)
+                        .foregroundStyle(category.tint)
+                        .frame(width: 22)
+                    Text(category.titleKey)
+                        .foregroundStyle(theme.textPrimary)
+                        .textCase(nil)
+                    Spacer()
+                    Text("\(tools.count)")
+                        .font(AppTypography.caption)
+                        .foregroundStyle(theme.textSecondary)
+                        .environment(\.layoutDirection, .leftToRight)
+                    Image(systemName: "chevron.down")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(theme.textSecondary)
+                        .rotationEffect(.degrees(expanded ? 0 : -90))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 
