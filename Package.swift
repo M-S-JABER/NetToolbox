@@ -23,7 +23,7 @@ let package = Package(
     name: "NetToolbox",
     defaultLocalization: "en",
     platforms: [
-        .iOS("26.5")
+        .iOS("26.0")
     ],
     products: [
         .library(

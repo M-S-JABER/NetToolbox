@@ -13,7 +13,7 @@ import AppleProductTypes
 let package = Package(
     name: "NetToolboxApp",
     platforms: [
-        .iOS("26.5")
+        .iOS("26.0")
     ],
     products: [
         .iOSApplication(
@@ -21,8 +21,8 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "com.aswaralmudun.nettoolbox",
             teamIdentifier: "",
-            displayVersion: "2.0.3",
-            bundleVersion: "10",
+            displayVersion: "2.0.4",
+            bundleVersion: "11",
             appIcon: .placeholder(icon: .earth),
             accentColor: .presetColor(.teal),
             supportedDeviceFamilies: [
@@ -54,7 +54,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.65.0")
+        .package(url: "https://github.com/M-S-JABER/NetToolbox", from: "1.66.0")
     ],
     targets: [
         .executableTarget(
