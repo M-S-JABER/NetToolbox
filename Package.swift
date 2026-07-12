@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.3
 
 // NetToolbox — network tools for iPad as an importable Swift package.
 //
@@ -23,7 +23,7 @@ let package = Package(
     name: "NetToolbox",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v17)
+        .iOS("26.5")
     ],
     products: [
         .library(
@@ -36,18 +36,21 @@ let package = Package(
             name: "NetToolboxKit",
             resources: [
                 .process("Resources")
+            ],
+            // Phase 1 of the Swift 6.3 / iOS 26.5 migration: build with the new
+            // toolchain and SDK while the code is still in Swift 5 language
+            // mode. Phase 2 flips this to `.v6` and resolves strict-concurrency
+            // diagnostics across the package.
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
             ]
-            // Note: the opt-in `StrictConcurrency` experimental feature was
-            // removed. It surfaced Swift 6 *preview* warnings that cannot be
-            // resolved on the Swift 5 Playgrounds toolchain — SwiftData's
-            // `#Predicate` macro emits non-Sendable `ReferenceWritableKeyPath`
-            // references, and `NWConnection` callbacks send Sendable Results
-            // through a continuation. Both are safe here; the flag only added
-            // noise, so the package now builds warning-free under Swift 5.
         ),
         .testTarget(
             name: "NetToolboxKitTests",
-            dependencies: ["NetToolboxKit"]
+            dependencies: ["NetToolboxKit"],
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
         )
     ]
 )

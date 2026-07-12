@@ -16,13 +16,15 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: macos-14
+    # Xcode 26 / iOS 26.5 SDK are only on the macOS 26 image.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
       - name: Environment
         run: |
           xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version || true
           echo "--- Schemes ---"
           xcodebuild -list || true
           echo "--- Simulators ---"

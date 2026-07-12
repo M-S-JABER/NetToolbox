@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.3
 
 // NetToolbox — thin app playground for Swift Playgrounds on iPad.
 //
@@ -13,7 +13,7 @@ import AppleProductTypes
 let package = Package(
     name: "NetToolboxApp",
     platforms: [
-        .iOS("17.0")
+        .iOS("26.5")
     ],
     products: [
         .iOSApplication(
