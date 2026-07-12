@@ -24,7 +24,10 @@ enum NetProbeError: LocalizedError, Equatable {
 
 /// Guards a `CheckedContinuation` so it resumes exactly once, even though
 /// `NWConnection` may deliver several callbacks (state change + timeout).
-final class OneShot<Value>: @unchecked Sendable {
+/// `Value` is `Sendable` — every probe resumes with a value type (a `Result`,
+/// `Data`, a tuple, …) — which lets it cross the callback boundary under
+/// Swift 6 strict concurrency without data-race diagnostics.
+final class OneShot<Value: Sendable>: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<Value, Never>?
 
