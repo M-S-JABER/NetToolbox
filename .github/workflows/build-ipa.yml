@@ -1,0 +1,65 @@
+name: Build unsigned IPA
+
+# Builds the NetToolbox.swiftpm app for a real device WITHOUT code signing and
+# packages it into an .ipa you can download from the run's Artifacts. An
+# unsigned IPA will NOT install by itself — sideload it with Sideloadly or
+# AltStore (which re-signs it with your own Apple ID), or use TestFlight/Xcode
+# for a properly signed build.
+#
+# Run it from the GitHub UI: Actions -> "Build unsigned IPA" -> Run workflow.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Environment
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version || true
+
+      - name: Build app (unsigned, device)
+        working-directory: NetToolbox.swiftpm
+        run: |
+          set -o pipefail
+          xcodebuild clean build \
+            -scheme NetToolbox \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            | tee build.log
+
+      - name: Package into Payload/*.ipa
+        working-directory: NetToolbox.swiftpm
+        run: |
+          set -euo pipefail
+          APP=$(find build -type d -name "NetToolbox.app" | head -1)
+          if [ -z "$APP" ]; then
+            echo "::error::NetToolbox.app not found — build did not produce an app bundle."
+            find build -maxdepth 5 -name "*.app" -type d || true
+            exit 1
+          fi
+          echo "Found app bundle: $APP"
+          rm -rf Payload NetToolbox.ipa
+          mkdir Payload
+          cp -R "$APP" Payload/
+          zip -qry NetToolbox.ipa Payload
+          echo "--- IPA ---"
+          ls -lh NetToolbox.ipa
+          unzip -l NetToolbox.ipa | head -20
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetToolbox-unsigned-ipa
+          path: NetToolbox.swiftpm/NetToolbox.ipa
+          retention-days: 30
+          if-no-files-found: error
