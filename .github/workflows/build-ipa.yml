@@ -26,12 +26,34 @@ jobs:
         working-directory: NetToolbox.swiftpm
         run: |
           set -o pipefail
+          echo "=== xcodebuild -list ==="
+          xcodebuild -list 2>&1 || true
+          # Auto-detect the app scheme (its exact name depends on how Xcode
+          # names the .swiftpm app product) rather than hard-coding it.
+          SCHEME=$(xcodebuild -list -json 2>/dev/null | python3 -c '
+import sys, json
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    print(""); raise SystemExit
+c = d.get("project") or d.get("workspace") or {}
+schemes = c.get("schemes", [])
+pref = ([s for s in schemes if s == "NetToolbox"]
+        or [s for s in schemes if "App" in s]
+        or [s for s in schemes if "Kit" not in s]
+        or schemes)
+print(pref[0] if pref else "")
+')
+          echo "Chosen scheme: [$SCHEME]"
+          if [ -z "$SCHEME" ]; then
+            echo "::error::Could not determine an app scheme to build."
+            exit 1
+          fi
           # DerivedData MUST live OUTSIDE the app target's source path ("."),
-          # otherwise the resolved dependency's checkout (which re-includes this
-          # .swiftpm's Assets.xcassets / PrivacyInfo.xcprivacy) collides with the
-          # app target's own resources.
+          # else the resolved dependency checkout re-includes this .swiftpm's
+          # Assets.xcassets / PrivacyInfo.xcprivacy and collides.
           xcodebuild clean build \
-            -scheme NetToolbox \
+            -scheme "$SCHEME" \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath "$RUNNER_TEMP/ddp" \
