@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NetToolbox — Privacy Policy / سياسة الخصوصية</title>
+<style>
+  :root{
+    --bg:#f6f8fa; --card:#ffffff; --text:#1a2027; --muted:#5b6773;
+    --border:#e3e8ee; --accent:#12a19a; --accent2:#0ea5e9;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0c1115; --card:#141b21; --text:#e6edf3; --muted:#9aa7b2;
+      --border:#232c34; --accent:#2dd4bf; --accent2:#38bdf8; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Arabic",sans-serif;
+    line-height:1.7; padding:24px 16px;
+  }
+  .wrap{max-width:820px;margin:0 auto}
+  header{
+    display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap;
+  }
+  .mark{
+    width:56px;height:56px;border-radius:14px;flex:0 0 auto;
+    background:linear-gradient(135deg,#0b6e6b,#16c7b5);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .mark svg{width:38px;height:38px}
+  h1{font-size:1.5rem;margin:0}
+  .sub{color:var(--muted);font-size:.95rem;margin-top:2px}
+  .toggle{margin-inline-start:auto;display:flex;gap:6px}
+  .toggle button{
+    border:1px solid var(--border);background:var(--card);color:var(--text);
+    padding:6px 14px;border-radius:999px;cursor:pointer;font-size:.9rem;font-weight:600;
+  }
+  .toggle button.active{background:var(--accent);color:#03201f;border-color:transparent}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:16px;
+    padding:20px 22px;margin:18px 0;
+  }
+  h2{font-size:1.15rem;margin:0 0 10px;color:var(--accent)}
+  p{margin:.5em 0}
+  ul{margin:.4em 0;padding-inline-start:1.3em}
+  li{margin:.3em 0}
+  .meta{color:var(--muted);font-size:.88rem}
+  a{color:var(--accent2)}
+  .pill{
+    display:inline-block;background:color-mix(in srgb,var(--accent) 18%,transparent);
+    color:var(--accent);border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;
+  }
+  [lang]{display:none}
+  body.ar [lang="ar"]{display:block}
+  body.en [lang="en"]{display:block}
+  body.en{direction:ltr}
+  footer{color:var(--muted);font-size:.85rem;text-align:center;margin-top:24px}
+</style>
+</head>
+<body class="ar">
+<div class="wrap">
+  <header>
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#EAFffb" stroke-width="34" stroke-linecap="round" opacity="0.92">
+          <line x1="512" y1="512" x2="512" y2="248"/><line x1="512" y1="512" x2="285" y2="404"/>
+          <line x1="512" y1="512" x2="285" y2="646"/><line x1="512" y1="512" x2="739" y2="404"/>
+          <line x1="512" y1="512" x2="739" y2="646"/><line x1="512" y1="512" x2="512" y2="776"/>
+        </g>
+        <g fill="#fff"><circle cx="512" cy="248" r="60"/><circle cx="285" cy="404" r="60"/>
+          <circle cx="285" cy="646" r="60"/><circle cx="739" cy="404" r="60"/>
+          <circle cx="739" cy="646" r="60"/><circle cx="512" cy="776" r="60"/></g>
+        <circle cx="512" cy="512" r="112" fill="#fff"/><circle cx="512" cy="512" r="56" fill="#12A19A"/>
+      </svg>
+    </div>
+    <div>
+      <h1>NetToolbox</h1>
+      <div class="sub" lang="ar">سياسة الخصوصية</div>
+      <div class="sub" lang="en">Privacy Policy</div>
+    </div>
+    <div class="toggle">
+      <button id="btn-ar" class="active" onclick="setLang('ar')">العربية</button>
+      <button id="btn-en" onclick="setLang('en')">English</button>
+    </div>
+  </header>
+
+  <p class="meta" lang="ar">آخر تحديث: 13 يوليو 2026 · المطوّر: أسوار المدن (Aswar Almudun)</p>
+  <p class="meta" lang="en">Last updated: 13 July 2026 · Developer: Aswar Almudun</p>
+
+  <!-- Summary -->
+  <div class="card">
+    <span class="pill" lang="ar">باختصار</span><span class="pill" lang="en">In short</span>
+    <p lang="ar">تطبيق <strong>NetToolbox</strong> يعمل على جهازك بالكامل. لا نجمع أي بيانات شخصية، ولا نتتبّعك، ولا نستخدم حسابات أو إعلانات أو أدوات تحليلات. كل ما تحفظه (المضيفون، ملفات SSH، الكاميرات، السجل) يبقى على جهازك ولا يُرسل إلينا مطلقاً.</p>
+    <p lang="en"><strong>NetToolbox</strong> runs entirely on your device. We collect no personal data, we do not track you, and there are no accounts, ads, or analytics. Everything you save (hosts, SSH keys, cameras, history) stays on your device and is never sent to us.</p>
+  </div>
+
+  <!-- What we collect -->
+  <div class="card">
+    <h2 lang="ar">البيانات التي نجمعها</h2><h2 lang="en">Data We Collect</h2>
+    <p lang="ar"><strong>لا شيء.</strong> لا يجمع NetToolbox أي بيانات شخصية أو بيانات استخدام أو معرّفات خارج جهازك. لا يوجد خادم خاص بنا يستقبل بياناتك.</p>
+    <p lang="en"><strong>None.</strong> NetToolbox collects no personal information, no usage data, and no identifiers off your device. We operate no server that receives your data.</p>
+  </div>
+
+  <!-- On-device storage -->
+  <div class="card">
+    <h2 lang="ar">التخزين على الجهاز</h2><h2 lang="en">On-Device Storage</h2>
+    <ul lang="ar">
+      <li>الإعدادات والمضيفون المحفوظون والسجل والمفضّلة تُخزَّن محلياً عبر <code>UserDefaults</code>.</li>
+      <li>الأسرار الحسّاسة (كلمات مرور SSH وبيانات الكاميرات) تُخزَّن في <strong>Keychain</strong> المشفّر من النظام.</li>
+      <li>النسخ الاحتياطية ملفات تنشئها أنت بنفسك، ويمكن تشفيرها بكلمة مرور (AES-256-GCM). أنت تتحكّم بمكان حفظها ومشاركتها.</li>
+      <li>مزامنة iCloud اختيارية؛ عند تفعيلها تتم عبر حساب iCloud الخاص بك مباشرة ولا نطّلع عليها.</li>
+    </ul>
+    <ul lang="en">
+      <li>Settings, saved hosts, history and favorites are stored locally via <code>UserDefaults</code>.</li>
+      <li>Sensitive secrets (SSH passwords, camera credentials) are stored in the system-encrypted <strong>Keychain</strong>.</li>
+      <li>Backups are files you create yourself, optionally passphrase-encrypted (AES-256-GCM). You control where they are saved and shared.</li>
+      <li>iCloud sync is optional; when enabled it uses your own iCloud account directly and is not visible to us.</li>
+    </ul>
+  </div>
+
+  <!-- Permissions -->
+  <div class="card">
+    <h2 lang="ar">الأذونات ولماذا نطلبها</h2><h2 lang="en">Permissions & Why</h2>
+    <p lang="ar">كل إذن يُطلب فقط عند أول استخدام للميزة التي تحتاجه — لا شيء يُطلب عند فتح التطبيق:</p>
+    <p lang="en">Each permission is requested only the first time you use the feature that needs it — nothing is requested at launch:</p>
+    <ul lang="ar">
+      <li><strong>الشبكة المحلية:</strong> لاكتشاف الأجهزة والخدمات على شبكتك (ماسح الشبكة، Bonjour، كاميرات IP).</li>
+      <li><strong>الكاميرا:</strong> لمسح رموز QR (إعدادات الواي فاي و WireGuard).</li>
+      <li><strong>إضافة إلى الصور:</strong> لحفظ لقطات الكاميرا في مكتبة الصور.</li>
+      <li><strong>Face ID / رمز الدخول:</strong> لقفل التطبيق اختيارياً وحماية اتصالاتك المحفوظة.</li>
+    </ul>
+    <ul lang="en">
+      <li><strong>Local Network:</strong> to discover devices and services on your network (LAN scanner, Bonjour, IP cameras).</li>
+      <li><strong>Camera:</strong> to scan QR codes (Wi-Fi and WireGuard configs).</li>
+      <li><strong>Add to Photos:</strong> to save camera snapshots to your photo library.</li>
+      <li><strong>Face ID / passcode:</strong> for the optional app lock protecting your saved connections.</li>
+    </ul>
+  </div>
+
+  <!-- Network connections -->
+  <div class="card">
+    <h2 lang="ar">الاتصالات الشبكية</h2><h2 lang="en">Network Connections</h2>
+    <p lang="ar">NetToolbox أداة شبكات، لذا تتصل بالمضيفين والخوادم التي <strong>تحدّدها أنت</strong> (SSH، Ping، DNS، الكاميرات… إلخ). هذه الاتصالات تذهب مباشرة من جهازك إلى الوجهة التي تكتبها، ولا تمرّ بنا.</p>
+    <p lang="en">NetToolbox is a network tool, so it connects to hosts and servers <strong>you specify</strong> (SSH, Ping, DNS, cameras, etc.). These connections go directly from your device to the destination you enter and never pass through us.</p>
+    <p lang="ar">بعض الأدوات تجلب بيانات عامة من خدمات خارجية معروفة. عند استخدام هذه الأدوات يُرسَل استعلامك (مثل عنوان IP أو اسم نطاق) إلى الخدمة المعنية فقط، وتخضع تلك الخدمة لسياسة الخصوصية الخاصة بها:</p>
+    <p lang="en">A few tools fetch public data from well-known third-party services. When you use them, only your query (such as an IP address or domain) is sent to that service, which is governed by its own privacy policy:</p>
+    <ul lang="ar">
+      <li><code>ipwho.is</code> — العنوان العام ومعلومات IP</li>
+      <li><code>speed.cloudflare.com</code> — اختبار السرعة · مُحلّلات DoH (Cloudflare / Google / Quad9 / AdGuard)</li>
+      <li><code>api.globalping.io</code> — البينغ العالمي</li>
+      <li><code>crt.sh</code> — شفافية الشهادات · <code>rdap.org</code> — استعلام RDAP</li>
+      <li><code>api.pwnedpasswords.com</code> — فحص التسريبات (بأسلوب k-anonymity؛ لا تغادر كلمة المرور جهازك)</li>
+      <li><code>stat.ripe.net</code> (RIPEstat) — أدوات BGP و RPKI</li>
+    </ul>
+    <ul lang="en">
+      <li><code>ipwho.is</code> — public IP and IP info</li>
+      <li><code>speed.cloudflare.com</code> — speed test · DoH resolvers (Cloudflare / Google / Quad9 / AdGuard)</li>
+      <li><code>api.globalping.io</code> — world ping</li>
+      <li><code>crt.sh</code> — certificate transparency · <code>rdap.org</code> — RDAP lookup</li>
+      <li><code>api.pwnedpasswords.com</code> — breach check (k-anonymity; your password never leaves the device)</li>
+      <li><code>stat.ripe.net</code> (RIPEstat) — BGP and RPKI tools</li>
+    </ul>
+    <p lang="ar">لا نبيع بياناتك ولا نشاركها، ولا نضيف أي تتبّع إلى هذه الطلبات.</p>
+    <p lang="en">We do not sell or share your data, and we add no tracking to these requests.</p>
+  </div>
+
+  <!-- No tracking -->
+  <div class="card">
+    <h2 lang="ar">لا تتبّع ولا إعلانات</h2><h2 lang="en">No Tracking, No Ads</h2>
+    <p lang="ar">لا يستخدم التطبيق أي أدوات تحليلات أو إعلانات أو مكتبات طرف ثالث للتتبّع. بيان الخصوصية في التطبيق يعلن صراحةً: <em>لا تتبّع، لا بيانات مجموعة</em>.</p>
+    <p lang="en">The app uses no analytics, advertising, or third-party tracking libraries. Its privacy manifest explicitly declares: <em>no tracking, no data collected</em>.</p>
+  </div>
+
+  <!-- Children -->
+  <div class="card">
+    <h2 lang="ar">خصوصية الأطفال</h2><h2 lang="en">Children's Privacy</h2>
+    <p lang="ar">لا يجمع التطبيق أي بيانات من أي مستخدم، بمن فيهم الأطفال. ولأنه لا يجمع بيانات أصلاً، فلا توجد بيانات خاصة بالأطفال تُجمع أو تُخزَّن لدينا.</p>
+    <p lang="en">The app collects no data from any user, including children. Because it collects no data at all, no children's data is ever gathered or stored by us.</p>
+  </div>
+
+  <!-- Security -->
+  <div class="card">
+    <h2 lang="ar">الأمان</h2><h2 lang="en">Security</h2>
+    <p lang="ar">تُخزَّن الأسرار في Keychain، ويمكن تشفير النسخ الاحتياطية بكلمة مرور، ويوفّر التطبيق قفلاً اختيارياً بـ Face ID أو رمز الدخول. ومع ذلك، لا يمكن ضمان أمان أي نظام بنسبة 100%، لذا نوصي بحماية جهازك برمز دخول قوي.</p>
+    <p lang="en">Secrets are stored in the Keychain, backups can be passphrase-encrypted, and the app offers an optional Face ID / passcode lock. That said, no system can be guaranteed 100% secure, so we recommend protecting your device with a strong passcode.</p>
+  </div>
+
+  <!-- Changes -->
+  <div class="card">
+    <h2 lang="ar">تغييرات هذه السياسة</h2><h2 lang="en">Changes to This Policy</h2>
+    <p lang="ar">قد نحدّث هذه السياسة من وقت لآخر. سيظهر تاريخ التحديث في أعلى الصفحة، وتسري النسخة المنشورة هنا اعتباراً من ذلك التاريخ.</p>
+    <p lang="en">We may update this policy from time to time. The revision date appears at the top of this page, and the version posted here is effective as of that date.</p>
+  </div>
+
+  <!-- Contact -->
+  <div class="card">
+    <h2 lang="ar">التواصل</h2><h2 lang="en">Contact</h2>
+    <p lang="ar">لأي سؤال حول الخصوصية، راسلنا على: <a href="mailto:info@aswaralmudun.com">info@aswaralmudun.com</a></p>
+    <p lang="en">For any privacy question, contact us at: <a href="mailto:info@aswaralmudun.com">info@aswaralmudun.com</a></p>
+  </div>
+
+  <footer>© 2026 Aswar Almudun · NetToolbox</footer>
+</div>
+
+<script>
+  function setLang(l){
+    document.body.classList.remove('ar','en');
+    document.body.classList.add(l);
+    document.documentElement.lang = l;
+    document.documentElement.dir = (l === 'ar') ? 'rtl' : 'ltr';
+    document.getElementById('btn-ar').classList.toggle('active', l==='ar');
+    document.getElementById('btn-en').classList.toggle('active', l==='en');
+  }
+</script>
+</body>
+</html>

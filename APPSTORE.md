@@ -28,6 +28,11 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
   (`Sources/NetToolboxKit/Resources/PrivacyInfo.xcprivacy`). Both declare the
   `UserDefaults` API reason `CA92.1` and no tracking / no collected data.
 - **Nutrition label:** "Data Not Collected."
+- **Privacy policy page:** a ready, bilingual (Arabic + English) page lives at
+  `docs/privacy/index.html`. Host it and paste the URL into App Store Connect →
+  App Privacy → Privacy Policy URL. Easiest option: enable **GitHub Pages** for
+  this repo (Settings → Pages → Deploy from branch → `/docs`), which serves it
+  at `https://<user>.github.io/NetToolbox/privacy/`. Any static host works too.
 
 ## Required Info.plist usage strings
 
