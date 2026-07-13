@@ -20,7 +20,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "NetToolbox",
+    name: "NetToolboxKit",
     defaultLocalization: "en",
     platforms: [
         .iOS("26.0")
