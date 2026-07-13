@@ -9,10 +9,13 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
 
 - **Name:** NetToolbox
 - **Bundle ID:** `com.aswaralmudun.nettoolbox`
-- **Version:** 1.4.0 (matches the app playground `displayVersion` and Settings → About)
+- **Version:** 2.3.0 (matches the app playground `displayVersion` and Settings → About)
 - **Category:** Utilities (secondary: Developer Tools)
-- **Supported devices:** iPad + iPhone, iOS 17+
+- **Supported devices:** iPad + iPhone, iOS 26.0+
 - **Localizations:** English, Arabic (RTL)
+- **Tools:** 81 in the tool list across 7 categories (Calculators, Diagnostics,
+  DNS & Domains, Security, Local Network, Professional, BGP) + History, Backup
+  and Engine Self-Tests inside Settings.
 
 ## Privacy
 
@@ -20,8 +23,10 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
 - **Data collected:** none off-device. Saved hosts, SSH profiles, cameras and
   history stay on the device (`UserDefaults` + Keychain). Backups are
   user-initiated files, optionally passphrase-encrypted.
-- **Privacy manifest:** `Sources/NetToolboxKit/Resources/PrivacyInfo.xcprivacy`
-  declares the `UserDefaults` API reason `CA92.1`.
+- **Privacy manifest:** shipped in two places — the app target
+  (`NetToolbox.swiftpm/PrivacyInfo.xcprivacy`) and the package
+  (`Sources/NetToolboxKit/Resources/PrivacyInfo.xcprivacy`). Both declare the
+  `UserDefaults` API reason `CA92.1` and no tracking / no collected data.
 - **Nutrition label:** "Data Not Collected."
 
 ## Required Info.plist usage strings
@@ -56,10 +61,12 @@ Notes:
 
 ## App icon
 
-- Source: `NetToolbox.swiftpm/AppIcon.svg` (1024×1024, no text, teal network
-  motif). Export a **1024×1024 PNG, no alpha/transparency** for App Store.
-- Swift Playgrounds: App Settings → App Icon → choose the PNG.
-- Xcode: `Assets.xcassets` → `AppIcon` → drop the 1024 PNG into "App Store iOS".
+- **Wired in:** `NetToolbox.swiftpm/Package.swift` uses `appIcon: .asset("AppIcon")`,
+  backed by `NetToolbox.swiftpm/Assets.xcassets/AppIcon.appiconset/` (1024×1024
+  PNG). The `.earth` placeholder is no longer used.
+- Design source: `NetToolbox.swiftpm/AppIcon.svg` (1024×1024, no text, teal
+  network hub-and-spoke motif). Re-export to `AppIcon.appiconset/AppIcon.png`
+  (no alpha) if you tweak the SVG.
 
 ## How to submit
 
@@ -78,7 +85,7 @@ record in App Store Connect (`appstoreconnect.apple.com` → Apps → +).
    imports `NetToolboxKit`.
 2. Signing & Capabilities: pick your team; add **iCloud → Key-value storage**
    if you want the sync toggle to work.
-3. Set version 1.4.0, build number, and the 1024 icon in `Assets.xcassets`.
+3. Set version 2.3.0, build number, and confirm the 1024 icon in `Assets.xcassets`.
 4. Product → **Archive** → **Distribute App** → **App Store Connect** → Upload.
 
 ### Then, in App Store Connect (both paths)
@@ -94,44 +101,55 @@ record in App Store Connect (`appstoreconnect.apple.com` → Apps → +).
 
 ## Description (English)
 
-NetToolbox is a professional network toolkit for iPad and iPhone — 76 native
+NetToolbox is a professional network toolkit for iPad and iPhone — 80+ native
 tools in one app, with zero tracking and no accounts.
 
 Calculators: subnet & VLSM planning, CIDR aggregation, MAC/OUI lookup, base and
 text converters, hashing and JWT, regex, and more. Diagnostics: ping, world
-ping, traceroute, DNS/DoH, WHOIS/RDAP, TLS inspection, HTTP timing, port and IP
-scanning, uptime and certificate monitors. Professional: native SSH shell,
+ping, traceroute, MTR, HTTP timing, port scanning, speed test. DNS & Domains:
+DNS lookup, DoH, multi-resolver compare, DNS health, WHOIS and RDAP. Security:
+TLS/SSL inspection, certificate expiry and transparency, email authenticity
+(SPF/DKIM/DMARC), blocklist and breach checks. Professional: native SSH shell,
 SFTP, Telnet, FTP, MikroTik API, SNMP, WebSocket, MQTT, Redis, Modbus and more.
 Local network: Bonjour discovery, LAN scanner, and full IP-camera control —
 ONVIF + RTSP live view, PTZ, multi-camera grid and recording.
 
-Privacy-first: everything runs on device. Secrets are stored in the Keychain,
-backups can be encrypted with a passphrase, and an optional Face ID / passcode
-lock keeps your saved connections private.
+Every tool has a built-in "?" explanation in English and Arabic. Privacy-first:
+everything runs on device. Secrets are stored in the Keychain, backups can be
+encrypted with a passphrase, and an optional Face ID / passcode lock keeps your
+saved connections private.
 
 ## Description (Arabic) / الوصف بالعربية
 
-NetToolbox حقيبة أدوات شبكات احترافية للآيباد والآيفون — 76 أداة أصلية في تطبيق
-واحد، دون أي تتبّع ودون حسابات.
+NetToolbox حقيبة أدوات شبكات احترافية للآيباد والآيفون — أكثر من 80 أداة أصلية في
+تطبيق واحد، دون أي تتبّع ودون حسابات.
 
-حاسبات الشبكات وتخطيط VLSM، أدوات التشخيص (ping، traceroute، DNS/DoH،
-WHOIS، فحص TLS، مسح المنافذ)، وأدوات احترافية (SSH، SFTP، SNMP، MQTT،
+حاسبات الشبكات وتخطيط VLSM، أدوات التشخيص (ping، traceroute، MTR، توقيت HTTP،
+مسح المنافذ، اختبار السرعة)، وفئة DNS والنطاقات (استعلام DNS، DoH، مقارنة
+المُحلّلات، WHOIS وRDAP)، وفئة الأمان (فحص TLS، انتهاء وشفافية الشهادات، أمان
+البريد، القوائم السوداء والتسريبات)، وأدوات احترافية (SSH، SFTP، SNMP، MQTT،
 MikroTik)، واكتشاف الأجهزة على الشبكة المحلية، والتحكم الكامل بكاميرات IP عبر
 ONVIF وRTSP مع بث حيّ وتحريك PTZ وتسجيل.
 
-الخصوصية أولاً: كل شيء يعمل على الجهاز. تُحفظ الأسرار في Keychain، ويمكن تشفير
-النسخ الاحتياطية بكلمة مرور، وقفل اختياري بـ Face ID أو رمز الدخول يحمي اتصالاتك
-المحفوظة.
+لكل أداة شرح مدمج بزر «؟» بالعربية والإنجليزية. الخصوصية أولاً: كل شيء يعمل على
+الجهاز. تُحفظ الأسرار في Keychain، ويمكن تشفير النسخ الاحتياطية بكلمة مرور، وقفل
+اختياري بـ Face ID أو رمز الدخول يحمي اتصالاتك المحفوظة.
 
 ## Keywords
 
 network, subnet, ping, traceroute, dns, ssh, snmp, port scanner, ip camera,
 onvif, rtsp, wireguard, mqtt, modbus, whois, tls, mac lookup
 
-## What's New (1.4.0)
+## What's New (2.3.0)
 
-- Secrets now stored in the Keychain instead of clear text.
-- Optional passphrase-encrypted backups (AES-256-GCM).
-- Optional Face ID / Touch ID / passcode app lock.
-- Haptics and refined plural/localization handling.
-- Privacy manifest and continuous-integration build/test pipeline.
+- New focused categories: DNS & Domains and Security, split out of Diagnostics.
+- Every tool now has a built-in bilingual "?" explanation (Arabic + English).
+- Collapsible category groups in the sidebar for a shorter, scannable list.
+- History, Backup and Engine Self-Tests moved into Settings.
+- Real app icon, and stability hardening across the protocol clients.
+- Built with Swift 6 / iOS 26; 80+ tools, still zero third-party dependencies.
+
+### Earlier (1.4.0)
+
+- Secrets stored in the Keychain; optional passphrase-encrypted backups
+  (AES-256-GCM); Face ID / passcode app lock; privacy manifest and CI pipeline.
