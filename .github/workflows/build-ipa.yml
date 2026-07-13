@@ -28,22 +28,15 @@ jobs:
           set -o pipefail
           echo "=== xcodebuild -list ==="
           xcodebuild -list 2>&1 || true
-          # Auto-detect the app scheme (its exact name depends on how Xcode
-          # names the .swiftpm app product) rather than hard-coding it.
-          SCHEME=$(xcodebuild -list -json 2>/dev/null | python3 -c '
-import sys, json
-try:
-    d = json.load(sys.stdin)
-except Exception:
-    print(""); raise SystemExit
-c = d.get("project") or d.get("workspace") or {}
-schemes = c.get("schemes", [])
-pref = ([s for s in schemes if s == "NetToolbox"]
-        or [s for s in schemes if "App" in s]
-        or [s for s in schemes if "Kit" not in s]
-        or schemes)
-print(pref[0] if pref else "")
-')
+          # Auto-detect the app scheme with plain shell (its exact name depends
+          # on how Xcode names the .swiftpm app product). Prefer an exact
+          # "NetToolbox", then an "App"-ish scheme, then any non-Kit one.
+          SCHEMES=$(xcodebuild -list 2>/dev/null | awk '/Schemes:/{f=1;next} f&&NF{gsub(/^[ \t]+/,"");print}')
+          echo "Schemes found:"; echo "$SCHEMES"
+          SCHEME=$(echo "$SCHEMES" | grep -x 'NetToolbox' || true)
+          [ -z "$SCHEME" ] && SCHEME=$(echo "$SCHEMES" | grep -i 'app' | head -1 || true)
+          [ -z "$SCHEME" ] && SCHEME=$(echo "$SCHEMES" | grep -v 'Kit' | head -1 || true)
+          [ -z "$SCHEME" ] && SCHEME=$(echo "$SCHEMES" | head -1 || true)
           echo "Chosen scheme: [$SCHEME]"
           if [ -z "$SCHEME" ]; then
             echo "::error::Could not determine an app scheme to build."
