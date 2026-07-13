@@ -26,40 +26,43 @@ jobs:
         working-directory: NetToolbox.swiftpm
         run: |
           set -o pipefail
+          # DerivedData MUST live OUTSIDE the app target's source path ("."),
+          # otherwise the resolved dependency's checkout (which re-includes this
+          # .swiftpm's Assets.xcassets / PrivacyInfo.xcprivacy) collides with the
+          # app target's own resources.
           xcodebuild clean build \
             -scheme NetToolbox \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -derivedDataPath build \
+            -derivedDataPath "$RUNNER_TEMP/ddp" \
             -skipMacroValidation \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            | tee build.log
+            | tee "$RUNNER_TEMP/build.log"
 
-      - name: Package into Payload/*.ipa
-        working-directory: NetToolbox.swiftpm
+      - name: Package into NetToolbox.ipa
         run: |
           set -euo pipefail
-          APP=$(find build -type d -name "NetToolbox.app" | head -1)
+          APP=$(find "$RUNNER_TEMP/ddp/Build/Products" -type d -name "NetToolbox.app" | head -1)
           if [ -z "$APP" ]; then
-            echo "::error::NetToolbox.app not found — build did not produce an app bundle."
-            find build -maxdepth 5 -name "*.app" -type d || true
+            echo "::error::NetToolbox.app not found — build produced no app bundle."
+            find "$RUNNER_TEMP/ddp/Build/Products" -maxdepth 3 -name "*.app" -type d || true
             exit 1
           fi
           echo "Found app bundle: $APP"
-          rm -rf Payload NetToolbox.ipa
-          mkdir Payload
-          cp -R "$APP" Payload/
-          zip -qry NetToolbox.ipa Payload
+          WORK="$RUNNER_TEMP/pkg"
+          rm -rf "$WORK" && mkdir -p "$WORK/Payload"
+          cp -R "$APP" "$WORK/Payload/"
+          ( cd "$WORK" && zip -qry "$GITHUB_WORKSPACE/NetToolbox.ipa" Payload )
           echo "--- IPA ---"
-          ls -lh NetToolbox.ipa
-          unzip -l NetToolbox.ipa | head -20
+          ls -lh "$GITHUB_WORKSPACE/NetToolbox.ipa"
+          unzip -l "$GITHUB_WORKSPACE/NetToolbox.ipa" | head -20
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: NetToolbox-unsigned-ipa
-          path: NetToolbox.swiftpm/NetToolbox.ipa
+          path: NetToolbox.ipa
           retention-days: 30
           if-no-files-found: error
