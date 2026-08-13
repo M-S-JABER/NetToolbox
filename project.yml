@@ -46,6 +46,11 @@ targets:
       # كتالوج الأيقونة مشترك مع نسخة .swiftpm: مصدر واحد للحقيقة بدل
       # نسختين تتباعدان.
       - path: NetToolbox.swiftpm/Assets.xcassets
+      # بيان الخصوصية على مستوى التطبيق — إلزامي من Apple.
+      # لا يكفي البيان الموجود في موارد المكتبة: ذاك ينتهي داخل حزمة موارد
+      # NetToolboxKit، بينما تفحص Apple بياناً في جذر حزمة التطبيق نفسه.
+      # نشارك ملف .swiftpm بدل نسخه، فيبقى مصدراً واحداً للنسختين.
+      - path: NetToolbox.swiftpm/PrivacyInfo.xcprivacy
     dependencies:
       - package: NetToolboxKit
         product: NetToolboxKit
