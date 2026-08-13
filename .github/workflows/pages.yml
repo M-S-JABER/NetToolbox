@@ -44,28 +44,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: التحقق من تفعيل Pages
+      - name: التحقق من حالة Pages
         id: check
         run: |
-          code=$(curl -s -o /dev/null -w "%{http_code}" \
+          body=$(curl -s -w "\n%{http_code}" \
             -H "Authorization: Bearer ${{ github.token }}" \
             -H "Accept: application/vnd.github+json" \
             "${{ github.api_url }}/repos/${{ github.repository }}/pages")
-          if [ "$code" = "200" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Pages مفعّل — نكمل النشر."
-          else
+          code=$(printf '%s' "$body" | tail -n1)
+          json=$(printf '%s' "$body" | sed '$d')
+
+          # الحالة الأولى: Pages غير مفعّل إطلاقاً.
+          if [ "$code" != "200" ]; then
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::GitHub Pages غير مفعّل بعد (HTTP $code) — تم تخطّي النشر."
+            echo "::warning::Pages غير مفعّل (HTTP $code) — تم تخطّي النشر."
             {
               echo "### ⏭️ تُخطّي النشر — Pages غير مفعّل"
               echo ""
-              echo "فعّله مرة واحدة من:"
-              echo "**Settings → Pages → Build and deployment → Source: \`GitHub Actions\`**"
-              echo ""
-              echo "ثم أعد تشغيل هذا الـ workflow من تبويب Actions."
+              echo "فعّله من: **Settings → Pages → Source: \`GitHub Actions\`**"
             } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+
+          # الحالة الثانية: Pages مفعّل لكن مصدره فرع لا Actions.
+          # عندها ينشر GitHub المحتوى بنفسه عبر pages-build-deployment،
+          # ومحاولتنا النشر هنا ستفشل. نتخطّى بصمت ونبقى خُضراً.
+          build_type=$(printf '%s' "$json" | jq -r '.build_type // "unknown"')
+          if [ "$build_type" != "workflow" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::مصدر Pages هو \"$build_type\" لا \"workflow\" — ينشر GitHub المحتوى بنفسه."
+            {
+              echo "### ⏭️ تُخطّي النشر — المصدر فرع لا Actions"
+              echo ""
+              echo "مصدر Pages مضبوط على \`$build_type\`، أي أن GitHub ينشر"
+              echo "مجلد docs/ بنفسه ولا حاجة لهذا الـ workflow. لا إجراء مطلوب."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "✅ Pages مفعّل بمصدر workflow — نكمل النشر."
 
       - name: تهيئة Pages
         if: steps.check.outputs.enabled == 'true'
