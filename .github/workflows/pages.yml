@@ -1,0 +1,94 @@
+# ينشر مجلد docs/ على GitHub Pages — وأهم ما فيه صفحة سياسة الخصوصية،
+# ورابطها حقل إلزامي في App Store Connect.
+#
+# ┌─ خطوة يدوية مطلوبة مرة واحدة ────────────────────────────────────────┐
+# │ Settings → Pages → Build and deployment → Source: **GitHub Actions** │
+# └──────────────────────────────────────────────────────────────────────┘
+#
+# لماذا لا يفعّلها هذا الـ workflow بنفسه؟ جُرّب ذلك عبر
+# actions/configure-pages مع enablement: true، فردّت واجهة GitHub:
+#   Create Pages site failed — Resource not accessible by integration
+# رمز GITHUB_TOKEN يملك صلاحية **النشر** على Pages، لكن **إنشاء** الموقع
+# أول مرة محجوب عنه. لا مفرّ إذاً من تفعيله مرة واحدة من الإعدادات.
+#
+# قبل التفعيل: تتخطّى الوظيفة نفسها برسالة تنبيه وتنتهي **خضراء**، فلا
+# تترك علامة فشل حمراء عند كل تعديل على docs/.
+# بعد التفعيل: تنشر تلقائياً، ويصبح الرابط:
+#   https://m-s-jaber.github.io/NetToolbox/privacy/
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write            # للنشر
+  id-token: write         # يطلبه deploy-pages للمصادقة
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: التحقق من تفعيل Pages
+        id: check
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/pages")
+          if [ "$code" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Pages مفعّل — نكمل النشر."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages غير مفعّل بعد (HTTP $code) — تم تخطّي النشر."
+            {
+              echo "### ⏭️ تُخطّي النشر — Pages غير مفعّل"
+              echo ""
+              echo "فعّله مرة واحدة من:"
+              echo "**Settings → Pages → Build and deployment → Source: \`GitHub Actions\`**"
+              echo ""
+              echo "ثم أعد تشغيل هذا الـ workflow من تبويب Actions."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: تهيئة Pages
+        if: steps.check.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
+
+      - name: رفع محتوى docs/ كنسخة للنشر
+        if: steps.check.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: النشر
+        id: deployment
+        if: steps.check.outputs.enabled == 'true'
+        uses: actions/deploy-pages@v4
+
+      - name: الخلاصة
+        if: steps.check.outputs.enabled == 'true'
+        run: |
+          {
+            echo "### ✅ نُشرت صفحة الخصوصية"
+            echo ""
+            echo "الرابط: ${{ steps.deployment.outputs.page_url }}privacy/"
+            echo ""
+            echo "الصقه في App Store Connect → App Privacy → Privacy Policy URL"
+          } >> "$GITHUB_STEP_SUMMARY"
