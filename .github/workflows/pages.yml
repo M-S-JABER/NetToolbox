@@ -1,0 +1,64 @@
+# ينشر مجلد docs/ على GitHub Pages — وأهم ما فيه صفحة سياسة الخصوصية،
+# ورابطها حقل إلزامي في App Store Connect.
+#
+# لماذا workflow بدل تفعيل Pages من الإعدادات يدوياً؟
+# لأن خطوة configure-pages أدناه تُفعّل Pages بنفسها عبر صلاحية pages: write
+# الممنوحة للـ GITHUB_TOKEN داخل الرنر. فلا حاجة لفتح صفحة الإعدادات إطلاقاً.
+#
+# المصدر يُضبط على "GitHub Actions" لا على "Deploy from a branch". النتيجة
+# النهائية واحدة، مع فارق أن هذا المسار لا يمرّر الملفات عبر Jekyll — وهو
+# ما نريده هنا: صفحة HTML ثابتة تُقدَّم كما هي بلا معالجة.
+#
+# الرابط الناتج:  https://m-s-jaber.github.io/NetToolbox/privacy/
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write            # يسمح بتفعيل Pages ونشر النسخة
+  id-token: write         # يطلبه deploy-pages للمصادقة
+
+# نشرة واحدة في كل مرة، وبلا إلغاء نشرة جارية.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تهيئة Pages وتفعيله إن لم يكن مفعّلاً
+        uses: actions/configure-pages@v5
+        with:
+          # هذا هو المفتاح: يُفعّل Pages على المستودع تلقائياً.
+          enablement: true
+
+      - name: رفع محتوى docs/ كنسخة للنشر
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: النشر
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: الخلاصة
+        run: |
+          echo "### ✅ نُشرت صفحة الخصوصية" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "الرابط: ${{ steps.deployment.outputs.page_url }}privacy/" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "الصقه في App Store Connect → App Privacy → Privacy Policy URL" >> $GITHUB_STEP_SUMMARY
