@@ -52,7 +52,13 @@
     display:inline-block;background:color-mix(in srgb,var(--accent) 18%,transparent);
     color:var(--accent);border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:700;
   }
-  [lang]{display:none}
+  /* الإخفاء محصور داخل الجسم عمداً.
+     `[lang]` وحده كان يطابق <html lang="ar"> أيضاً، و display:none على
+     العنصر الجذر يُخفي المستند كاملاً — فكانت الصفحة تُخدَم سليمة لكنها
+     تظهر بيضاء. وقاعدة الإظهار أدناه محدِّد نَسَب لا يطال <html> لأنه
+     ليس داخل <body>، فيبقى مخفياً بلا علاج.
+     `body [lang]` يطابق أحفاد الجسم فقط، فينجو <html> و <body>. */
+  body [lang]{display:none}
   body.ar [lang="ar"]{display:block}
   body.en [lang="en"]{display:block}
   body.en{direction:ltr}
