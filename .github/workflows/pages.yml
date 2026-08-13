@@ -1,15 +1,20 @@
 # ينشر مجلد docs/ على GitHub Pages — وأهم ما فيه صفحة سياسة الخصوصية،
 # ورابطها حقل إلزامي في App Store Connect.
 #
-# لماذا workflow بدل تفعيل Pages من الإعدادات يدوياً؟
-# لأن خطوة configure-pages أدناه تُفعّل Pages بنفسها عبر صلاحية pages: write
-# الممنوحة للـ GITHUB_TOKEN داخل الرنر. فلا حاجة لفتح صفحة الإعدادات إطلاقاً.
+# ┌─ خطوة يدوية مطلوبة مرة واحدة ────────────────────────────────────────┐
+# │ Settings → Pages → Build and deployment → Source: **GitHub Actions** │
+# └──────────────────────────────────────────────────────────────────────┘
 #
-# المصدر يُضبط على "GitHub Actions" لا على "Deploy from a branch". النتيجة
-# النهائية واحدة، مع فارق أن هذا المسار لا يمرّر الملفات عبر Jekyll — وهو
-# ما نريده هنا: صفحة HTML ثابتة تُقدَّم كما هي بلا معالجة.
+# لماذا لا يفعّلها هذا الـ workflow بنفسه؟ جُرّب ذلك عبر
+# actions/configure-pages مع enablement: true، فردّت واجهة GitHub:
+#   Create Pages site failed — Resource not accessible by integration
+# رمز GITHUB_TOKEN يملك صلاحية **النشر** على Pages، لكن **إنشاء** الموقع
+# أول مرة محجوب عنه. لا مفرّ إذاً من تفعيله مرة واحدة من الإعدادات.
 #
-# الرابط الناتج:  https://m-s-jaber.github.io/NetToolbox/privacy/
+# قبل التفعيل: تتخطّى الوظيفة نفسها برسالة تنبيه وتنتهي **خضراء**، فلا
+# تترك علامة فشل حمراء عند كل تعديل على docs/.
+# بعد التفعيل: تنشر تلقائياً، ويصبح الرابط:
+#   https://m-s-jaber.github.io/NetToolbox/privacy/
 name: pages
 
 on:
@@ -22,10 +27,9 @@ on:
 
 permissions:
   contents: read
-  pages: write            # يسمح بتفعيل Pages ونشر النسخة
+  pages: write            # للنشر
   id-token: write         # يطلبه deploy-pages للمصادقة
 
-# نشرة واحدة في كل مرة، وبلا إلغاء نشرة جارية.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -40,25 +44,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: تهيئة Pages وتفعيله إن لم يكن مفعّلاً
+      - name: التحقق من تفعيل Pages
+        id: check
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/pages")
+          if [ "$code" = "200" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Pages مفعّل — نكمل النشر."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages غير مفعّل بعد (HTTP $code) — تم تخطّي النشر."
+            {
+              echo "### ⏭️ تُخطّي النشر — Pages غير مفعّل"
+              echo ""
+              echo "فعّله مرة واحدة من:"
+              echo "**Settings → Pages → Build and deployment → Source: \`GitHub Actions\`**"
+              echo ""
+              echo "ثم أعد تشغيل هذا الـ workflow من تبويب Actions."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: تهيئة Pages
+        if: steps.check.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
-        with:
-          # هذا هو المفتاح: يُفعّل Pages على المستودع تلقائياً.
-          enablement: true
 
       - name: رفع محتوى docs/ كنسخة للنشر
+        if: steps.check.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
       - name: النشر
         id: deployment
+        if: steps.check.outputs.enabled == 'true'
         uses: actions/deploy-pages@v4
 
       - name: الخلاصة
+        if: steps.check.outputs.enabled == 'true'
         run: |
-          echo "### ✅ نُشرت صفحة الخصوصية" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "الرابط: ${{ steps.deployment.outputs.page_url }}privacy/" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "الصقه في App Store Connect → App Privacy → Privacy Policy URL" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "### ✅ نُشرت صفحة الخصوصية"
+            echo ""
+            echo "الرابط: ${{ steps.deployment.outputs.page_url }}privacy/"
+            echo ""
+            echo "الصقه في App Store Connect → App Privacy → Privacy Policy URL"
+          } >> "$GITHUB_STEP_SUMMARY"
