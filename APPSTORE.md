@@ -8,10 +8,10 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
 ## Identity
 
 - **Name:** NetToolbox
-- **Bundle ID:** `com.aswaralmudun.nettoolbox`
+- **Bundle ID:** `net.alnokhba.nettoolbox`
 - **Version:** 2.3.0 (matches the app playground `displayVersion` and Settings → About)
 - **Category:** Utilities (secondary: Developer Tools)
-- **Supported devices:** iPad + iPhone, iOS 26.0+
+- **Supported devices:** iPad + iPhone, iOS 17.0+
 - **Localizations:** English, Arabic (RTL)
 - **Tools:** 81 in the tool list across 7 categories (Calculators, Diagnostics,
   DNS & Domains, Security, Local Network, Professional, BGP) + History, Backup
@@ -152,7 +152,7 @@ onvif, rtsp, wireguard, mqtt, modbus, whois, tls, mac lookup
 - Collapsible category groups in the sidebar for a shorter, scannable list.
 - History, Backup and Engine Self-Tests moved into Settings.
 - Real app icon, and stability hardening across the protocol clients.
-- Built with Swift 6 / iOS 26; 80+ tools, still zero third-party dependencies.
+- Built with Swift 6, iOS 17+; 80+ tools, still zero third-party dependencies.
 
 ### Earlier (1.4.0)
 

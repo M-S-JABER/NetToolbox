@@ -1,0 +1,17 @@
+# إعدادات fastlane match — إدارة الشهادات عبر مستودع git مشفّر.
+#
+# مهم: هذا المستودع يشارك WhatsX نفس مستودع الشهادات ونفس MATCH_PASSWORD.
+# match يخزّن شهادة توزيع واحدة لكل الحساب (Apple تسمح باثنتين كحد أقصى)
+# وملف تزويد منفصلاً لكل معرّف حزمة. لذلك لا تعارض بين التطبيقين — بل هذا
+# هو الاستخدام الصحيح: شهادة مشتركة، وملفات تزويد متعددة.
+
+git_url(ENV["MATCH_GIT_URL"] || "https://github.com/M-S-JABER/certificates")
+
+storage_mode("git")
+git_branch("main")
+type("appstore")
+
+app_identifier(["net.alnokhba.nettoolbox"])
+
+# readonly هو الوضع الافتراضي الآمن. lane :bootstrap_signing وحده يتجاوزه.
+readonly(true)

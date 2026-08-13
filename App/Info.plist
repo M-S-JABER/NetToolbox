@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Info.plist لهدف التطبيق المولَّد بـ XcodeGen.
+
+  أوصاف الاستخدام أدناه تطابق حرفياً ما يعلنه NetToolbox.swiftpm عبر
+  .iOSApplication(capabilities:) — فأي تعديل هنا يجب أن يُنسخ هناك
+  والعكس، وإلا اختلف سلوك النسختين.
+
+  ملاحظة مهمة: كل هذه مجرد أوصاف استخدام في Info.plist، وليست
+  entitlements. التطبيق لا يحمل أي entitlement على الإطلاق — لا Apple Pay
+  ولا Wallet ولا Sign in with Apple ولا Network Extension ولا iCloud.
+  هذا مقصود: يبقى App Transfer إلى حساب المؤسسة لاحقاً بلا عوائق.
+-->
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleDisplayName</key>
+    <string>NetToolbox</string>
+    <key>CFBundleName</key>
+    <string>NetToolbox</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
+
+    <!-- اللغات المدعومة — تطابق ar.lproj و en.lproj في موارد المكتبة -->
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>ar</string>
+    </array>
+
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UILaunchScreen</key>
+    <dict/>
+
+    <!-- iPhone: بلا مقلوب. iPad: الأربع اتجاهات -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- ══ أوصاف الصلاحيات ══
+         كلها تُطلب عند أول استخدام للميزة، لا عند إقلاع التطبيق. -->
+
+    <!-- قفل التطبيق. بدون هذا المفتاح ينهار التطبيق عند أول محاولة
+         مصادقة على جهاز حقيقي. -->
+    <key>NSFaceIDUsageDescription</key>
+    <string>يُستخدم Face ID لقفل NetToolbox وحماية المضيفات المحفوظة وملفات SSH والكاميرات.</string>
+
+    <key>NSCameraUsageDescription</key>
+    <string>تُستخدم الكاميرا لمسح رموز QR (إعدادات Wi-Fi و WireGuard).</string>
+
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>يُستخدم لحفظ لقطات الكاميرا في مكتبة الصور.</string>
+
+    <!-- اكتشاف الأجهزة والخدمات على الشبكة المحلية عبر Bonjour و mDNS -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>يُستخدم لاكتشاف الأجهزة والخدمات على شبكتك المحلية (Bonjour، فحص الشبكة، كاميرات IP).</string>
+
+    <!-- أنواع خدمات Bonjour التي يستعلم عنها LANScanner. iOS يرفض أي نوع
+         غير مذكور هنا صراحةً. -->
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_http._tcp</string>
+        <string>_https._tcp</string>
+        <string>_ssh._tcp</string>
+        <string>_smb._tcp</string>
+        <string>_airplay._tcp</string>
+        <string>_raop._tcp</string>
+        <string>_ipp._tcp</string>
+        <string>_printer._tcp</string>
+        <string>_googlecast._tcp</string>
+        <string>_rfb._tcp</string>
+        <string>_device-info._tcp</string>
+        <string>_homekit._tcp</string>
+    </array>
+</dict>
+</plist>

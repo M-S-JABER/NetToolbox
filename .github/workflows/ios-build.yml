@@ -1,0 +1,105 @@
+# بناء + اختبار على كل دفعة — لا يحتاج أي سر ولا حساب مطوّر مفعّلاً.
+#
+# ينتج .ipa غير موقّع يمكنك تنزيله من قسم Artifacts، ثم إعادة توقيعه بـ
+# AltStore أو Sideloadly لتجربته على جهاز حقيقي. هذه طريقتك الوحيدة
+# للتجربة على جهاز قبل تفعيل حساب المطوّر.
+name: ios-build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ══════════════════════════════════════════════════════════════════════
+  # اختبارات المكتبة — وظيفة مستقلة عمداً
+  # ══════════════════════════════════════════════════════════════════════
+  # ⚠️ هذه الوظيفة لا تشغّل xcodegen إطلاقاً، وهذا مقصود: xcodebuild يكتشف
+  # تلقائياً ما يبنيه في المجلد الحالي، وما إن يوجد NetToolbox.xcodeproj
+  # حتى يفضّله على Package.swift فتفشل مخططات الحزمة. فصل الوظيفتين يمنع
+  # هذا التعارض ويجعلهما تعملان بالتوازي أيضاً.
+  test:
+    name: اختبارات NetToolboxKit
+    runs-on: macos-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: بيئة البناء
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: اختيار محاكي متاح
+        id: sim
+        run: |
+          DEVICE=$(xcrun simctl list devices available \
+            | grep -oE 'iPhone [0-9]+( Pro Max| Pro| Plus)?' | tail -1)
+          echo "device=${DEVICE:-iPhone 16}" >> "$GITHUB_OUTPUT"
+          echo "المحاكي المختار: ${DEVICE:-iPhone 16}"
+
+      - name: تشغيل الاختبارات
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme NetToolboxKit \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+            -skipMacroValidation \
+            CODE_SIGNING_ALLOWED=NO
+
+  # ══════════════════════════════════════════════════════════════════════
+  # بناء التطبيق عبر XcodeGen
+  # ══════════════════════════════════════════════════════════════════════
+  build:
+    name: بناء التطبيق (غير موقّع)
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: تثبيت XcodeGen
+        run: brew install xcodegen
+
+      - name: تهيئة Ruby و fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: توليد مشروع Xcode من project.yml
+        run: |
+          xcodegen generate
+          echo "--- الأهداف والمخططات ---"
+          xcodebuild -list -project NetToolbox.xcodeproj
+
+      - name: بناء غير موقّع + تغليف IPA
+        run: bundle exec fastlane build
+
+      - name: رفع الـ IPA غير الموقّع كـ artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetToolbox-unsigned-ipa
+          path: build/NetToolbox-unsigned.ipa
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: رفع سجلّ البناء عند الفشل
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            ~/Library/Logs/gym/**
+            fastlane/report.xml
+          retention-days: 7
+          if-no-files-found: ignore

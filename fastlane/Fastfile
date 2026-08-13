@@ -1,0 +1,272 @@
+# Fastfile — خط البناء والنشر لـ NetToolbox
+#
+# كل الـ lanes مصمَّمة للعمل داخل runner من نوع macOS على GitHub Actions.
+# لا شيء منها يحتاج جهاز Mac محلياً، ولا Xcode على جهازك.
+#
+# ────────────────────────────────────────────────────────────────────────
+#  الـ lanes المتاحة
+# ────────────────────────────────────────────────────────────────────────
+#   fastlane build                 بناء غير موقّع للتحقق السريع (لا يحتاج أي سر)
+#   fastlane test                  اختبارات المكتبة على المحاكي
+#   fastlane setup_certificates    سحب الشهادات من مستودع match بوضع readonly
+#   fastlane beta                  بناء موقّع + رفع إلى TestFlight
+#   fastlane bootstrap_signing     تشغيل لمرة واحدة: تسجيل التطبيق + توليد الشهادات
+#
+# ────────────────────────────────────────────────────────────────────────
+#  الأسرار المطلوبة (GitHub → Settings → Secrets and variables → Actions)
+# ────────────────────────────────────────────────────────────────────────
+#   TEAM_ID                       Team ID من developer.apple.com → Membership
+#   APP_STORE_CONNECT_KEY_ID      معرّف مفتاح API (10 محارف)
+#   APP_STORE_CONNECT_ISSUER_ID   Issuer ID (صيغة UUID)
+#   APP_STORE_CONNECT_KEY_P8      محتوى ملف .p8 كاملاً (أو مُرمَّزاً base64)
+#   MATCH_PASSWORD                عبارة تشفير مخزن الشهادات
+#   MATCH_GIT_TOKEN               PAT بصلاحية repo لمستودع certificates
+#   MATCH_GIT_URL                 (اختياري) رابط مستودع الشهادات
+
+require "base64"
+require "fileutils"
+
+APP_IDENTIFIER = "net.alnokhba.nettoolbox"
+SCHEME         = "NetToolbox"
+KIT_SCHEME     = "NetToolboxKit"
+APP_NAME       = "NetToolbox"
+
+# fastlane ينفّذ الأوامر من داخل مجلد fastlane/ لا من جذر المستودع، وهذا
+# مصدر أخطاء مسارات متكرر. نحسب الجذر مرة واحدة ونستخدم مسارات مطلقة.
+ROOT         = File.expand_path("..", __dir__)
+PROJECT      = File.join(ROOT, "NetToolbox.xcodeproj")
+BUILD_DIR    = File.join(ROOT, "build")
+ARCHIVE_PATH = File.join(BUILD_DIR, "#{SCHEME}.xcarchive")
+
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    setup_ci if ENV["CI"]
+  end
+
+  # ══════════════════════════════════════════════════════════════════════
+  # اختبارات المكتبة
+  # ══════════════════════════════════════════════════════════════════════
+  # ⚠️ يجب أن تعمل **قبل** توليد NetToolbox.xcodeproj. السبب: xcodebuild
+  # يكتشف تلقائياً ما يبنيه في المجلد الحالي، وما إن يوجد ملف .xcodeproj
+  # حتى يفضّله على Package.swift — فتفشل مخططات الحزمة. لذلك يفصل
+  # ios-build.yml الاختبارات في وظيفة مستقلة لا تولّد المشروع أصلاً.
+  desc "تشغيل اختبارات NetToolboxKit على المحاكي"
+  lane :test do
+    device = simulator_name
+    UI.message("المحاكي المستخدم: #{device}")
+
+    Dir.chdir(ROOT) do
+      scan(
+        scheme: KIT_SCHEME,
+        destination: "platform=iOS Simulator,name=#{device}",
+        skip_slack: true,
+        xcargs: "-skipMacroValidation CODE_SIGNING_ALLOWED=NO"
+      )
+    end
+  end
+
+  # ══════════════════════════════════════════════════════════════════════
+  # بناء غير موقّع — للتحقق السريع
+  # ══════════════════════════════════════════════════════════════════════
+  # لا يحتاج أي سر ولا حساب Apple مفعّلاً. يُنتج .ipa غير موقّع صالح
+  # لإعادة التوقيع عبر AltStore أو Sideloadly.
+  desc "بناء غير موقّع للتحقق السريع"
+  lane :build do
+    generate_project
+
+    gym(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      skip_package_ipa: true,
+      skip_codesigning: true,
+      destination: "generic/platform=iOS",
+      archive_path: ARCHIVE_PATH,
+      xcargs: "-skipMacroValidation CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=''"
+    )
+
+    package_unsigned_ipa
+  end
+
+  # ══════════════════════════════════════════════════════════════════════
+  # سحب الشهادات — يُستدعى داخل CI قبل أي بناء موقّع
+  # ══════════════════════════════════════════════════════════════════════
+  desc "سحب شهادات match بوضع readonly (للاستخدام داخل CI)"
+  lane :setup_certificates do
+    match(
+      type: "appstore",
+      app_identifier: APP_IDENTIFIER,
+      readonly: true,
+      git_url: match_git_url,
+      git_basic_authorization: match_git_auth,
+      api_key: appstore_api_key,
+      keychain_name: ENV["MATCH_KEYCHAIN_NAME"] || "fastlane_tmp_keychain",
+      keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"] || ""
+    )
+  end
+
+  # ══════════════════════════════════════════════════════════════════════
+  # بناء موقّع + رفع إلى TestFlight
+  # ══════════════════════════════════════════════════════════════════════
+  desc "بناء موقّع ورفعه إلى TestFlight"
+  lane :beta do
+    setup_certificates
+    generate_project
+
+    increment_build_number(
+      xcodeproj: PROJECT,
+      build_number: ENV["BUILD_NUMBER"] || ENV["GITHUB_RUN_NUMBER"] || "1"
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: PROJECT,
+      team_id: ENV["TEAM_ID"],
+      targets: [SCHEME],
+      bundle_identifier: APP_IDENTIFIER,
+      code_sign_identity: "Apple Distribution",
+      profile_name: "match AppStore #{APP_IDENTIFIER}"
+    )
+
+    gym(
+      project: PROJECT,
+      scheme: SCHEME,
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: BUILD_DIR,
+      output_name: "#{SCHEME}.ipa",
+      destination: "generic/platform=iOS",
+      xcargs: "-skipMacroValidation",
+      export_options: {
+        provisioningProfiles: {
+          APP_IDENTIFIER => "match AppStore #{APP_IDENTIFIER}"
+        }
+      }
+    )
+
+    upload_to_testflight(
+      api_key: appstore_api_key,
+      app_identifier: APP_IDENTIFIER,
+      ipa: File.join(BUILD_DIR, "#{SCHEME}.ipa"),
+      skip_waiting_for_build_processing: true,
+      distribute_external: false,
+      changelog: ENV["CHANGELOG"] || "بناء آلي من فرع #{git_branch_name}"
+    )
+  end
+
+  # ══════════════════════════════════════════════════════════════════════
+  # تشغيل لمرة واحدة — بعد تفعيل حساب المطوّر مباشرة
+  # ══════════════════════════════════════════════════════════════════════
+  # التشغيل الأول لـ match يحتاج صلاحية الكتابة لتوليد الشهادات، وعادةً
+  # يُنفَّذ على جهاز المطوّر. هنا ننفّذه داخل runner بدل ذلك — وهذا ما
+  # يجعل الإعداد ممكناً بلا جهاز Mac.
+  #
+  # شغّله من: Actions → ios-certificates → Run workflow
+  desc "تشغيل أولي: تسجيل التطبيق في البوابة + توليد الشهادات وتخزينها"
+  lane :bootstrap_signing do
+    # 1) تسجيل معرّف الحزمة وإنشاء سجل التطبيق. match لا ينشئ المعرّف بنفسه.
+    begin
+      produce(
+        app_identifier: APP_IDENTIFIER,
+        app_name: APP_NAME,
+        language: "English",
+        app_version: "2.3.2",
+        sku: "nettoolbox-ios-#{APP_IDENTIFIER.gsub('.', '-')}",
+        team_id: ENV["TEAM_ID"],
+        api_key: appstore_api_key,
+        skip_itc: false,
+        skip_devcenter: false
+      )
+    rescue => e
+      UI.important("تخطّي produce: #{e.message}")
+    end
+
+    # 2) توليد شهادة التوزيع وملف التزويد وتخزينهما مشفَّرَين.
+    #    readonly: false هو الفارق الجوهري عن setup_certificates.
+    match(
+      type: "appstore",
+      app_identifier: APP_IDENTIFIER,
+      readonly: false,
+      git_url: match_git_url,
+      git_basic_authorization: match_git_auth,
+      api_key: appstore_api_key,
+      keychain_name: ENV["MATCH_KEYCHAIN_NAME"] || "fastlane_tmp_keychain",
+      keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"] || ""
+    )
+
+    UI.success("تم. مستودع الشهادات صار جاهزاً — لا تشغّل هذا الـ lane مجدداً.")
+  end
+
+  # ══════════════════════════════════════════════════════════════════════
+  # دوال مساعدة
+  # ══════════════════════════════════════════════════════════════════════
+
+  private_lane :generate_project do
+    Dir.chdir(ROOT) { sh("xcodegen", "generate") }
+    UI.user_error!("فشل توليد #{PROJECT}") unless Dir.exist?(PROJECT)
+  end
+
+  # مفتاح App Store Connect API. نقبل محتوى .p8 خاماً أو مُرمَّزاً base64
+  # ونكتشف الصيغة تلقائياً — لأن اللصق المباشر من الآيباد أسهل من الترميز.
+  def appstore_api_key
+    @api_key ||= begin
+      raw = ENV["APP_STORE_CONNECT_KEY_P8"].to_s
+      UI.user_error!("APP_STORE_CONNECT_KEY_P8 غير مضبوط") if raw.strip.empty?
+
+      is_base64 = !raw.include?("BEGIN PRIVATE KEY")
+
+      app_store_connect_api_key(
+        key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
+        issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+        key_content: raw,
+        is_key_content_base64: is_base64,
+        in_house: false
+      )
+    end
+  end
+
+  def match_git_url
+    ENV["MATCH_GIT_URL"] || "https://github.com/M-S-JABER/certificates"
+  end
+
+  def match_git_auth
+    token = ENV["MATCH_GIT_TOKEN"].to_s
+    UI.user_error!("MATCH_GIT_TOKEN غير مضبوط") if token.strip.empty?
+    Base64.strict_encode64("x-access-token:#{token}")
+  end
+
+  def git_branch_name
+    ENV["GITHUB_REF_NAME"] || "local"
+  end
+
+  # يختار أحدث محاكي iPhone متاح على الرنر بدل تثبيت اسم جهاز قد يختفي
+  # مع تحديث صورة الرنر.
+  def simulator_name
+    out = `xcrun simctl list devices available`
+    found = out.scan(/iPhone [0-9]+(?: Pro Max| Pro| Plus)?/).uniq.last
+    found || "iPhone 16"
+  end
+
+  # يغلّف الـ .app الناتج عن الأرشيف في ملف .ipa غير موقّع، بالبنية التي
+  # يتوقعها iOS: Payload/<App>.app داخل أرشيف zip بامتداد ipa.
+  def package_unsigned_ipa
+    app     = File.join(ARCHIVE_PATH, "Products/Applications/#{SCHEME}.app")
+    payload = File.join(BUILD_DIR, "Payload")
+    ipa     = File.join(BUILD_DIR, "#{SCHEME}-unsigned.ipa")
+
+    UI.user_error!("لم يُعثر على حزمة التطبيق في #{app}") unless Dir.exist?(app)
+
+    FileUtils.rm_rf(payload)
+    FileUtils.mkdir_p(payload)
+    FileUtils.cp_r(app, payload)
+    FileUtils.rm_f(ipa)
+
+    # zip يُنفَّذ من داخل build/ ليكون المسار داخل الأرشيف
+    # Payload/<App>.app وليس مساراً مطلقاً.
+    Dir.chdir(BUILD_DIR) { sh("zip", "-qry", ipa, "Payload") }
+
+    UI.success("تم إنتاج #{ipa}")
+  end
+end

@@ -13,13 +13,17 @@ import AppleProductTypes
 let package = Package(
     name: "NetToolboxApp",
     platforms: [
-        .iOS("26.0")
+        // يطابق حد المكتبة في Package.swift بالجذر. أبقِ الاثنين متطابقين.
+        .iOS("17.0")
     ],
     products: [
         .iOSApplication(
             name: "NetToolbox",
             targets: ["AppModule"],
-            bundleIdentifier: "com.aswaralmudun.nettoolbox",
+            // يطابق PRODUCT_BUNDLE_IDENTIFIER في project.yml. غُيّر من
+            // com.aswaralmudun.nettoolbox لتوحيد الهوية مع WhatsX تحت نطاق
+            // واحد يخدم خطة النقل إلى حساب "مختبرات النخبة".
+            bundleIdentifier: "net.alnokhba.nettoolbox",
             teamIdentifier: "",
             displayVersion: "2.3.2",
             bundleVersion: "18",

@@ -1,0 +1,65 @@
+# مواصفة XcodeGen — تولّد NetToolbox.xcodeproj من هذا الملف.
+#
+# لا تحتاج Mac: ملف المشروع يُولَّد داخل runner في كل بناء، ولا يُرفع إلى
+# المستودع أبداً (مستثنى في .gitignore).
+#
+# ══ لماذا حزمة محلية وليس دمج الملفات مباشرة؟ ══════════════════════════
+# NetToolboxKit تعتمد على `Bundle.module` في ثلاثة مواضع جوهرية:
+#   - Core/Extensions/Localization.swift  → كل نصوص الواجهة (عربي/إنجليزي)
+#   - Features/MACLookup/OUIDatabase.swift → قاعدة oui.json
+#   - Features/ToolHelp/ToolHelp.swift     → اختيار لغة الشروحات
+# و`Bundle.module` رمز يولّده SwiftPM للحزم فقط. لو دُمجت الملفات مباشرة
+# في هدف التطبيق لانهارت الترجمة ولضاعت كل النصوص. لذلك تبقى المكتبة حزمة
+# حقيقية، ويرتبط بها هدف التطبيق عبر `packages` أدناه.
+#
+# ══ ولماذا حزمة محلية وليس وسماً من GitHub؟ ═════════════════════════════
+# NetToolbox.swiftpm يسحب المكتبة من وسم منشور، فيبني شيفرة قديمة لا تطابق
+# المستودع. ذلك مقبول للتطوير على الآيباد، لكنه غير مقبول لخط نشر: ستصل
+# TestFlight نسخة ليست هي ما في المستودع. الربط المحلي (path: .) يضمن أن
+# كل بناء يعكس آخر commit بالضبط.
+name: NetToolbox
+
+options:
+  bundleIdPrefix: net.alnokhba
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+# المكتبة في جذر المستودع نفسه — نفس المجلد الذي يُولَّد فيه المشروع.
+packages:
+  NetToolboxKit:
+    path: .
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+
+targets:
+  NetToolbox:
+    type: application
+    platform: iOS
+    scheme:
+      configVariants: []
+    sources:
+      # نقطة الدخول فقط — كل الشيفرة في المكتبة.
+      - path: App
+      # كتالوج الأيقونة مشترك مع نسخة .swiftpm: مصدر واحد للحقيقة بدل
+      # نسختين تتباعدان.
+      - path: NetToolbox.swiftpm/Assets.xcassets
+    dependencies:
+      - package: NetToolboxKit
+        product: NetToolboxKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: net.alnokhba.nettoolbox
+        # رقم النسخة الظاهر في App Store. ارفعه يدوياً عند كل إصدار علني.
+        MARKETING_VERSION: "2.3.2"
+        # رقم البناء — يعيد fastlane كتابته في كل رفع إلى TestFlight.
+        CURRENT_PROJECT_VERSION: 1
+        INFOPLIST_FILE: App/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        # 1,2 = iPhone و iPad. التطبيق مصمَّم للجهازين وواجهته تستخدم
+        # NavigationSplitView على iPad.
+        TARGETED_DEVICE_FAMILY: "1,2"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

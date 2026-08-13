@@ -23,7 +23,14 @@ let package = Package(
     name: "NetToolboxKit",
     defaultLocalization: "en",
     platforms: [
-        .iOS("26.0")
+        // iOS 17 هو الحد الأدنى التقني الحقيقي: `@Observable` (Observation)
+        // و SwiftData و `Section(isExpanded:)` كلها من iOS 17، ولا تستخدم
+        // المكتبة أي واجهة أحدث من ذلك. الحد كان 26.0 سابقاً بلا ضرورة
+        // تقنية، وكان يستثني كل جهاز أقدم من iPhone 11 تقريباً.
+        //
+        // ملاحظة: وضع لغة Swift 6 أدناه مستقل تماماً عن حد النشر — يحدّده
+        // إصدار المترجم لا إصدار النظام المستهدف.
+        .iOS(.v17)
     ],
     products: [
         .library(
@@ -37,8 +44,9 @@ let package = Package(
             resources: [
                 .process("Resources")
             ],
-            // Phase 2 of the Swift 6.3 / iOS 26.5 migration: full Swift 6
-            // language mode with strict concurrency checking.
+            // Full Swift 6 language mode with strict concurrency checking.
+            // This is a *compiler* setting and is independent of the iOS
+            // deployment target above — Swift 6 concurrency back-deploys.
             swiftSettings: [
                 .swiftLanguageMode(.v6)
             ]
