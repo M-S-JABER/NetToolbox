@@ -13,3 +13,32 @@ xcuserdata/
 *.xcuserstate
 **/.swiftpm/xcode/
 Package.resolved
+
+# === XcodeGen ===
+# NetToolbox.xcodeproj يُولَّد من project.yml داخل الرنر في كل بناء،
+# ولا يُرفع إلى المستودع أبداً.
+NetToolbox.xcodeproj/
+*.xcworkspace/
+
+# === مخرجات البناء ===
+build/
+*.xcarchive
+*.ipa
+*.dSYM
+*.dSYM.zip
+Payload/
+
+# === fastlane ===
+fastlane/README.md
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/screenshots/**/*.png
+
+# === أسرار التوقيع — لا تُرفع أبداً ===
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+*.keychain
+*.keychain-db

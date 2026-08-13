@@ -1,0 +1,118 @@
+# ⭐ التشغيل الأول لـ match — داخل runner، لا على جهازك.
+#
+# عادةً يُنفَّذ التشغيل الأول لـ match على جهاز Mac للمطوّر، لأنه يحتاج
+# صلاحية الكتابة لتوليد شهادة التوزيع وملف التزويد وتشفيرهما في مستودع
+# الشهادات. بما أنك لا تملك Mac، ننفّذه هنا داخل macOS runner.
+#
+# ┌─ متى تشغّله ─────────────────────────────────────────────────────────┐
+# │ مرة واحدة فقط، بعد أن تتحول بوابة المطورين من (Pending) إلى مفعّلة،   │
+# │ وبعد ضبط الأسرار الستة. بعدها لا تعده أبداً — كل بناء لاحق يسحب      │
+# │ الشهادات المخزَّنة عبر lane :setup_certificates بوضع readonly.        │
+# └──────────────────────────────────────────────────────────────────────┘
+#
+# ⚠️ وضع bootstrap يكتب في مستودع certificates. إعادة تشغيله بلا داعٍ قد
+#    تُبطل شهادات قائمة وتكسر أجهزة مثبَّت عليها بناء سابق. لذلك يطلب
+#    تأكيداً نصياً صريحاً قبل التنفيذ.
+name: ios-certificates
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "الوضع المطلوب"
+        required: true
+        type: choice
+        default: verify
+        options:
+          - verify        # readonly — يتحقق فقط أن الشهادات موجودة وقابلة للسحب
+          - bootstrap     # كتابة — التوليد الأول للشهادات (مرة واحدة)
+      confirm:
+        description: "لوضع bootstrap فقط: اكتب  CREATE  للتأكيد"
+        required: false
+        default: ""
+
+concurrency:
+  group: ios-certificates
+  cancel-in-progress: false      # لا نقطع عملية كتابة على مستودع الشهادات
+
+permissions:
+  contents: read
+
+jobs:
+  certificates:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    env:
+      TEAM_ID: ${{ secrets.TEAM_ID }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_P8: ${{ secrets.APP_STORE_CONNECT_KEY_P8 }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+
+    steps:
+      - name: التحقق من الأسرار
+        run: |
+          missing=""
+          for s in TEAM_ID APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID \
+                   APP_STORE_CONNECT_KEY_P8 MATCH_PASSWORD MATCH_GIT_TOKEN; do
+            if [ -z "${!s}" ]; then missing="$missing $s"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::أسرار ناقصة:$missing — راجع SETUP.md"
+            exit 1
+          fi
+          echo "✅ الأسرار مكتملة."
+
+      - name: بوابة التأكيد لوضع bootstrap
+        if: ${{ inputs.mode == 'bootstrap' }}
+        run: |
+          if [ "${{ inputs.confirm }}" != "CREATE" ]; then
+            echo "::error::وضع bootstrap يكتب شهادات جديدة في مستودع certificates."
+            echo "أعد التشغيل مع كتابة  CREATE  في حقل confirm إن كنت متأكداً."
+            exit 1
+          fi
+          echo "⚠️ تم التأكيد — سيجري توليد الشهادات وتخزينها."
+
+      - uses: actions/checkout@v4
+
+      - name: تهيئة Ruby و fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: توليد الشهادات وتخزينها (bootstrap)
+        if: ${{ inputs.mode == 'bootstrap' }}
+        run: bundle exec fastlane bootstrap_signing
+
+      - name: التحقق من إمكانية سحب الشهادات (verify)
+        if: ${{ inputs.mode == 'verify' }}
+        run: bundle exec fastlane setup_certificates
+
+      - name: الخلاصة
+        if: success()
+        run: |
+          if [ "${{ inputs.mode }}" = "bootstrap" ]; then
+            echo "### ✅ تم توليد الشهادات" >> $GITHUB_STEP_SUMMARY
+            echo "مستودع certificates صار يحتوي شهادة التوزيع وملف التزويد مشفَّرَين." >> $GITHUB_STEP_SUMMARY
+            echo "الخطوة التالية: شغّل **ios-release** لرفع أول بناء إلى TestFlight." >> $GITHUB_STEP_SUMMARY
+            echo "لا تعد تشغيل bootstrap مرة أخرى." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ الشهادات سليمة وقابلة للسحب" >> $GITHUB_STEP_SUMMARY
+            echo "خط الرفع إلى TestFlight جاهز." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: السجلات عند الفشل
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: certificates-logs
+          path: |
+            ~/Library/Logs/fastlane/**
+            fastlane/report.xml
+          retention-days: 14
+          if-no-files-found: ignore

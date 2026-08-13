@@ -1,0 +1,96 @@
+# رفع بناء موقّع إلى TestFlight — يدوياً أو عند دفع وسم إصدار.
+#
+# لا يعمل قبل تفعيل حساب المطوّر وضبط الأسرار الخمسة. تتحقق أول خطوة من
+# وجودها وتتوقف برسالة واضحة بدل أن تفشل في منتصف البناء برسالة غامضة.
+name: ios-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      changelog:
+        description: "ملاحظات هذا البناء للمختبِرين في TestFlight"
+        required: false
+        default: "بناء تجريبي"
+      build_number:
+        description: "رقم البناء (اتركه فارغاً ليُستخدم رقم التشغيل تلقائياً)"
+        required: false
+  push:
+    tags:
+      - "v*"          # مثال: v1.9.1 — الوسوم بلا بادئة v لا تُطلق نشراً
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false      # لا نلغي رفعاً جارياً إلى TestFlight
+
+permissions:
+  contents: read
+
+jobs:
+  testflight:
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    env:
+      TEAM_ID: ${{ secrets.TEAM_ID }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_P8: ${{ secrets.APP_STORE_CONNECT_KEY_P8 }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      BUILD_NUMBER: ${{ inputs.build_number }}
+      CHANGELOG: ${{ inputs.changelog }}
+      # يمنع fastlane من طرح أسئلة تفاعلية داخل CI.
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+      FASTLANE_HIDE_CHANGELOG: "1"
+
+    steps:
+      - name: التحقق من وجود الأسرار المطلوبة
+        run: |
+          missing=""
+          for s in TEAM_ID APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID \
+                   APP_STORE_CONNECT_KEY_P8 MATCH_PASSWORD MATCH_GIT_TOKEN; do
+            if [ -z "${!s}" ]; then missing="$missing $s"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::أسرار ناقصة:$missing"
+            echo "أضفها من: Settings → Secrets and variables → Actions → New repository secret"
+            echo "راجع SETUP.md للحصول على مصدر كل قيمة."
+            exit 1
+          fi
+          echo "✅ كل الأسرار المطلوبة موجودة."
+
+      - uses: actions/checkout@v4
+
+      - name: تثبيت XcodeGen
+        run: brew install xcodegen
+
+      - name: تهيئة Ruby و fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: بناء موقّع + رفع إلى TestFlight
+        run: bundle exec fastlane beta
+
+      - name: رفع الـ IPA كـ artifact للأرشفة
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetToolbox-testflight-ipa
+          path: build/NetToolbox.ipa
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: رفع السجلات عند الفشل
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-logs
+          path: |
+            ~/Library/Logs/gym/**
+            ~/Library/Logs/fastlane/**
+            fastlane/report.xml
+          retention-days: 14
+          if-no-files-found: ignore

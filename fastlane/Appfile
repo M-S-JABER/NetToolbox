@@ -1,0 +1,14 @@
+# هوية التطبيق والحساب. لا تضع هنا أي سر — كل القيم الحسّاسة تأتي من
+# أسرار GitHub (Settings → Secrets and variables → Actions).
+
+# معرّف الحزمة. يجب أن يطابق PRODUCT_BUNDLE_IDENTIFIER في project.yml.
+# غُيّر من com.aswaralmudun.nettoolbox لتوحيد الهوية مع WhatsX تحت نطاق
+# واحد يخدم خطة النقل إلى حساب "مختبرات النخبة" لاحقاً.
+app_identifier("net.alnokhba.nettoolbox")
+
+# Team ID: سلسلة من 10 محارف. مصدرها بعد تفعيل الحساب:
+#   developer.apple.com → Account → Membership details → Team ID
+team_id(ENV["TEAM_ID"].to_s)
+
+# لا نضع apple_id عمداً. المصادقة عبر App Store Connect API Key (.p8)
+# حصراً — لا كلمة مرور ولا رمز مصادقة ثنائية، وهو شرط العمل داخل CI.
