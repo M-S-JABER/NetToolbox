@@ -33,6 +33,13 @@
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
 
+    <!-- التشفير: التطبيق يستخدم فقط تشفير نظام Apple القياسي (CryptoKit،
+         TLS عبر Network.framework) — لا خوارزميات خاصة ولا مكتبات خارجية،
+         فهو معفى. هذا المفتاح يُجيب تلقائياً عن سؤال Export Compliance في
+         كل رفع، فلا تظهر "Missing Compliance" على أي بناء بعد الآن. -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+
     <!-- اللغات المدعومة — تطابق ar.lproj و en.lproj في موارد المكتبة -->
     <key>CFBundleLocalizations</key>
     <array>
