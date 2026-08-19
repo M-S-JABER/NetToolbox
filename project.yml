@@ -61,6 +61,9 @@ targets:
         MARKETING_VERSION: "2.3.2"
         # رقم البناء — يعيد fastlane كتابته في كل رفع إلى TestFlight.
         CURRENT_PROJECT_VERSION: 1
+        # مطلوب حتى يعمل agvtool / increment_build_number في fastlane —
+        # بدونه يفشل رفع رقم البناء بـ "Apple Generic Versioning is not enabled".
+        VERSIONING_SYSTEM: "apple-generic"
         INFOPLIST_FILE: App/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         # 1,2 = iPhone و iPad. التطبيق مصمَّم للجهازين وواجهته تستخدم
