@@ -5,7 +5,8 @@
 # وملف تزويد منفصلاً لكل معرّف حزمة. لذلك لا تعارض بين التطبيقين — بل هذا
 # هو الاستخدام الصحيح: شهادة مشتركة، وملفات تزويد متعددة.
 
-git_url(ENV["MATCH_GIT_URL"] || "https://github.com/M-S-JABER/certificates")
+_match_git_url = ENV["MATCH_GIT_URL"].to_s.strip
+git_url(_match_git_url.empty? ? "https://github.com/M-S-JABER/certificates" : _match_git_url)
 
 storage_mode("git")
 git_branch("main")

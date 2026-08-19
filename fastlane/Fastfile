@@ -228,7 +228,11 @@ platform :ios do
   end
 
   def match_git_url
-    ENV["MATCH_GIT_URL"] || "https://github.com/M-S-JABER/certificates"
+    # ملاحظة: في CI يُمرَّر السرّ غير المضبوط كسلسلة فارغة لا كـ nil، و
+    # `"" || default` في Ruby تُرجع "" — فيصير الرابط فارغاً. نعامل الفارغ
+    # كغياب صريح حتى يعمل الرابط الافتراضي كما هو موثّق (السرّ اختياري).
+    url = ENV["MATCH_GIT_URL"].to_s.strip
+    url.empty? ? "https://github.com/M-S-JABER/certificates" : url
   end
 
   def match_git_auth
