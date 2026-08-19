@@ -115,9 +115,15 @@ platform :ios do
     setup_certificates
     generate_project
 
+    # نختار أول قيمة غير فارغة. في CI يصل السرّ/المُدخل غير المضبوط كسلسلة
+    # فارغة لا nil، و `"" || x` في Ruby تُرجع "" — فكان agvtool يُستدعى بلا
+    # رقم بناء ويفشل. GITHUB_RUN_NUMBER مضبوط دائماً داخل Actions ويتزايد.
+    build_number = [ENV["BUILD_NUMBER"], ENV["GITHUB_RUN_NUMBER"], "1"]
+                   .map { |v| v.to_s.strip }.find { |v| !v.empty? }
+
     increment_build_number(
       xcodeproj: PROJECT,
-      build_number: ENV["BUILD_NUMBER"] || ENV["GITHUB_RUN_NUMBER"] || "1"
+      build_number: build_number
     )
 
     update_code_signing_settings(
