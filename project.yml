@@ -20,7 +20,7 @@
 name: NetToolbox
 
 options:
-  bundleIdPrefix: net.alnokhba
+  bundleIdPrefix: com.m-s-jaber
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -56,7 +56,7 @@ targets:
         product: NetToolboxKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: net.alnokhba.nettoolbox
+        PRODUCT_BUNDLE_IDENTIFIER: com.m-s-jaber.nettoolbox
         # رقم النسخة الظاهر في App Store. ارفعه يدوياً عند كل إصدار علني.
         MARKETING_VERSION: "2.3.2"
         # رقم البناء — يعيد fastlane كتابته في كل رفع إلى TestFlight.
