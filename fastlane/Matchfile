@@ -11,7 +11,7 @@ storage_mode("git")
 git_branch("main")
 type("appstore")
 
-app_identifier(["net.alnokhba.nettoolbox"])
+app_identifier(["com.m-s-jaber.nettoolbox"])
 
 # readonly هو الوضع الافتراضي الآمن. lane :bootstrap_signing وحده يتجاوزه.
 readonly(true)

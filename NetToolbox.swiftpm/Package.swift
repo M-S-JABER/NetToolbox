@@ -23,7 +23,7 @@ let package = Package(
             // يطابق PRODUCT_BUNDLE_IDENTIFIER في project.yml. غُيّر من
             // com.aswaralmudun.nettoolbox لتوحيد الهوية مع WhatsX تحت نطاق
             // واحد يخدم خطة النقل إلى حساب "مختبرات النخبة".
-            bundleIdentifier: "net.alnokhba.nettoolbox",
+            bundleIdentifier: "com.m-s-jaber.nettoolbox",
             teamIdentifier: "",
             displayVersion: "2.3.2",
             bundleVersion: "18",

@@ -8,7 +8,7 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
 ## Identity
 
 - **Name:** NetToolbox
-- **Bundle ID:** `net.alnokhba.nettoolbox`
+- **Bundle ID:** `com.m-s-jaber.nettoolbox`
 - **Version:** 2.3.0 (matches the app playground `displayVersion` and Settings → About)
 - **Category:** Utilities (secondary: Developer Tools)
 - **Supported devices:** iPad + iPhone, iOS 17.0+

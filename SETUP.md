@@ -145,7 +145,7 @@ gh secret list
 > - `mode` = **`bootstrap`**
 > - `confirm` = **`CREATE`**
 
-ينفّذ داخل الرنر: تسجيل `net.alnokhba.nettoolbox` في البوابة، إنشاء سجل
+ينفّذ داخل الرنر: تسجيل `com.m-s-jaber.nettoolbox` في البوابة، إنشاء سجل
 التطبيق في App Store Connect، توليد ملف التزويد، وتشفيره في مستودع
 `certificates`.
 
