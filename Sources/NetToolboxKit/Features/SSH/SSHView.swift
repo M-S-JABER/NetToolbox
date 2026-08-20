@@ -31,7 +31,10 @@ final class SSHViewModel {
             if shellConnected { activity?.start(toolID) } else { activity?.stop(toolID) }
         }
     }
-    private(set) var shellTranscript = ""
+    /// Terminal buffer for the interactive shell — a real VT100 emulator, so
+    /// colours and cursor movement render instead of raw escape bytes.
+    private let shellEmulator = TerminalEmulator(rows: 24, columns: 80)
+    private(set) var shellLines: [[TerminalCell]] = []
     var shellInput = ""
     var activity: ActivityCenter?
     var toolID = ""
@@ -107,7 +110,8 @@ final class SSHViewModel {
 
     func connectShell() async {
         errorMessage = nil
-        shellTranscript = ""
+        shellEmulator.reset()
+        shellLines = []
         hostKeyTrust = nil
         guard let (client, auth) = makeClient() else { return }
         isRunning = true
@@ -129,13 +133,18 @@ final class SSHViewModel {
             while !Task.isCancelled {
                 do {
                     guard let chunk = try await client.readShellChunk() else { break }
-                    await MainActor.run { self?.shellTranscript.append(chunk) }
+                    await MainActor.run { self?.appendShell(chunk) }
                 } catch {
                     break
                 }
             }
             await MainActor.run { self?.shellConnected = false }
         }
+    }
+
+    private func appendShell(_ chunk: String) {
+        shellEmulator.feed(chunk)
+        shellLines = shellEmulator.displayLines
     }
 
     func sendShell() async {
@@ -385,8 +394,17 @@ struct SSHView: View {
             if let status = result.exitStatus {
                 ResultRow(label: L10n("ssh.exitStatus"), value: String(status))
             }
-            terminalText(result.output.isEmpty ? " " : result.output)
+            TerminalView(lines: Self.render(result.output))
         }
+    }
+
+    /// One-shot render of exec output through the emulator (a tall screen so
+    /// nothing scrolls out of a finished command's output).
+    private static func render(_ text: String) -> [[TerminalCell]] {
+        let rowEstimate = text.reduce(into: 1) { count, character in if character == "\n" { count += 1 } }
+        let emulator = TerminalEmulator(rows: max(1, min(rowEstimate + 1, 2000)), columns: 120, maxScrollback: 0)
+        emulator.feed(text)
+        return emulator.displayLines
     }
 
     @ViewBuilder
@@ -395,7 +413,7 @@ struct SSHView: View {
         SectionCard(title: L10n("ssh.mode.shell"), systemImage: "terminal") {
             if viewModel.shellConnected {
                 trustRow
-                terminalText(viewModel.shellTranscript.isEmpty ? " " : viewModel.shellTranscript)
+                TerminalView(lines: viewModel.shellLines)
                 HStack(spacing: Spacing.sm) {
                     TextField(L10nString("ssh.shell.input"), text: $viewModel.shellInput)
                         .textFieldStyle(.roundedBorder)
@@ -429,19 +447,6 @@ struct SSHView: View {
         }
     }
 
-    private func terminalText(_ text: String) -> some View {
-        Text(text)
-            .font(AppTypography.monoCaption)
-            .foregroundStyle(theme.success)
-            .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
-            .textSelection(.enabled)
-            .environment(\.layoutDirection, .leftToRight)
-            .padding(Spacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous)
-                    .fill(theme.background)
-            )
-    }
 }
 
 private extension SSHView {
