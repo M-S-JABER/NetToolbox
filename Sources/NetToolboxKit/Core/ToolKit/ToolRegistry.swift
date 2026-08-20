@@ -33,7 +33,7 @@ enum ToolRegistry {
         HashIDTool(),
 
         // MARK: Diagnostics — addressing → reachability → ports → HTTP → speed
-        GuideTool(),
+        // (The user Guide is not a probe — it lives in Settings, not this list.)
         PublicIPTool(),
         IPInfoTool(),
         HostToIPTool(),

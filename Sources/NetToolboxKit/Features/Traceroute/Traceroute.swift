@@ -186,11 +186,18 @@ final class TracerouteViewModel {
         }
 
         let reached = hops.contains { $0.reached }
-        // ICMP produced nothing usable — fall back to a TCP reach test so the
-        // user still learns whether the host is reachable and how far away.
-        if isRunning, !reached, hops.allSatisfy({ $0.address == nil }) {
+        // On iOS the unprivileged ICMP datagram socket never receives the
+        // intermediate routers' "Time Exceeded" messages, so a normal trace can
+        // only ever name the destination itself — every router in between shows
+        // as `*`. Whenever no intermediate router was named (the common case),
+        // fall back to a TCP reach test so the user still gets a real result:
+        // hop-distance + RTT to the host. (Previously this was gated behind
+        // `!reached`, so a host that answered ping produced only a column of
+        // `*` and no summary at all — which read as "traceroute doesn't work".)
+        let namedRouter = hops.contains { $0.address != nil && !$0.reached }
+        if isRunning, !namedRouter {
             tcpSummary = await TCPTraceProbe.trace(host: target, maxHops: maxHops, timeout: timeout)
-            if tcpSummary == nil {
+            if tcpSummary == nil, !reached {
                 errorMessage = L10nString("traceroute.error.noResponse")
             }
         }

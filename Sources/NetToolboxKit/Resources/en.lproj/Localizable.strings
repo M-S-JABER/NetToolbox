@@ -203,7 +203,7 @@
 "smtp.note" = "Connects and runs an EHLO handshake, showing the banner and advertised capabilities. Port 25/587 (plain) or 465 (TLS).";
 "smtp.section.transcript" = "Transcript";
 "banner.action.grab" = "Grab banner";
-"banner.empty" = "The service sent no data.";
+"banner.empty" = "The service sent no banner. Some ports (like HTTP 80/443) only reply to a request — enter a probe line and try again.";
 "banner.error.host" = "Invalid host or port.";
 "banner.input.host" = "Host or IP";
 "banner.input.probe" = "Probe to send (optional, e.g. GET / HTTP/1.0)";
@@ -893,6 +893,8 @@
 "home.hide" = "Hide tool";
 "home.unhide" = "Unhide tool";
 "settings.data" = "Data & Tools";
+"settings.help" = "Help";
+"settings.help.hint" = "A full guide to every tool in the app, with how each one works.";
 "settings.general" = "General";
 "settings.showHidden" = "Show hidden tools";
 "settings.unhideAll" = "Unhide all tools";
@@ -1148,7 +1150,7 @@
 "tool.guide.title" = "Guide";
 "tool.guide.subtitle" = "How to use every tool, step by step";
 "guide.intro.title" = "Welcome";
-"guide.intro.body" = "NetToolbox is a modular network toolbox with 35 tools in four categories: Calculators, Diagnostics, Local Network and Professional. Everything runs natively on your device with no external servers except where a tool clearly fetches public data (public IP, speed test).\n\nOpen any tool from the home grid. Pull down to refresh where supported. Most results have a copy button; some have a share button.";
+"guide.intro.body" = "NetToolbox is a modular network toolbox: dozens of native tools grouped into categories — Calculators, Diagnostics, DNS & Domains, Security, Local Network, Professional and BGP. Everything runs on your device, with no accounts and no tracking, except where a tool clearly fetches public data (public IP, speed test, DNS).\n\nThis guide documents every tool in the app. Open any tool from the sidebar, and use the \"?\" button inside a tool for the same explanation in context. Below, each category lists all of its tools with what each one does, how it works, a worked example, and its notes and limits.";
 "guide.home.title" = "Home, search & themes";
 "guide.home.body" = "• Search bar: type a tool name, or paste an IP / MAC / URL / domain — a smart suggestion card appears and takes you to the right tool.\n• Star (☆) on any card adds it to Favorites, which pin to the top.\n• Settings (top-right ⚙︎): pick one of six accent themes; your choice is saved.\n• The status pill shows your live connection: Wi-Fi / Cellular / Offline.";
 "guide.tools.title" = "Key tools";

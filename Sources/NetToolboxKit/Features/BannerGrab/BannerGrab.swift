@@ -17,12 +17,17 @@ struct BannerGrabService: Sendable {
         if !trimmedProbe.isEmpty {
             _ = await connection.send(Data((trimmedProbe + "\r\n\r\n").utf8))
         }
-        let result = await connection.receiveAll(timeout: timeout)
+        let result = await connection.receiveBanner(timeout: timeout)
         connection.cancel()
         switch result {
         case .success(let data):
             let text = String(decoding: data, as: UTF8.self)
             return text.isEmpty ? .failure(EngineError(L10nString("banner.empty"))) : .success(text)
+        case .failure(.noData):
+            // Connected fine, but the service sent nothing unsolicited (e.g. an
+            // HTTP port with no probe). Guide the user rather than reporting a
+            // hard failure.
+            return .failure(EngineError(L10nString("banner.empty")))
         case .failure(let error):
             return .failure(EngineError(error.localizedDescription))
         }

@@ -25,6 +25,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: Spacing.lg) {
                     appearanceCard
                     themeCard
+                    guideCard
                     permissionsCard
                     dataCard
                     generalCard
@@ -145,6 +146,18 @@ struct SettingsView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// The user guide lives here rather than in the tool list — it documents
+    /// the app instead of probing the network.
+    private var guideCard: some View {
+        SectionCard(title: L10n("settings.help"), systemImage: "book") {
+            dataLink(L10n("tool.guide.title"), "book.pages") { GuideView() }
+            Text(L10n("settings.help.hint"))
+                .font(AppTypography.caption)
+                .foregroundStyle(theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     /// History, backup and self-tests live here rather than in the tool list —

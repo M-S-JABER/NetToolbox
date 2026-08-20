@@ -117,21 +117,30 @@ final class TCPConnection: @unchecked Sendable {
         await withCheckedContinuation { continuation in
             let shot = OneShot(continuation)
             let connection = self.connection
+            // Tear the connection down only if the timeout actually wins the
+            // race. Firing this unconditionally (the old behaviour) cancelled a
+            // perfectly healthy connection `timeout` seconds after it opened —
+            // which silently killed long-lived sessions (Telnet, MikroTik,
+            // banner reads) mid-use. Cancelling the work item on `.ready`
+            // leaves the open connection alone.
+            let timeoutWork = DispatchWorkItem {
+                connection.cancel()   // don't leave a half-open NWConnection dialing
+                shot.resume(.failure(.timeout))
+            }
             connection.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
+                    timeoutWork.cancel()
                     shot.resume(.success(()))
                 case .failed(let error), .waiting(let error):
+                    timeoutWork.cancel()
                     shot.resume(.failure(.connection(error.localizedDescription)))
                 default:
                     break
                 }
             }
             connection.start(queue: queue)
-            queue.asyncAfter(deadline: .now() + timeout) {
-                connection.cancel()   // don't leave a half-open NWConnection dialing
-                shot.resume(.failure(.timeout))
-            }
+            queue.asyncAfter(deadline: .now() + timeout, execute: timeoutWork)
         }
     }
 
@@ -183,6 +192,48 @@ final class TCPConnection: @unchecked Sendable {
                 accumulated.append(chunk)
             case .failure(let error):
                 return accumulated.isEmpty ? .failure(error) : .success(accumulated)
+            }
+        }
+    }
+
+    /// Reads a service *banner*: returns as soon as the peer goes quiet for
+    /// `drain` seconds after sending its first bytes, or when it closes, or when
+    /// the overall `timeout` elapses with nothing received. Unlike
+    /// `receiveAll`, it does NOT wait for the peer to close the stream — banner
+    /// services (SSH / FTP / SMTP) emit a line and then stay open, so
+    /// `receiveAll` would always block for the full timeout before showing
+    /// anything. This returns the moment the banner has arrived.
+    func receiveBanner(timeout: Double, drain: Double = 0.7) async -> Result<Data, NetProbeError> {
+        let connection = self.connection
+        // If nothing ever arrives, cancel at the overall deadline so the
+        // pending receive() unblocks and we fail cleanly.
+        let overall = DispatchWorkItem { connection.cancel() }
+        queue.asyncAfter(deadline: .now() + timeout, execute: overall)
+        var accumulated = Data()
+        var drainWork: DispatchWorkItem?
+        while true {
+            switch await receive() {
+            case .success(let chunk):
+                if chunk.isEmpty {   // peer closed the stream
+                    overall.cancel()
+                    drainWork?.cancel()
+                    return .success(accumulated)
+                }
+                accumulated.append(chunk)
+                // First (or further) bytes are in. (Re)arm an idle timer: once
+                // the peer has been quiet for `drain` seconds, stop — it may
+                // never close on its own.
+                overall.cancel()
+                drainWork?.cancel()
+                let work = DispatchWorkItem { connection.cancel() }
+                drainWork = work
+                queue.asyncAfter(deadline: .now() + drain, execute: work)
+            case .failure:
+                // The idle/overall timer cancelled the connection (expected once
+                // we have data) or it genuinely failed — return what we have.
+                overall.cancel()
+                drainWork?.cancel()
+                return accumulated.isEmpty ? .failure(.noData) : .success(accumulated)
             }
         }
     }
