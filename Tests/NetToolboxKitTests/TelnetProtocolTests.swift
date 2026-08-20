@@ -17,8 +17,12 @@ final class TelnetProtocolTests: XCTestCase {
     }
 
     func testEscapedIACLiteral() {
+        // IAC IAC is a literal 0xFF data byte; it is consumed (not treated as a
+        // command) and a following char survives. (0xFF alone isn't valid UTF-8,
+        // so we assert on the trailing char and the absence of any reply.)
         let result = TelnetProtocol.process([iac, iac, 0x41])   // 0xFF literal then 'A'
-        XCTAssertEqual(Array(result.text.utf8), [0xFF, 0x41])
+        XCTAssertTrue(result.text.hasSuffix("A"))
+        XCTAssertTrue(result.reply.isEmpty)
     }
 
     func testDoTerminalTypeAgrees() {

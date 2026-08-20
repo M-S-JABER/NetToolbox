@@ -142,6 +142,11 @@ final class TerminalEmulator {
     }
 
     private func lineFeed() {
+        // Treat LF as newline (line-down + carriage-return). Interactive shells
+        // send CRLF, and the extra CR here is harmless for them; it also makes
+        // plain output that uses bare "\n" start each line at column 0 instead
+        // of drifting right (LF-only would keep the column).
+        cursorCol = 0
         if cursorRow >= rows - 1 {
             // Scroll: the top line rolls into scrollback, a blank line appears
             // at the bottom.

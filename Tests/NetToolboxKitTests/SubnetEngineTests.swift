@@ -230,11 +230,13 @@ final class SubnetEngineTests: XCTestCase {
     }
 
     func testTelnetNegotiation() {
+        // DO ECHO → we won't echo (WONT ECHO).
         let doEcho = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.doo, 1, 0x68, 0x69])
         XCTAssertEqual(doEcho.text, "hi")
         XCTAssertEqual(doEcho.reply, [255, 252, 1])
+        // WILL SGA → accept (DO SGA); suppress-go-ahead is one we want on.
         let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])
-        XCTAssertEqual(willSup.reply, [255, 254, 3])
+        XCTAssertEqual(willSup.reply, [255, 253, 3])
     }
 
     func testX509TimeParsing() {
