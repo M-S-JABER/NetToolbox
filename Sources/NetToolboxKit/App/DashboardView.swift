@@ -14,6 +14,7 @@ struct DashboardView: View {
 
     @State private var ipInfo: PublicIPInfo?
     @State private var isLoadingIP = false
+    @State private var query = ""
 
     private var favoriteTools: [any NetworkTool] {
         ToolRegistry.all.filter { favorites.isFavorite($0.id) }
@@ -26,6 +27,7 @@ struct DashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 header
+                searchCard
                 connectionCard
                 if !favoriteTools.isEmpty { quickSection(L10n("home.favorites"), favoriteTools) }
                 if !recentTools_.isEmpty { quickSection(L10n("dashboard.recent"), recentTools_) }
@@ -58,6 +60,72 @@ struct DashboardView: View {
             }
             Spacer()
         }
+    }
+
+    // MARK: Smart search ("paste what you have")
+
+    /// The fastest path through ~80 tools: type a name, or paste an IP / MAC /
+    /// URL / domain and the classifier jumps straight to the right tool.
+    private var searchCard: some View {
+        SectionCard(title: L10n("dashboard.ask"), systemImage: "sparkle.magnifyingglass") {
+            HStack(spacing: Spacing.md) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(theme.textSecondary)
+                TextField(L10nString("home.search"), text: $query)
+                    .textFieldStyle(.plain)
+                    .font(AppTypography.body)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .submitLabel(.go)
+                    .onSubmit(submitQuery)
+                    .environment(\.layoutDirection, .leftToRight)
+                if !query.isEmpty {
+                    Button {
+                        submitQuery()
+                    } label: {
+                        Image(systemName: "arrow.forward.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(theme.accent)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(Spacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: CornerRadius.medium, style: .continuous)
+                    .fill(theme.surfaceElevated)
+            )
+            if let hint = suggestionHint {
+                Text(hint)
+                    .font(AppTypography.caption)
+                    .foregroundStyle(theme.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    /// Live hint under the field: names the tool the input will open.
+    private var suggestionHint: LocalizedStringResource? {
+        guard let id = resolvedToolID, let tool = ToolRegistry.tool(withID: id) else { return nil }
+        return tool.titleKey
+    }
+
+    /// Resolves free text to a tool: the smart classifier first (IP/MAC/URL/
+    /// domain), then the first tool whose name or id contains the text.
+    private var resolvedToolID: String? {
+        let text = query.trimmingCharacters(in: .whitespaces)
+        guard text.count >= 2 else { return nil }
+        if let id = InputClassifier.classify(text).suggestedToolID { return id }
+        let lower = text.lowercased()
+        return ToolRegistry.all.first {
+            String(localized: $0.titleKey).lowercased().contains(lower) || $0.id.contains(lower)
+        }?.id
+    }
+
+    private func submitQuery() {
+        guard let id = resolvedToolID else { return }
+        query = ""
+        onOpen(id)
     }
 
     // MARK: Connection + public IP

@@ -19,6 +19,11 @@ final class SSHViewModel {
     private(set) var result: SSHRunResult?
     private(set) var errorMessage: String?
 
+    // Host-key trust-on-first-use.
+    var knownHosts: KnownHostsStore?
+    private(set) var hostKeyTrust: KnownHostsStore.Trust?
+    private var lastFingerprint = ""
+
     // Interactive shell state.
     private(set) var shellConnected = false {
         didSet {
@@ -26,7 +31,10 @@ final class SSHViewModel {
             if shellConnected { activity?.start(toolID) } else { activity?.stop(toolID) }
         }
     }
-    private(set) var shellTranscript = ""
+    /// Terminal buffer for the interactive shell — a real VT100 emulator, so
+    /// colours and cursor movement render instead of raw escape bytes.
+    private let shellEmulator = TerminalEmulator(rows: 24, columns: 80)
+    private(set) var shellLines: [[TerminalCell]] = []
     var shellInput = ""
     var activity: ActivityCenter?
     var toolID = ""
@@ -35,10 +43,28 @@ final class SSHViewModel {
 
     private func makeAuth() -> SSHAuth? {
         if useKey {
-            guard let key = SSHPrivateKey(pem: privateKey) else { return nil }
-            return .key(key)
+            do {
+                return .key(try SSHPrivateKey(parsing: privateKey))
+            } catch {
+                errorMessage = error.localizedDescription
+                return nil
+            }
         }
         return .password(password)
+    }
+
+    /// Compares the presented host key against what we remember (TOFU).
+    private func evaluateTrust(fingerprint: String) {
+        lastFingerprint = fingerprint
+        let port = portText.trimmingCharacters(in: .whitespaces)
+        hostKeyTrust = knownHosts?.evaluate(host: host, port: port, fingerprint: fingerprint)
+    }
+
+    /// Accept a changed host key after the user confirms it.
+    func acceptChangedKey() {
+        guard !lastFingerprint.isEmpty else { return }
+        knownHosts?.accept(host: host, port: portText.trimmingCharacters(in: .whitespaces), fingerprint: lastFingerprint)
+        hostKeyTrust = .known
     }
 
     private func makeClient() -> (SSHClient, SSHAuth)? {
@@ -50,7 +76,10 @@ final class SSHViewModel {
         guard !username.trimmingCharacters(in: .whitespaces).isEmpty else {
             errorMessage = L10nString("ssh.error.noUser"); return nil
         }
-        guard let auth = makeAuth() else { errorMessage = L10nString("sftp.error.key"); return nil }
+        guard let auth = makeAuth() else {
+            if errorMessage == nil { errorMessage = L10nString("sftp.error.key") }
+            return nil
+        }
         guard let client = SSHClient(host: target, port: port) else {
             errorMessage = L10nString("error.probe.invalidHost"); return nil
         }
@@ -62,12 +91,15 @@ final class SSHViewModel {
     func run() async {
         errorMessage = nil
         result = nil
+        hostKeyTrust = nil
         guard let (client, auth) = makeClient() else { return }
         isRunning = true
         let user = username.trimmingCharacters(in: .whitespaces)
         let command = self.command
         do {
-            result = try await client.run(username: user, auth: auth, command: command, timeout: 12)
+            let runResult = try await client.run(username: user, auth: auth, command: command, timeout: 12)
+            result = runResult
+            evaluateTrust(fingerprint: runResult.fingerprint)
         } catch {
             errorMessage = error.localizedDescription + "\n\(client.diagnostics) · stage=\(client.stage)"
         }
@@ -78,12 +110,15 @@ final class SSHViewModel {
 
     func connectShell() async {
         errorMessage = nil
-        shellTranscript = ""
+        shellEmulator.reset()
+        shellLines = []
+        hostKeyTrust = nil
         guard let (client, auth) = makeClient() else { return }
         isRunning = true
         let user = username.trimmingCharacters(in: .whitespaces)
         do {
             try await client.openShell(username: user, auth: auth, timeout: 12)
+            evaluateTrust(fingerprint: client.fingerprint)
             shellClient = client
             shellConnected = true
             startReading(client)
@@ -98,13 +133,18 @@ final class SSHViewModel {
             while !Task.isCancelled {
                 do {
                     guard let chunk = try await client.readShellChunk() else { break }
-                    await MainActor.run { self?.shellTranscript.append(chunk) }
+                    await MainActor.run { self?.appendShell(chunk) }
                 } catch {
                     break
                 }
             }
             await MainActor.run { self?.shellConnected = false }
         }
+    }
+
+    private func appendShell(_ chunk: String) {
+        shellEmulator.feed(chunk)
+        shellLines = shellEmulator.displayLines
     }
 
     func sendShell() async {
@@ -139,12 +179,16 @@ struct SSHView: View {
     @Environment(\.toolSessions) private var sessions
     @Environment(ActivityCenter.self) private var activity
     @Environment(SSHProfilesStore.self) private var profiles
+    @Environment(KnownHostsStore.self) private var knownHosts
+    @Environment(SSHConnectRequest.self) private var sshConnect
+    @State private var appliedRequestToken = 0
 
     private var viewModel: SSHViewModel {
         sessions.session("ssh") {
             let model = SSHViewModel()
             model.activity = activity
             model.toolID = "ssh"
+            model.knownHosts = knownHosts
             return model
         }
     }
@@ -177,6 +221,16 @@ struct SSHView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.ssh.title")))
         .navigationBarTitleDisplayMode(.large)
+        .onChange(of: sshConnect.token, initial: true) { applyConnectRequest() }
+    }
+
+    /// Pre-fills host/port/user when another tool requested an SSH session.
+    private func applyConnectRequest() {
+        guard sshConnect.token > 0, sshConnect.token != appliedRequestToken else { return }
+        appliedRequestToken = sshConnect.token
+        viewModel.host = sshConnect.host
+        if !sshConnect.port.isEmpty { viewModel.portText = sshConnect.port }
+        if !sshConnect.username.isEmpty { viewModel.username = sshConnect.username }
     }
 
     private var profilesMenu: some View {
@@ -307,6 +361,43 @@ struct SSHView: View {
                     .font(AppTypography.footnote)
                     .foregroundStyle(result.hostKeyVerified ? theme.success : theme.warning)
             }
+            trustRow
+        }
+    }
+
+    /// Trust-on-first-use status: new host, matches the remembered key, or a
+    /// mismatch (with a button to accept the new key).
+    @ViewBuilder
+    private var trustRow: some View {
+        if let trust = viewModel.hostKeyTrust {
+            Divider().overlay(theme.separator)
+            switch trust {
+            case .new:
+                trustLine("info.circle", L10n("ssh.hostKey.trust.new"), theme.textSecondary)
+            case .known:
+                trustLine("checkmark.seal.fill", L10n("ssh.hostKey.trust.known"), theme.success)
+            case .changed:
+                trustLine("exclamationmark.triangle.fill", L10n("ssh.hostKey.trust.changed"), theme.danger)
+                Button {
+                    viewModel.acceptChangedKey()
+                } label: {
+                    Label(L10nString("ssh.hostKey.acceptNew"), systemImage: "key.fill")
+                        .font(AppTypography.footnote)
+                }
+                .buttonStyle(.bordered)
+                .tint(theme.danger)
+            }
+        }
+    }
+
+    private func trustLine(_ icon: String, _ text: LocalizedStringResource, _ color: Color) -> some View {
+        HStack(spacing: Spacing.sm) {
+            Image(systemName: icon).foregroundStyle(color)
+            Text(text)
+                .font(AppTypography.footnote)
+                .foregroundStyle(color)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
         }
     }
 
@@ -315,8 +406,17 @@ struct SSHView: View {
             if let status = result.exitStatus {
                 ResultRow(label: L10n("ssh.exitStatus"), value: String(status))
             }
-            terminalText(result.output.isEmpty ? " " : result.output)
+            TerminalView(lines: Self.render(result.output))
         }
+    }
+
+    /// One-shot render of exec output through the emulator (a tall screen so
+    /// nothing scrolls out of a finished command's output).
+    private static func render(_ text: String) -> [[TerminalCell]] {
+        let rowEstimate = text.reduce(into: 1) { count, character in if character == "\n" { count += 1 } }
+        let emulator = TerminalEmulator(rows: max(1, min(rowEstimate + 1, 2000)), columns: 120, maxScrollback: 0)
+        emulator.feed(text)
+        return emulator.displayLines
     }
 
     @ViewBuilder
@@ -324,7 +424,8 @@ struct SSHView: View {
         @Bindable var viewModel = viewModel
         SectionCard(title: L10n("ssh.mode.shell"), systemImage: "terminal") {
             if viewModel.shellConnected {
-                terminalText(viewModel.shellTranscript.isEmpty ? " " : viewModel.shellTranscript)
+                trustRow
+                TerminalView(lines: viewModel.shellLines)
                 HStack(spacing: Spacing.sm) {
                     TextField(L10nString("ssh.shell.input"), text: $viewModel.shellInput)
                         .textFieldStyle(.roundedBorder)
@@ -358,19 +459,6 @@ struct SSHView: View {
         }
     }
 
-    private func terminalText(_ text: String) -> some View {
-        Text(text)
-            .font(AppTypography.monoCaption)
-            .foregroundStyle(theme.success)
-            .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
-            .textSelection(.enabled)
-            .environment(\.layoutDirection, .leftToRight)
-            .padding(Spacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: CornerRadius.small, style: .continuous)
-                    .fill(theme.background)
-            )
-    }
 }
 
 private extension SSHView {

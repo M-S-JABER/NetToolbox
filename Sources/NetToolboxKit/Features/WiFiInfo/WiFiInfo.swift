@@ -5,6 +5,55 @@ import Observation
 /// button can launch it via the `shortcuts://` URL scheme.
 let wifiShortcutName = "NetToolbox WiFi"
 
+/// The custom URL scheme the app registers (see `App/Info.plist`
+/// `CFBundleURLTypes`). A Shortcut ends with an "Open URL" action targeting
+/// `nettoolbox://wifi?ssid=…&bssid=…&ip=…`, which is how Wi-Fi details the app
+/// itself cannot read (SSID/BSSID need the Access-WiFi-Information entitlement)
+/// flow back in without any entitlement.
+enum AppURLScheme {
+    static let scheme = "nettoolbox"
+    static let wifiHost = "wifi"
+}
+
+/// Holds the Wi-Fi details handed back by the Shortcut via the app's URL
+/// scheme. Injected into the environment by `NetToolboxRootView` and filled by
+/// its `onOpenURL` handler; `WiFiInfoView` reads it.
+@MainActor
+@Observable
+final class WiFiShortcutInbox {
+    private(set) var ssid: String?
+    private(set) var bssid: String?
+    private(set) var ip: String?
+    private(set) var receivedAt: Date?
+
+    var hasData: Bool { ssid != nil || bssid != nil || ip != nil }
+
+    /// Parses `nettoolbox://wifi?ssid=…&bssid=…&ip=…`. Returns true when the URL
+    /// was a Wi-Fi callback this inbox handled (so the caller can navigate to
+    /// the Wi-Fi tool).
+    @discardableResult
+    func apply(_ url: URL) -> Bool {
+        guard url.scheme == AppURLScheme.scheme,
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              components.host == AppURLScheme.wifiHost else { return false }
+        let items = components.queryItems ?? []
+        func value(_ name: String) -> String? {
+            guard let raw = items.first(where: { $0.name == name })?.value else { return nil }
+            let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
+        }
+        ssid = value("ssid") ?? ssid
+        bssid = value("bssid") ?? bssid
+        ip = value("ip") ?? ip
+        receivedAt = Date()
+        return true
+    }
+
+    func clear() {
+        ssid = nil; bssid = nil; ip = nil; receivedAt = nil
+    }
+}
+
 @MainActor
 @Observable
 final class WiFiInfoViewModel {
@@ -29,10 +78,12 @@ final class WiFiInfoViewModel {
     }
 
     func refresh() async {
-        // The Wi-Fi interface on iOS is en0; fall back to all IPv4 if absent.
+        // The Wi-Fi interface on iOS is en0; show its IPv4 *and* IPv6
+        // addresses, falling back to every non-loopback interface if en0 is
+        // absent (e.g. on cellular).
         let all = localProvider.addresses()
-        let enZero = all.filter { $0.interface == "en0" && !$0.isIPv6 }
-        wifiAddresses = enZero.isEmpty ? all.filter { !$0.isIPv6 } : enZero
+        let enZero = all.filter { $0.interface == "en0" }
+        wifiAddresses = enZero.isEmpty ? all : enZero
 
         publicState = .loading
         do {
@@ -58,12 +109,14 @@ struct WiFiInfoView: View {
     @Environment(\.theme) private var theme
     @Environment(\.openURL) private var openURL
     @Environment(NetworkStatusMonitor.self) private var status
+    @Environment(WiFiShortcutInbox.self) private var inbox
     @State private var viewModel = WiFiInfoViewModel()
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 availableCard
+                if inbox.hasData { shortcutResultCard }
                 shortcutCard
                 limitationsCard
             }
@@ -92,7 +145,10 @@ struct WiFiInfoView: View {
             Divider().overlay(theme.separator)
 
             ForEach(viewModel.wifiAddresses) { address in
-                ResultRow(label: L10n("wifiinfo.deviceIP"), value: address.address)
+                ResultRow(
+                    label: address.isIPv6 ? L10n("wifiinfo.deviceIPv6") : L10n("wifiinfo.deviceIP"),
+                    value: address.address
+                )
             }
 
             switch viewModel.publicState {
@@ -109,6 +165,24 @@ struct WiFiInfoView: View {
                     ResultRow(label: L10n("publicip.result.isp"), value: isp, isMonospaced: false)
                 }
             }
+        }
+    }
+
+    /// Shows the Wi-Fi details a Shortcut handed back through the app's URL
+    /// scheme — SSID/BSSID that the app itself cannot read without the
+    /// Access-WiFi-Information entitlement.
+    private var shortcutResultCard: some View {
+        SectionCard(title: L10n("wifiinfo.section.fromShortcut"), systemImage: "checkmark.seal.fill") {
+            if let ssid = inbox.ssid { ResultRow(label: L10n("wifiinfo.metric.ssid"), value: ssid, isMonospaced: false) }
+            if let bssid = inbox.bssid { ResultRow(label: L10n("wifiinfo.metric.bssid"), value: bssid) }
+            if let ip = inbox.ip { ResultRow(label: L10n("wifiinfo.deviceIP"), value: ip) }
+            Button(role: .destructive) {
+                inbox.clear()
+            } label: {
+                Label(L10nString("common.clear"), systemImage: "xmark.circle")
+                    .font(AppTypography.footnote)
+            }
+            .buttonStyle(.bordered)
         }
     }
 
@@ -168,7 +242,6 @@ struct WiFiInfoView: View {
                 unavailableRow("wifiinfo.metric.band")
                 unavailableRow("wifiinfo.metric.generation")
                 unavailableRow("wifiinfo.metric.linkSpeed")
-                unavailableRow("wifiinfo.metric.ssid")
                 unavailableRow("wifiinfo.gateway")
                 unavailableRow("wifiinfo.routerVendor")
             }

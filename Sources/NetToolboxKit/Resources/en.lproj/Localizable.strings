@@ -203,7 +203,7 @@
 "smtp.note" = "Connects and runs an EHLO handshake, showing the banner and advertised capabilities. Port 25/587 (plain) or 465 (TLS).";
 "smtp.section.transcript" = "Transcript";
 "banner.action.grab" = "Grab banner";
-"banner.empty" = "The service sent no data.";
+"banner.empty" = "The service sent no banner. Some ports (like HTTP 80/443) only reply to a request — enter a probe line and try again.";
 "banner.error.host" = "Invalid host or port.";
 "banner.input.host" = "Host or IP";
 "banner.input.probe" = "Probe to send (optional, e.g. GET / HTTP/1.0)";
@@ -471,6 +471,8 @@
 "mikrotik.input.command" = "Command (e.g. /system/resource/print)";
 "mikrotik.input.host" = "Host or IP";
 "mikrotik.input.password" = "Password";
+"mikrotik.tls" = "Encrypted API (api-ssl, port 8729)";
+"mikrotik.openSSH" = "Open interactive CLI over SSH";
 "mikrotik.input.title" = "Router";
 "mikrotik.input.user" = "Username";
 "mikrotik.note" = "Uses the RouterOS API (port 8728) with plain login (RouterOS 6.43+). Enable the API service on the router and use a dedicated account.";
@@ -590,7 +592,16 @@
 "ssh.auth.key" = "Key";
 "ssh.auth.mode" = "Authentication";
 "ssh.auth.password" = "Password";
-"ssh.key.hint" = "Paste an unencrypted OpenSSH ed25519 private key (BEGIN OPENSSH PRIVATE KEY … END).";
+"ssh.key.hint" = "Paste an unencrypted private key. Supported: OpenSSH ed25519 and ECDSA (nistp256/384/521), and RSA in PEM form (BEGIN RSA PRIVATE KEY). For an OpenSSH-format RSA key, convert it first: ssh-keygen -p -m PEM -f key.";
+"ssh.key.error.format" = "Unsupported key format. Use an unencrypted OpenSSH ed25519/ECDSA key, or an RSA key in PEM form (BEGIN RSA PRIVATE KEY).";
+"ssh.key.error.encrypted" = "This key is passphrase-protected, which isn't supported yet. Export an unencrypted copy for use here.";
+"ssh.key.error.rsaPem" = "OpenSSH-format RSA keys aren't supported. Convert to PEM: ssh-keygen -p -m PEM -f your_key";
+"ssh.key.error.parse" = "Could not read this private key — check that you pasted the whole file, including the BEGIN/END lines.";
+"ssh.key.error.signing" = "This key can't be used for signing on this device.";
+"ssh.hostKey.trust.new" = "First connection to this host — its key has been remembered.";
+"ssh.hostKey.trust.known" = "Host key matches the one remembered from a previous connection.";
+"ssh.hostKey.trust.changed" = "WARNING: this host's key has CHANGED since last time. This can mean the server was reinstalled — or a man-in-the-middle. Do not proceed unless you know why it changed.";
+"ssh.hostKey.acceptNew" = "Accept the new key";
 "ssh.mode.command" = "Command";
 "ssh.mode.shell" = "Shell";
 "ssh.mode.title" = "Mode";
@@ -871,6 +882,7 @@
 "home.favorites" = "Favorites";
 "dashboard.home" = "Dashboard";
 "dashboard.tagline" = "Your network toolkit";
+"dashboard.ask" = "What do you want to check?";
 "dashboard.recent" = "Recent";
 "dashboard.connection" = "Connection";
 "dashboard.publicIP" = "Public IP";
@@ -893,6 +905,8 @@
 "home.hide" = "Hide tool";
 "home.unhide" = "Unhide tool";
 "settings.data" = "Data & Tools";
+"settings.help" = "Help";
+"settings.help.hint" = "A full guide to every tool in the app, with how each one works.";
 "settings.general" = "General";
 "settings.showHidden" = "Show hidden tools";
 "settings.unhideAll" = "Unhide all tools";
@@ -997,7 +1011,8 @@
 
 /* LAN scanner */
 "lan.action.scan" = "Scan network";
-"lan.note" = "Uses Bonjour (NWBrowser). iOS requires the Local Network permission; a raw ping-sweep isn't possible without it. Discovery runs for a few seconds.";
+"lan.note" = "Combines a ping/TCP sweep of your subnet, Bonjour (mDNS) discovery and reverse-DNS naming into one device list. iOS requires the Local Network permission; without it nothing is found. A full /24 scan takes several seconds, and iOS can't see a device that answers none of these probes.";
+"lan.section.devices" = "Devices";
 "lan.permission" = "No services found yet. Tap Scan. If nothing appears, enable the Local Network permission for this app in iOS Settings, and make sure the app declares the Bonjour service types.";
 "lan.tryRange" = "This tool only finds devices advertising Bonjour services. To list every device on the network, use the IP Range Scanner.";
 "lan.scanning" = "Scanning the local network…";
@@ -1106,6 +1121,9 @@
 "tool.wifiinfo.subtitle" = "Connection, device IP and router address";
 "tool.wifiinfo.title" = "Wi-Fi Info";
 "wifiinfo.deviceIP" = "Device IP";
+"wifiinfo.deviceIPv6" = "Device IPv6";
+"wifiinfo.section.fromShortcut" = "From the Shortcut";
+"wifiinfo.metric.bssid" = "Router MAC (BSSID)";
 "wifiinfo.gateway" = "Router (gateway)";
 "wifiinfo.metric.band" = "Band (2.4 / 5 / 6 GHz)";
 "wifiinfo.metric.channel" = "Channel";
@@ -1118,7 +1136,7 @@
 "wifiinfo.section.available" = "Available";
 "wifiinfo.section.unavailable" = "Not available on iOS";
 "wifiinfo.unavailable.intro" = "iOS gives no public API for these Wi-Fi radio details — they're blocked for all apps, so the app shows only what the system exposes.";
-"wifiinfo.shortcutHint" = "iOS blocks apps from reading the SSID/BSSID and building Shortcuts. Create a Shortcut once (Shortcuts app → Get Network Details) named exactly as below — then this button runs it. Tap \"Create it\" to open a new Shortcut.";
+"wifiinfo.shortcutHint" = "iOS blocks apps from reading the SSID/BSSID directly. Build a Shortcut once (Shortcuts app → Get Network Details) that ends with an \"Open URL\" action pointing to nettoolbox://wifi?ssid=…&bssid=…&ip=… — that hands the details back here into a \"From the Shortcut\" card. Name it exactly as below, then this button runs it. See Settings → Help for the full step-by-step.";
 
 /* SNMP walk + FTP */
 "error.ftp.connection" = "Could not connect to the FTP server";
@@ -1148,13 +1166,13 @@
 "tool.guide.title" = "Guide";
 "tool.guide.subtitle" = "How to use every tool, step by step";
 "guide.intro.title" = "Welcome";
-"guide.intro.body" = "NetToolbox is a modular network toolbox with 35 tools in four categories: Calculators, Diagnostics, Local Network and Professional. Everything runs natively on your device with no external servers except where a tool clearly fetches public data (public IP, speed test).\n\nOpen any tool from the home grid. Pull down to refresh where supported. Most results have a copy button; some have a share button.";
+"guide.intro.body" = "NetToolbox is a modular network toolbox: dozens of native tools grouped into categories — Calculators, Diagnostics, DNS & Domains, Security, Local Network, Professional and BGP. Everything runs on your device, with no accounts and no tracking, except where a tool clearly fetches public data (public IP, speed test, DNS).\n\nThis guide documents every tool in the app. Open any tool from the sidebar, and use the \"?\" button inside a tool for the same explanation in context. Below, each category lists all of its tools with what each one does, how it works, a worked example, and its notes and limits.";
 "guide.home.title" = "Home, search & themes";
 "guide.home.body" = "• Search bar: type a tool name, or paste an IP / MAC / URL / domain — a smart suggestion card appears and takes you to the right tool.\n• Star (☆) on any card adds it to Favorites, which pin to the top.\n• Settings (top-right ⚙︎): pick one of six accent themes; your choice is saved.\n• The status pill shows your live connection: Wi-Fi / Cellular / Offline.";
 "guide.tools.title" = "Key tools";
 "guide.tools.body" = "• Subnet Calculator & VLSM: enter an IP with a CIDR (e.g. 192.168.1.10/24). VLSM splits a network into right-sized subnets.\n• Ping / Traceroute / IP Range Scanner: enter a host or CIDR. Ping is a TCP handshake timing (iOS blocks raw ICMP for ping); Traceroute and the Range Scanner use ICMP.\n• Port Scanner: choose Common/Web/All, or Custom and type e.g. 22,80,443,8000-8100.\n• DNS / nslookup / WHOIS / RBL / Email: DNS-based lookups. nslookup auto-detects forward vs reverse.\n• History: every Subnet/DNS/WHOIS/IP run is logged; copy, share or clear it.";
 "guide.wifi.title" = "Wi-Fi info & the Shortcut (detailed)";
-"guide.wifi.body" = "iOS does NOT let any app read Wi-Fi signal, channel, band, generation, link speed, or the SSID/BSSID. The Wi-Fi Info tool shows what IS allowed: connection type, device IP, and public IP.\n\nTo get the real SSID/BSSID, use the Shortcuts app (it has privileged access). Build it once:\n1. In Wi-Fi Info, tap \"Create it\" — the Shortcuts app opens a new shortcut.\n2. Add action \"Get Network Details\", set it to \"Wi-Fi Network Name\".\n3. Add \"Get Network Details\" again → \"Wi-Fi BSSID\".\n4. Add \"Get Network Details\" again → \"IP Address\".\n5. Add \"Get Contents of URL\" with URL: https://api.ipify.org\n6. Add \"Text\" and insert the values from steps 2–5 on separate lines.\n7. Add \"Show Result\".\n8. Name the shortcut EXACTLY: NetToolbox WiFi\n\nNow the \"Run Wi-Fi Shortcut\" button opens and runs it. First run asks for Location permission (needed to read the SSID) — allow it.";
+"guide.wifi.body" = "iOS does NOT let any app read Wi-Fi signal, channel, band, generation, link speed, or the SSID/BSSID. The Wi-Fi Info tool shows what IS allowed: connection type, the device's IPv4 and IPv6 addresses, and the public IP.\n\nTo pull the real SSID/BSSID into the app, use the Shortcuts app (it has privileged access) and hand the values back through NetToolbox's URL scheme. Build it once:\n1. In Wi-Fi Info, tap \"Create it\" — the Shortcuts app opens a new shortcut.\n2. Add \"Get Network Details\" → set it to \"Wi-Fi Network Name\".\n3. Add \"Get Network Details\" again → \"BSSID\".\n4. Add \"Get Network Details\" again → \"IP Address\".\n5. Add a \"Text\" action and type exactly:\nnettoolbox://wifi?ssid=[Network Name]&bssid=[BSSID]&ip=[IP Address]\n— where [Network Name], [BSSID] and [IP Address] are the magic variables from steps 2–4 (tap to insert them, don't type them literally).\n6. Add \"Open URL\" and set its URL to that Text.\n7. Name the shortcut EXACTLY: NetToolbox WiFi\n\nNow the \"Run Wi-Fi Shortcut\" button opens and runs it; it collects the details and re-opens NetToolbox with them filled into a \"From the Shortcut\" card. The first run asks for Location permission (needed to read the SSID) — allow it.";
 "guide.localnet.title" = "Setup: Local Network capability";
 "guide.localnet.body" = "For the LAN Scanner and IP Range Scanner to find anything, the host app must declare the Local Network capability. Do this once in Swift Playgrounds:\n\n1. In the Playgrounds sidebar, tap your app's name at the very top (e.g. \"NETPulse\") to open App Settings.\n2. Scroll to Capabilities and tap the + (Add) button.\n3. Choose \"Local Network\".\n4. Purpose String: type a reason, e.g. \"NetToolbox discovers devices and services on your local network.\" This text is shown in the iOS permission alert.\n5. Under \"Bonjour Service Types\", tap \"Add Service Type\" and add each of these (one per entry):\n_http._tcp\n_https._tcp\n_ssh._tcp\n_smb._tcp\n_airplay._tcp\n_raop._tcp\n_ipp._tcp\n_printer._tcp\n_googlecast._tcp\n_rfb._tcp\n_device-info._tcp\n_homekit._tcp\n6. Tap Add (top-right) to save the capability.\n\nAny service type you do NOT add here will never appear in scan results, so add all 12. The first time you open the LAN Scanner, iOS asks for Local Network access — tap Allow. Note: Traceroute to a public host (e.g. 8.8.8.8) does not need this capability.";
 "guide.permissions.title" = "Permissions";
@@ -1162,7 +1180,7 @@
 "guide.pro.title" = "Professional: routers & devices";
 "guide.pro.body" = "• SSH: a real, native SSH-2 client (curve25519-sha256 key exchange, aes256-gcm@openssh.com cipher, password auth), built entirely on CryptoKit — no external libraries. Enter host, port (22), username, password and a command; it opens a session, runs the one command, and shows the output. On first connect, check the host-key fingerprint it displays. No interactive shell yet, and only password auth.\n• Telnet: interactive plaintext terminal. Connect, then type commands. Unencrypted — trusted networks only.\n• FTP: connect + log in (default anonymous) and list a directory over passive mode. Plaintext.\n• MikroTik API: RouterOS API on port 8728. Enter host/user/password, then send commands like /system/resource/print.\n• SNMP: v2c GET for one OID, or Walk to enumerate a whole subtree. Configurable port and community; presets included.";
 "guide.limits.title" = "Limits (Wi-Fi radio)";
-"guide.limits.body" = "• SSH now works natively (see Professional) using CryptoKit's AES-GCM + curve25519 — it needs a server that offers aes256-gcm@openssh.com (nearly all modern OpenSSH do). It runs one command per session; there is no interactive shell or key-file auth yet, and SFTP is not built yet.\n• Wi-Fi radio details (signal/channel/band/generation/speed) and SSID/BSSID: blocked by iOS for all apps — use the Shortcut workaround above.\n• Traceroute may show \"*\" for routers that don't reply to ICMP.";
+"guide.limits.body" = "These are genuine iOS limits, not missing features:\n• Wi-Fi radio details (signal/channel/band/generation/link speed) are blocked by iOS for every app. The SSID/BSSID need a system entitlement the app deliberately doesn't carry — use the Shortcut workaround above to bring them in.\n• Traceroute and MTR can't name the routers between you and the host: iOS never delivers those replies to an app. You still get reachability and round-trip time to the destination.\n• SSDP/UPnP discovery needs a multicast entitlement the app doesn't carry, so it stays empty for now.\n• SSH needs a server offering curve25519 + aes256-gcm@openssh.com (nearly all modern OpenSSH do); very old servers with only legacy algorithms won't connect yet.";
 "guide.tests.title" = "Verify it works";
 "guide.tests.body" = "Open Diagnostics → Engine Self-Tests and tap Run. It runs the same test vectors as the developer's unit tests — subnetting, IPv6, MAC/OUI, DNS, SNMP BER, Wake-on-LAN, Telnet, X.509 dates, base conversion, VLSM, passwords, input classification, IP ranges, FTP PASV, and more. All should pass on your device.";
 

@@ -478,8 +478,8 @@ struct EngineTestSuite: Sendable {
             let willSup = TelnetProtocol.process([TelnetProtocol.iac, TelnetProtocol.will, 3])
             return firstFailure(
                 expect(doEcho.text, equals: "hi", "stripped text"),
-                expect(doEcho.reply, equals: [255, 252, 1], "WONT reply"),
-                expect(willSup.reply, equals: [255, 254, 3], "DONT reply")
+                expect(doEcho.reply, equals: [255, 252, 1], "WONT ECHO reply"),
+                expect(willSup.reply, equals: [255, 253, 3], "DO SGA reply")
             )
         },
         Case(name: "X.509 time parsing") {

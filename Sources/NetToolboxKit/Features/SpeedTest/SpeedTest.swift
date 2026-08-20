@@ -53,6 +53,9 @@ struct CloudflareSpeedEngine: Sendable {
     private let downloadSeconds = 8.0
     private let uploadSeconds = 6.0
     private let warmupSeconds = 1.0
+    /// Several concurrent transfers keep a fast link saturated (a single
+    /// HTTP/2 stream can't), so the reading isn't underestimated.
+    private let parallelStreams = 3
 
     private var session: URLSession {
         let configuration = URLSessionConfiguration.ephemeral
@@ -185,99 +188,162 @@ struct CloudflareSpeedEngine: Sendable {
     // MARK: - Download
 
     private func measureDownload(live: @escaping @Sendable (Double) -> Void) async throws -> Double {
-        // Pull fixed-size chunks back-to-back with the same async API the upload
-        // uses. URLSession keeps the HTTP/2 connection alive between chunks, so
-        // throughput stays high — and unlike a delegate-driven session, this
-        // works reliably inside the Swift Playgrounds preview sandbox.
-        let chunkBytes = 20_000_000
+        // Stream the response body (not whole buffers) across several parallel
+        // connections. Streaming lets a sampler report throughput continuously —
+        // every 200 ms — instead of only at multi-megabyte chunk boundaries
+        // (the old approach emitted a live figure at most a couple of times per
+        // test, so the number appeared frozen). The parallel streams keep a
+        // fast link saturated so the reading isn't underestimated.
+        let chunkBytes = 100_000_000
         guard let url = URL(string: "https://speed.cloudflare.com/__down?bytes=\(chunkBytes)") else {
             throw NetworkServiceError.invalidURL
         }
-        let session = self.session
+        let counter = TransferCounter()
+        let snapshot = WarmupSnapshot()
         let clock = ContinuousClock()
         let start = clock.now
-        var total = 0
-        var warmupBytes = 0
-        var warmupTime = start
-        var warmupDone = false
+        let sampler = liveSampler(counter: counter, snapshot: snapshot, start: start, clock: clock, live: live)
 
-        while true {
-            if Task.isCancelled { break }
-            if Self.seconds(clock.now - start) >= downloadSeconds { break }
-            do {
-                let (data, _) = try await session.data(from: url)
-                total += data.count
-            } catch {
-                if total > 0 { break }   // slow link timed out mid-chunk — use what arrived
-                throw error
-            }
-            let now = clock.now
-            if !warmupDone, Self.seconds(now - start) >= warmupSeconds {
-                warmupBytes = total
-                warmupTime = now
-                warmupDone = true
-            }
-            let measured = Self.seconds(now - (warmupDone ? warmupTime : start))
-            if measured > 0 {
-                live(Double(total - warmupBytes) * 8 / measured / 1_000_000)
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<parallelStreams {
+                group.addTask {
+                    let session = self.session
+                    while Self.seconds(clock.now - start) < downloadSeconds, !Task.isCancelled {
+                        do {
+                            let (stream, response) = try await session.bytes(from: url)
+                            if let http = response as? HTTPURLResponse, http.statusCode >= 400 { break }
+                            var sinceFlush = 0
+                            for try await _ in stream {
+                                sinceFlush += 1
+                                if sinceFlush >= 65_536 {
+                                    counter.add(sinceFlush)
+                                    sinceFlush = 0
+                                    if Self.seconds(clock.now - start) >= downloadSeconds { break }
+                                }
+                            }
+                            counter.add(sinceFlush)
+                        } catch {
+                            break
+                        }
+                    }
+                }
             }
         }
-
-        let measuredSeconds = Self.seconds(clock.now - warmupTime)
-        let measuredBytes = total - warmupBytes
-        let seconds = measuredSeconds > 0 ? measuredSeconds : Self.seconds(clock.now - start)
-        let bytes = measuredBytes > 0 ? measuredBytes : total
-        guard seconds > 0, bytes > 0 else { throw NetworkServiceError.decoding }
-        return Double(bytes) * 8 / seconds / 1_000_000
+        sampler.cancel()
+        return try Self.throughput(totalBytes: counter.bytes, snapshot: snapshot, start: start, clock: clock)
     }
 
     // MARK: - Upload
 
     private func measureUpload(live: @escaping @Sendable (Double) -> Void) async throws -> Double {
         guard let url = URL(string: "https://speed.cloudflare.com/__up") else { throw NetworkServiceError.invalidURL }
-        let payload = Data(count: 4_000_000)
+        // Small bodies uploaded back-to-back across parallel streams: each
+        // completion advances the shared counter often enough for the sampler
+        // to show a moving figure, and the parallel streams saturate the uplink.
+        let payload = Data(count: 1_000_000)
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
 
-        let session = self.session
+        let counter = TransferCounter()
+        let snapshot = WarmupSnapshot()
         let clock = ContinuousClock()
         let start = clock.now
-        var total = 0
-        var warmupBytes = 0
-        var warmupTime = start
-        var warmupDone = false
+        let sampler = liveSampler(counter: counter, snapshot: snapshot, start: start, clock: clock, live: live)
 
-        while true {
-            if Task.isCancelled { break }
-            let elapsed = Self.seconds(clock.now - start)
-            if elapsed >= uploadSeconds { break }
-            _ = try await session.upload(for: request, from: payload)
-            total += payload.count
-            let now = clock.now
-            let done = Self.seconds(now - start)
-            if !warmupDone, done >= warmupSeconds {
-                warmupBytes = total
-                warmupTime = now
-                warmupDone = true
-            }
-            let measured = Self.seconds(now - (warmupDone ? warmupTime : start))
-            if measured > 0 {
-                live(Double(total - warmupBytes) * 8 / measured / 1_000_000)
+        await withTaskGroup(of: Void.self) { group in
+            for _ in 0..<parallelStreams {
+                let request = request
+                let payload = payload
+                group.addTask {
+                    let session = self.session
+                    while Self.seconds(clock.now - start) < uploadSeconds, !Task.isCancelled {
+                        do {
+                            _ = try await session.upload(for: request, from: payload)
+                            counter.add(payload.count)
+                        } catch {
+                            break
+                        }
+                    }
+                }
             }
         }
+        sampler.cancel()
+        return try Self.throughput(totalBytes: counter.bytes, snapshot: snapshot, start: start, clock: clock)
+    }
 
-        let measuredSeconds = Self.seconds(clock.now - warmupTime)
-        let measuredBytes = total - warmupBytes
-        let seconds = measuredSeconds > 0 ? measuredSeconds : Self.seconds(clock.now - start)
-        let bytes = measuredBytes > 0 ? measuredBytes : total
-        guard seconds > 0, bytes > 0 else { throw NetworkServiceError.decoding }
-        return Double(bytes) * 8 / seconds / 1_000_000
+    // MARK: - Live sampling
+
+    /// Samples the shared byte counter every 200 ms and emits a live Mbps
+    /// figure from the delta, and records a one-time snapshot at the end of
+    /// warmup so the final figure can exclude connection ramp-up.
+    private func liveSampler(
+        counter: TransferCounter, snapshot: WarmupSnapshot,
+        start: ContinuousClock.Instant, clock: ContinuousClock,
+        live: @escaping @Sendable (Double) -> Void
+    ) -> Task<Void, Never> {
+        let warmup = warmupSeconds
+        return Task {
+            var lastBytes = 0
+            var lastTime = start
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(200))
+                let now = clock.now
+                let bytes = counter.bytes
+                let dt = Self.seconds(now - lastTime)
+                if dt > 0 {
+                    live(Double(bytes - lastBytes) * 8 / dt / 1_000_000)
+                }
+                lastBytes = bytes
+                lastTime = now
+                if Self.seconds(now - start) >= warmup {
+                    snapshot.setIfNeeded(bytes: bytes, at: now)
+                }
+            }
+        }
+    }
+
+    /// Computes throughput over the measured window (everything after warmup).
+    private static func throughput(
+        totalBytes: Int, snapshot: WarmupSnapshot,
+        start: ContinuousClock.Instant, clock: ContinuousClock
+    ) throws -> Double {
+        let end = clock.now
+        let measuredStart = snapshot.instant ?? start
+        let measuredBytes = totalBytes - snapshot.bytes
+        let windowSeconds = seconds(end - measuredStart)
+        let effectiveSeconds = windowSeconds > 0 ? windowSeconds : seconds(end - start)
+        let effectiveBytes = measuredBytes > 0 ? measuredBytes : totalBytes
+        guard effectiveSeconds > 0, effectiveBytes > 0 else { throw NetworkServiceError.decoding }
+        return Double(effectiveBytes) * 8 / effectiveSeconds / 1_000_000
     }
 
     // MARK: - Helpers
 
     private static func seconds(_ duration: Duration) -> Double {
         Double(duration.components.seconds) + Double(duration.components.attoseconds) / 1_000_000_000_000_000_000
+    }
+}
+
+/// Thread-safe byte accumulator shared across the parallel transfer streams
+/// and read by the live sampler.
+private final class TransferCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var value = 0
+    func add(_ n: Int) { lock.lock(); value += n; lock.unlock() }
+    var bytes: Int { lock.lock(); defer { lock.unlock() }; return value }
+}
+
+/// Captures the byte total and instant at the end of warmup, exactly once, so
+/// the final throughput can exclude the connection ramp-up window.
+private final class WarmupSnapshot: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _bytes = 0
+    private var _instant: ContinuousClock.Instant?
+    var bytes: Int { lock.lock(); defer { lock.unlock() }; return _bytes }
+    var instant: ContinuousClock.Instant? { lock.lock(); defer { lock.unlock() }; return _instant }
+    func setIfNeeded(bytes: Int, at instant: ContinuousClock.Instant) {
+        lock.lock(); defer { lock.unlock() }
+        if _instant == nil { _bytes = bytes; _instant = instant }
     }
 }

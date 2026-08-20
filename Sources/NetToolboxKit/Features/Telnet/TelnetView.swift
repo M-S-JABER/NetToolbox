@@ -7,7 +7,9 @@ final class TelnetViewModel {
     var host = ""
     var portText = "23"
     var command = ""
-    private(set) var transcript = ""
+    private let emulator = TerminalEmulator(rows: 24, columns: 80)
+    private(set) var terminalLines: [[TerminalCell]] = []
+    private(set) var hasOutput = false
     private(set) var isConnected = false {
         didSet {
             guard !toolID.isEmpty, oldValue != isConnected else { return }
@@ -28,7 +30,9 @@ final class TelnetViewModel {
             return
         }
         disconnect()
-        transcript = ""
+        emulator.reset()
+        terminalLines = []
+        hasOutput = false
         statusMessage = nil
 
         guard let connection = TCPConnection(host: target, port: port) else {
@@ -57,11 +61,18 @@ final class TelnetViewModel {
                     _ = await connection.send(Data(processed.reply))
                 }
                 await MainActor.run {
-                    self?.transcript.append(processed.text)
+                    self?.appendOutput(processed.text)
                 }
             }
             await MainActor.run { self?.isConnected = false }
         }
+    }
+
+    private func appendOutput(_ text: String) {
+        guard !text.isEmpty else { return }
+        emulator.feed(text)
+        terminalLines = emulator.displayLines
+        hasOutput = true
     }
 
     func sendCommand() async {
@@ -110,7 +121,7 @@ struct TelnetView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 connectionSection
-                if viewModel.isConnected || !viewModel.transcript.isEmpty {
+                if viewModel.isConnected || viewModel.hasOutput {
                     terminalSection
                 }
                 Text(L10n("telnet.note"))
@@ -173,17 +184,7 @@ struct TelnetView: View {
     private var terminalSection: some View {
         @Bindable var viewModel = viewModel
         return SectionCard(title: L10n("telnet.section.terminal"), systemImage: "terminal") {
-            Text(viewModel.transcript.isEmpty ? " " : viewModel.transcript)
-                .font(AppTypography.monoCaption)
-                .foregroundStyle(theme.success)
-                .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-                .textSelection(.enabled)
-                .environment(\.layoutDirection, .leftToRight)
-                .padding(Spacing.sm)
-                .background(
-                    RoundedRectangle(cornerRadius: CornerRadius.small)
-                        .fill(theme.background)
-                )
+            TerminalView(lines: viewModel.terminalLines)
 
             HStack(spacing: Spacing.sm) {
                 TextField(L10nString("telnet.input.command"), text: $viewModel.command)

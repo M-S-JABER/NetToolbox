@@ -52,6 +52,21 @@
     <key>UILaunchScreen</key>
     <dict/>
 
+    <!-- مخطط روابط خاص بالتطبيق: يسمح لاختصار iOS بإعادة تفاصيل الواي فاي
+         (SSID/BSSID/IP) إلى التطبيق عبر nettoolbox://wifi?ssid=…&bssid=…&ip=…
+         بدون أي entitlement. يعالجه onOpenURL في NetToolboxRootView. -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.m-s-jaber.nettoolbox</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>nettoolbox</string>
+            </array>
+        </dict>
+    </array>
+
     <!-- iPhone: بلا مقلوب. iPad: الأربع اتجاهات -->
     <key>UISupportedInterfaceOrientations</key>
     <array>
