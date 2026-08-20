@@ -50,10 +50,11 @@ enum SSHError: LocalizedError {
     }
 }
 
-/// A minimal SSH-2 client (curve25519-sha256 + aes256-gcm@openssh.com,
-/// password or ed25519 public-key auth), built entirely on CryptoKit/Security
-/// so the package keeps zero external dependencies. Supports one-shot exec,
-/// SFTP directory listing / download, and a line-oriented interactive shell.
+/// A minimal SSH-2 client (curve25519-sha256 + aes256-gcm@openssh.com;
+/// password or public-key auth — ed25519, ECDSA nistp256/384/521, and RSA),
+/// built entirely on CryptoKit/Security so the package keeps zero external
+/// dependencies. Supports one-shot exec, SFTP directory listing / download,
+/// and a line-oriented interactive shell.
 final class SSHClient: @unchecked Sendable {
     private enum Msg {
         static let disconnect: UInt8 = 1
@@ -202,16 +203,15 @@ final class SSHClient: @unchecked Sendable {
         case .key(let key):
             SSHWire.putString("publickey", into: &request)
             request.append(1)                          // with signature
-            SSHWire.putString("ssh-ed25519", into: &request)
+            SSHWire.putString(key.authAlgorithm, into: &request)
             SSHWire.putString(key.publicKeyBlob, into: &request)
-            // Sign string(session_id) || (the request built so far).
+            // Sign string(session_id) || (the request built so far). The key
+            // itself emits the correct algorithm-specific signature blob
+            // (ed25519 / ecdsa-sha2-nistp* / rsa-sha2-512).
             var signed = Data()
             SSHWire.putString(sessionID, into: &signed)
             signed.append(request)
-            let signature = try key.sign(signed)
-            var signatureBlob = Data()
-            SSHWire.putString("ssh-ed25519", into: &signatureBlob)
-            SSHWire.putString(signature, into: &signatureBlob)
+            let signatureBlob = try key.signatureBlob(over: signed)
             SSHWire.putString(signatureBlob, into: &request)
         }
         try await sendPacket(request)

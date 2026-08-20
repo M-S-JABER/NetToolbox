@@ -590,7 +590,16 @@
 "ssh.auth.key" = "Key";
 "ssh.auth.mode" = "Authentication";
 "ssh.auth.password" = "Password";
-"ssh.key.hint" = "Paste an unencrypted OpenSSH ed25519 private key (BEGIN OPENSSH PRIVATE KEY … END).";
+"ssh.key.hint" = "Paste an unencrypted private key. Supported: OpenSSH ed25519 and ECDSA (nistp256/384/521), and RSA in PEM form (BEGIN RSA PRIVATE KEY). For an OpenSSH-format RSA key, convert it first: ssh-keygen -p -m PEM -f key.";
+"ssh.key.error.format" = "Unsupported key format. Use an unencrypted OpenSSH ed25519/ECDSA key, or an RSA key in PEM form (BEGIN RSA PRIVATE KEY).";
+"ssh.key.error.encrypted" = "This key is passphrase-protected, which isn't supported yet. Export an unencrypted copy for use here.";
+"ssh.key.error.rsaPem" = "OpenSSH-format RSA keys aren't supported. Convert to PEM: ssh-keygen -p -m PEM -f your_key";
+"ssh.key.error.parse" = "Could not read this private key — check that you pasted the whole file, including the BEGIN/END lines.";
+"ssh.key.error.signing" = "This key can't be used for signing on this device.";
+"ssh.hostKey.trust.new" = "First connection to this host — its key has been remembered.";
+"ssh.hostKey.trust.known" = "Host key matches the one remembered from a previous connection.";
+"ssh.hostKey.trust.changed" = "WARNING: this host's key has CHANGED since last time. This can mean the server was reinstalled — or a man-in-the-middle. Do not proceed unless you know why it changed.";
+"ssh.hostKey.acceptNew" = "Accept the new key";
 "ssh.mode.command" = "Command";
 "ssh.mode.shell" = "Shell";
 "ssh.mode.title" = "Mode";
@@ -1168,7 +1177,7 @@
 "guide.pro.title" = "Professional: routers & devices";
 "guide.pro.body" = "• SSH: a real, native SSH-2 client (curve25519-sha256 key exchange, aes256-gcm@openssh.com cipher, password auth), built entirely on CryptoKit — no external libraries. Enter host, port (22), username, password and a command; it opens a session, runs the one command, and shows the output. On first connect, check the host-key fingerprint it displays. No interactive shell yet, and only password auth.\n• Telnet: interactive plaintext terminal. Connect, then type commands. Unencrypted — trusted networks only.\n• FTP: connect + log in (default anonymous) and list a directory over passive mode. Plaintext.\n• MikroTik API: RouterOS API on port 8728. Enter host/user/password, then send commands like /system/resource/print.\n• SNMP: v2c GET for one OID, or Walk to enumerate a whole subtree. Configurable port and community; presets included.";
 "guide.limits.title" = "Limits (Wi-Fi radio)";
-"guide.limits.body" = "• SSH now works natively (see Professional) using CryptoKit's AES-GCM + curve25519 — it needs a server that offers aes256-gcm@openssh.com (nearly all modern OpenSSH do). It runs one command per session; there is no interactive shell or key-file auth yet, and SFTP is not built yet.\n• Wi-Fi radio details (signal/channel/band/generation/speed) and SSID/BSSID: blocked by iOS for all apps — use the Shortcut workaround above.\n• Traceroute may show \"*\" for routers that don't reply to ICMP.";
+"guide.limits.body" = "These are genuine iOS limits, not missing features:\n• Wi-Fi radio details (signal/channel/band/generation/link speed) are blocked by iOS for every app. The SSID/BSSID need a system entitlement the app deliberately doesn't carry — use the Shortcut workaround above to bring them in.\n• Traceroute and MTR can't name the routers between you and the host: iOS never delivers those replies to an app. You still get reachability and round-trip time to the destination.\n• SSDP/UPnP discovery needs a multicast entitlement the app doesn't carry, so it stays empty for now.\n• SSH needs a server offering curve25519 + aes256-gcm@openssh.com (nearly all modern OpenSSH do); very old servers with only legacy algorithms won't connect yet.";
 "guide.tests.title" = "Verify it works";
 "guide.tests.body" = "Open Diagnostics → Engine Self-Tests and tap Run. It runs the same test vectors as the developer's unit tests — subnetting, IPv6, MAC/OUI, DNS, SNMP BER, Wake-on-LAN, Telnet, X.509 dates, base conversion, VLSM, passwords, input classification, IP ranges, FTP PASV, and more. All should pass on your device.";
 
