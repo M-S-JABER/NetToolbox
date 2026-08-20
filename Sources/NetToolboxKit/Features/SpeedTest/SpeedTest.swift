@@ -188,13 +188,12 @@ struct CloudflareSpeedEngine: Sendable {
     // MARK: - Download
 
     private func measureDownload(live: @escaping @Sendable (Double) -> Void) async throws -> Double {
-        // Stream the response body (not whole buffers) across several parallel
-        // connections. Streaming lets a sampler report throughput continuously —
-        // every 200 ms — instead of only at multi-megabyte chunk boundaries
-        // (the old approach emitted a live figure at most a couple of times per
-        // test, so the number appeared frozen). The parallel streams keep a
-        // fast link saturated so the reading isn't underestimated.
-        let chunkBytes = 100_000_000
+        // Pull moderate fixed-size chunks back-to-back across several parallel
+        // connections. `URLSession.data` is used (not the `.bytes` async stream):
+        // the byte stream returns nothing on-device here, which zeroed the whole
+        // test. Modest chunks + parallel streams keep the shared counter moving
+        // often enough for the live sampler while keeping a fast link saturated.
+        let chunkBytes = 3_000_000
         guard let url = URL(string: "https://speed.cloudflare.com/__down?bytes=\(chunkBytes)") else {
             throw NetworkServiceError.invalidURL
         }
@@ -210,18 +209,9 @@ struct CloudflareSpeedEngine: Sendable {
                     let session = self.session
                     while Self.seconds(clock.now - start) < downloadSeconds, !Task.isCancelled {
                         do {
-                            let (stream, response) = try await session.bytes(from: url)
+                            let (data, response) = try await session.data(from: url)
                             if let http = response as? HTTPURLResponse, http.statusCode >= 400 { break }
-                            var sinceFlush = 0
-                            for try await _ in stream {
-                                sinceFlush += 1
-                                if sinceFlush >= 65_536 {
-                                    counter.add(sinceFlush)
-                                    sinceFlush = 0
-                                    if Self.seconds(clock.now - start) >= downloadSeconds { break }
-                                }
-                            }
-                            counter.add(sinceFlush)
+                            counter.add(data.count)
                         } catch {
                             break
                         }
@@ -275,8 +265,11 @@ struct CloudflareSpeedEngine: Sendable {
     // MARK: - Live sampling
 
     /// Samples the shared byte counter every 200 ms and emits a live Mbps
-    /// figure from the delta, and records a one-time snapshot at the end of
-    /// warmup so the final figure can exclude connection ramp-up.
+    /// figure. It reports the running average since warmup (rather than the
+    /// instantaneous 200 ms delta) so the number climbs smoothly and converges
+    /// on the final result instead of flickering between 0 and spikes as
+    /// fixed-size chunks land. Also records the warmup snapshot once, so the
+    /// final figure excludes connection ramp-up.
     private func liveSampler(
         counter: TransferCounter, snapshot: WarmupSnapshot,
         start: ContinuousClock.Instant, clock: ContinuousClock,
@@ -284,20 +277,20 @@ struct CloudflareSpeedEngine: Sendable {
     ) -> Task<Void, Never> {
         let warmup = warmupSeconds
         return Task {
-            var lastBytes = 0
-            var lastTime = start
             while !Task.isCancelled {
                 try? await Task.sleep(for: .milliseconds(200))
                 let now = clock.now
                 let bytes = counter.bytes
-                let dt = Self.seconds(now - lastTime)
-                if dt > 0 {
-                    live(Double(bytes - lastBytes) * 8 / dt / 1_000_000)
-                }
-                lastBytes = bytes
-                lastTime = now
                 if Self.seconds(now - start) >= warmup {
                     snapshot.setIfNeeded(bytes: bytes, at: now)
+                }
+                // Average over the window since warmup (or since start before
+                // warmup completes) — smooth and monotonic-ish.
+                let base = snapshot.instant ?? start
+                let baseBytes = snapshot.bytes
+                let elapsed = Self.seconds(now - base)
+                if elapsed > 0 {
+                    live(Double(bytes - baseBytes) * 8 / elapsed / 1_000_000)
                 }
             }
         }
