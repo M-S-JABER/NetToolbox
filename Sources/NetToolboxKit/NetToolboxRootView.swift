@@ -33,6 +33,7 @@ public struct NetToolboxRootView: View {
     @State private var activity = ActivityCenter()
     @State private var appLock = AppLock()
     @State private var cloudSync = CloudSync()
+    @State private var wifiInbox = WiFiShortcutInbox()
     @Environment(\.scenePhase) private var scenePhase
     private let toolSessions = ToolSessions()
 
@@ -62,6 +63,7 @@ public struct NetToolboxRootView: View {
             .environment(activity)
             .environment(appLock)
             .environment(cloudSync)
+            .environment(wifiInbox)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)
             // Follow the system appearance by default, or force light/dark.
@@ -69,6 +71,7 @@ public struct NetToolboxRootView: View {
             .modelContainer(for: [HistoryEntry.self, SavedHost.self, Favorite.self])
             .task { status.start() }
             .task { cloudSync.start() }
+            .task { favorites.seedStarterFavoritesIfNeeded() }
             // Biometric app lock: cover the UI while locked and re-lock when
             // the app leaves the foreground.
             .overlay {

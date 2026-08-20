@@ -12,6 +12,7 @@ struct RootView: View {
     @Environment(RecentToolsStore.self) private var recentTools
     @Environment(HiddenToolsStore.self) private var hiddenTools
     @Environment(ActivityCenter.self) private var activity
+    @Environment(WiFiShortcutInbox.self) private var wifiInbox
 
     /// Sentinel selection that shows the dashboard instead of a tool.
     static let dashboardID = "__dashboard__"
@@ -32,7 +33,9 @@ struct RootView: View {
 
     private static func loadExpandedCategories() -> Set<String> {
         guard let raw = UserDefaults.standard.string(forKey: expandedKey) else {
-            return [ToolCategory.diagnostics.rawValue]   // first launch: open the busiest group
+            // First launch: keep every group collapsed. Favorites (seeded
+            // below) and search are the fast paths; a wall of ~80 tools is not.
+            return []
         }
         return Set(raw.split(separator: ",").map(String.init))
     }
@@ -113,6 +116,14 @@ struct RootView: View {
         .navigationSplitViewStyle(.balanced)
         .onChange(of: selectedToolID) { _, newValue in
             if let newValue, newValue != Self.dashboardID { recentTools.record(newValue) }
+        }
+        // A Shortcut hands Wi-Fi details back via nettoolbox://wifi?… — store
+        // them and jump to the Wi-Fi tool so the user sees them immediately.
+        .onOpenURL { url in
+            if wifiInbox.apply(url) {
+                search = ""
+                selectedToolID = "wifi-info"
+            }
         }
         .task {
             if !onboarded { showOnboarding = true }

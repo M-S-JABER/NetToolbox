@@ -871,6 +871,7 @@
 "home.favorites" = "Favorites";
 "dashboard.home" = "Dashboard";
 "dashboard.tagline" = "Your network toolkit";
+"dashboard.ask" = "What do you want to check?";
 "dashboard.recent" = "Recent";
 "dashboard.connection" = "Connection";
 "dashboard.publicIP" = "Public IP";
@@ -1108,6 +1109,9 @@
 "tool.wifiinfo.subtitle" = "Connection, device IP and router address";
 "tool.wifiinfo.title" = "Wi-Fi Info";
 "wifiinfo.deviceIP" = "Device IP";
+"wifiinfo.deviceIPv6" = "Device IPv6";
+"wifiinfo.section.fromShortcut" = "From the Shortcut";
+"wifiinfo.metric.bssid" = "Router MAC (BSSID)";
 "wifiinfo.gateway" = "Router (gateway)";
 "wifiinfo.metric.band" = "Band (2.4 / 5 / 6 GHz)";
 "wifiinfo.metric.channel" = "Channel";
@@ -1120,7 +1124,7 @@
 "wifiinfo.section.available" = "Available";
 "wifiinfo.section.unavailable" = "Not available on iOS";
 "wifiinfo.unavailable.intro" = "iOS gives no public API for these Wi-Fi radio details — they're blocked for all apps, so the app shows only what the system exposes.";
-"wifiinfo.shortcutHint" = "iOS blocks apps from reading the SSID/BSSID and building Shortcuts. Create a Shortcut once (Shortcuts app → Get Network Details) named exactly as below — then this button runs it. Tap \"Create it\" to open a new Shortcut.";
+"wifiinfo.shortcutHint" = "iOS blocks apps from reading the SSID/BSSID directly. Build a Shortcut once (Shortcuts app → Get Network Details) that ends with an \"Open URL\" action pointing to nettoolbox://wifi?ssid=…&bssid=…&ip=… — that hands the details back here into a \"From the Shortcut\" card. Name it exactly as below, then this button runs it. See Settings → Help for the full step-by-step.";
 
 /* SNMP walk + FTP */
 "error.ftp.connection" = "Could not connect to the FTP server";
@@ -1156,7 +1160,7 @@
 "guide.tools.title" = "Key tools";
 "guide.tools.body" = "• Subnet Calculator & VLSM: enter an IP with a CIDR (e.g. 192.168.1.10/24). VLSM splits a network into right-sized subnets.\n• Ping / Traceroute / IP Range Scanner: enter a host or CIDR. Ping is a TCP handshake timing (iOS blocks raw ICMP for ping); Traceroute and the Range Scanner use ICMP.\n• Port Scanner: choose Common/Web/All, or Custom and type e.g. 22,80,443,8000-8100.\n• DNS / nslookup / WHOIS / RBL / Email: DNS-based lookups. nslookup auto-detects forward vs reverse.\n• History: every Subnet/DNS/WHOIS/IP run is logged; copy, share or clear it.";
 "guide.wifi.title" = "Wi-Fi info & the Shortcut (detailed)";
-"guide.wifi.body" = "iOS does NOT let any app read Wi-Fi signal, channel, band, generation, link speed, or the SSID/BSSID. The Wi-Fi Info tool shows what IS allowed: connection type, device IP, and public IP.\n\nTo get the real SSID/BSSID, use the Shortcuts app (it has privileged access). Build it once:\n1. In Wi-Fi Info, tap \"Create it\" — the Shortcuts app opens a new shortcut.\n2. Add action \"Get Network Details\", set it to \"Wi-Fi Network Name\".\n3. Add \"Get Network Details\" again → \"Wi-Fi BSSID\".\n4. Add \"Get Network Details\" again → \"IP Address\".\n5. Add \"Get Contents of URL\" with URL: https://api.ipify.org\n6. Add \"Text\" and insert the values from steps 2–5 on separate lines.\n7. Add \"Show Result\".\n8. Name the shortcut EXACTLY: NetToolbox WiFi\n\nNow the \"Run Wi-Fi Shortcut\" button opens and runs it. First run asks for Location permission (needed to read the SSID) — allow it.";
+"guide.wifi.body" = "iOS does NOT let any app read Wi-Fi signal, channel, band, generation, link speed, or the SSID/BSSID. The Wi-Fi Info tool shows what IS allowed: connection type, the device's IPv4 and IPv6 addresses, and the public IP.\n\nTo pull the real SSID/BSSID into the app, use the Shortcuts app (it has privileged access) and hand the values back through NetToolbox's URL scheme. Build it once:\n1. In Wi-Fi Info, tap \"Create it\" — the Shortcuts app opens a new shortcut.\n2. Add \"Get Network Details\" → set it to \"Wi-Fi Network Name\".\n3. Add \"Get Network Details\" again → \"BSSID\".\n4. Add \"Get Network Details\" again → \"IP Address\".\n5. Add a \"Text\" action and type exactly:\nnettoolbox://wifi?ssid=[Network Name]&bssid=[BSSID]&ip=[IP Address]\n— where [Network Name], [BSSID] and [IP Address] are the magic variables from steps 2–4 (tap to insert them, don't type them literally).\n6. Add \"Open URL\" and set its URL to that Text.\n7. Name the shortcut EXACTLY: NetToolbox WiFi\n\nNow the \"Run Wi-Fi Shortcut\" button opens and runs it; it collects the details and re-opens NetToolbox with them filled into a \"From the Shortcut\" card. The first run asks for Location permission (needed to read the SSID) — allow it.";
 "guide.localnet.title" = "Setup: Local Network capability";
 "guide.localnet.body" = "For the LAN Scanner and IP Range Scanner to find anything, the host app must declare the Local Network capability. Do this once in Swift Playgrounds:\n\n1. In the Playgrounds sidebar, tap your app's name at the very top (e.g. \"NETPulse\") to open App Settings.\n2. Scroll to Capabilities and tap the + (Add) button.\n3. Choose \"Local Network\".\n4. Purpose String: type a reason, e.g. \"NetToolbox discovers devices and services on your local network.\" This text is shown in the iOS permission alert.\n5. Under \"Bonjour Service Types\", tap \"Add Service Type\" and add each of these (one per entry):\n_http._tcp\n_https._tcp\n_ssh._tcp\n_smb._tcp\n_airplay._tcp\n_raop._tcp\n_ipp._tcp\n_printer._tcp\n_googlecast._tcp\n_rfb._tcp\n_device-info._tcp\n_homekit._tcp\n6. Tap Add (top-right) to save the capability.\n\nAny service type you do NOT add here will never appear in scan results, so add all 12. The first time you open the LAN Scanner, iOS asks for Local Network access — tap Allow. Note: Traceroute to a public host (e.g. 8.8.8.8) does not need this capability.";
 "guide.permissions.title" = "Permissions";

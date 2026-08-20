@@ -15,6 +15,20 @@ final class FavoritesStore {
         ids = Set(raw.split(separator: ",").map(String.init))
     }
 
+    /// Curated favourites seeded once, on first launch, so the dashboard and
+    /// sidebar are useful immediately instead of empty. Runs a single time
+    /// (guarded by its own flag), and never overrides a user who has since
+    /// cleared them all.
+    func seedStarterFavoritesIfNeeded() {
+        let seededKey = "nettoolbox.favorites.seeded"
+        guard !UserDefaults.standard.bool(forKey: seededKey) else { return }
+        UserDefaults.standard.set(true, forKey: seededKey)
+        guard ids.isEmpty else { return }
+        let starters = ["ping", "public-ip", "subnet-calculator", "dns-lookup", "lan-scanner"]
+        ids = Set(starters)
+        UserDefaults.standard.set(ids.sorted().joined(separator: ","), forKey: key)
+    }
+
     func isFavorite(_ id: String) -> Bool { ids.contains(id) }
 
     func toggle(_ id: String) {
