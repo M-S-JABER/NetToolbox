@@ -1011,7 +1011,8 @@
 
 /* LAN scanner */
 "lan.action.scan" = "Scan network";
-"lan.note" = "Uses Bonjour (NWBrowser). iOS requires the Local Network permission; a raw ping-sweep isn't possible without it. Discovery runs for a few seconds.";
+"lan.note" = "Combines a ping/TCP sweep of your subnet, Bonjour (mDNS) discovery and reverse-DNS naming into one device list. iOS requires the Local Network permission; without it nothing is found. A full /24 scan takes several seconds, and iOS can't see a device that answers none of these probes.";
+"lan.section.devices" = "Devices";
 "lan.permission" = "No services found yet. Tap Scan. If nothing appears, enable the Local Network permission for this app in iOS Settings, and make sure the app declares the Bonjour service types.";
 "lan.tryRange" = "This tool only finds devices advertising Bonjour services. To list every device on the network, use the IP Range Scanner.";
 "lan.scanning" = "Scanning the local network…";

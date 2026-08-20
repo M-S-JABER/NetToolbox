@@ -40,20 +40,20 @@ extension ToolHelp {
         ),
         "lan-scanner": ToolHelpContent(
             overview: LocalizedText(
-                en: "Discovers devices and services advertised on your local network via Bonjour/mDNS — web servers, SSH, file sharing, AirPlay, printers, Chromecast, and HomeKit. For each service it shows the name and type, resolves it to a concrete host:port, and can save it to Saved Hosts.",
-                ar: "يكتشف الأجهزة والخدمات المُعلَنة على شبكتك المحلية عبر Bonjour/mDNS — خوادم الويب وSSH ومشاركة الملفات وAirPlay والطابعات وChromecast وHomeKit. لكل خدمة يعرض الاسم والنوع، ثم يحلّها إلى عنوان host:port فعلي، مع إمكانية حفظها في المضيفين المحفوظين."
+                en: "Finds every device it can on your local network, merged into one list: it sweeps your subnet with ping + TCP probes, browses Bonjour/mDNS for advertised services (SSH, file sharing, AirPlay, printers, Chromecast, HomeKit…), and reverse-DNS-names each address. Each device shows its name, IP, services and round-trip time, and can be saved to Saved Hosts.",
+                ar: "يعثر على أكبر عدد ممكن من أجهزة شبكتك المحلية في قائمة واحدة: يمسح شبكتك الفرعية بفحوص ping وTCP، ويتصفّح Bonjour/mDNS للخدمات المُعلَنة (SSH ومشاركة الملفات وAirPlay والطابعات وChromecast وHomeKit…)، ويسمّي كل عنوان بـDNS العكسي. يعرض كل جهاز اسمه وIP وخدماته وزمن الذهاب والإياب، ويمكن حفظه في المضيفين المحفوظين."
             ),
             howItWorks: LocalizedText(
-                en: "It uses NWBrowser over mDNS (port 5353), launching a browser per service type from a fixed list (http, https, ssh, smb, airplay, raop, ipp, printer, googlecast, rfb, device-info, homekit), with includePeerToPeer for AWDL. Found services resolve to host and port via NWConnection with a 4-second timeout; the discovery window runs 6 seconds then stops. TXT records are read and displayed.",
-                ar: "تستخدم NWBrowser عبر mDNS (المنفذ 5353)، وتُطلق متصفّحًا لكل نوع خدمة من قائمة ثابتة (http وhttps وssh وsmb وairplay وraop وipp وprinter وgooglecast وrfb وdevice-info وhomekit) مع includePeerToPeer لاكتشاف AWDL. الخدمات المكتشفة تُحلَّل إلى host وport عبر NWConnection بمهلة 4 ثوانٍ؛ ونافذة الاكتشاف تدوم 6 ثوانٍ ثم تتوقف. تُقرأ سجلات TXT وتُعرض."
+                en: "It expands your interface's subnet and probes each host with an unprivileged ICMP ping raced against a TCP-connect (so hosts that filter ICMP are still found), while NWBrowser looks for Bonjour service types over mDNS. Bonjour hits resolve to an IP, every discovered address is reverse-DNS-named, and the three signals merge into one device list keyed by IP.",
+                ar: "يوسّع الشبكة الفرعية لواجهتك ويفحص كل مضيف بـICMP ping غير مميّز متسابقًا مع اتصال TCP (فتُكتشف حتى الأجهزة التي تحجب ICMP)، بينما يبحث NWBrowser عن أنواع خدمات Bonjour عبر mDNS. تُحلّ نتائج Bonjour إلى IP، ويُسمّى كل عنوان مكتشف بـDNS عكسي، وتُدمج الإشارات الثلاث في قائمة أجهزة واحدة مفتاحها IP."
             ),
             example: LocalizedText(
-                en: "Tapping Scan on a home network lists within six seconds: Apple TV (AirPlay) at 192.168.8.30:7000, an HP LaserJet printer (IPP) at 192.168.8.45:631 with TXT line rp=ipp/print, and raspberrypi (SSH) at 192.168.8.60:22. You bookmark the Raspberry Pi to save it.",
-                ar: "الضغط على فحص على شبكة منزلية يُظهر خلال ست ثوانٍ: Apple TV (AirPlay) على 192.168.8.30:7000، وطابعة HP LaserJet (IPP) على 192.168.8.45:631 مع سطر TXT هو rp=ipp/print، وخادم raspberrypi (SSH) على 192.168.8.60:22. تنقر الإشارة المرجعية لحفظ الراسبيري باي."
+                en: "Tapping Scan on a home network lists, within a few seconds: nas.local at 192.168.8.10 (File sharing, 3 ms), an HP printer at 192.168.8.45 (Printer, 5 ms), raspberrypi at 192.168.8.60 (SSH, 2 ms), plus a few bare IPs that answered ping but advertise nothing. You bookmark the Raspberry Pi to save it.",
+                ar: "الضغط على فحص على شبكة منزلية يُظهر خلال ثوانٍ: nas.local على 192.168.8.10 (مشاركة ملفات، 3 مللي)، وطابعة HP على 192.168.8.45 (طابعة، 5 مللي)، وraspberrypi على 192.168.8.60 (SSH، 2 مللي)، إضافةً إلى عناوين IP مجرّدة ردّت على ping دون أن تُعلن شيئًا. تنقر الإشارة المرجعية لحفظ الراسبيري باي."
             ),
             notes: LocalizedText(
-                en: "This scanner requires the iOS Local Network permission (Settings ← NetToolbox ← Local Network); without it the system returns a completely empty list with no visible error. It only finds devices that advertise via Bonjour — use the IP Range Scanner for a full ping sweep. Address resolution may lag or fail, leaving the type shown without an address.",
-                ar: "يتطلب هذا الفاحص صلاحية الشبكة المحلية في iOS (الإعدادات ← NetToolbox ← الشبكة المحلية)؛ بدونها يعيد النظام قائمة فارغة تمامًا دون خطأ ظاهر. يكتشف فقط الأجهزة التي تُعلن عبر Bonjour — استخدم فاحص مدى IP لمسح كامل بالـ ping. قد يتأخر تحليل العنوان أو يفشل فيبقى النوع دون عنوان."
+                en: "Requires the iOS Local Network permission (Settings ← NetToolbox ← Local Network); without it discovery returns nothing with no visible error. A full /24 sweep takes several seconds. iOS still can't see a device that answers no ping, no probed TCP port, and no Bonjour — that's a platform limit (no ARP/raw sockets), not a bug; a desktop ARP scanner can see more.",
+                ar: "يتطلب صلاحية الشبكة المحلية في iOS (الإعدادات ← NetToolbox ← الشبكة المحلية)؛ بدونها لا يعثر على شيء دون خطأ ظاهر. مسح /24 كامل يستغرق عدة ثوانٍ. ومع ذلك لا يستطيع iOS رؤية جهاز لا يردّ على ping ولا على أي منفذ TCP مفحوص ولا على Bonjour — هذا قيد نظام (لا ARP ولا raw sockets) وليس خللًا؛ وفاحص ARP على حاسوب يرى أكثر."
             )
         ),
         "ip-range-scanner": ToolHelpContent(
