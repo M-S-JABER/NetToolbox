@@ -13,6 +13,7 @@ struct RootView: View {
     @Environment(HiddenToolsStore.self) private var hiddenTools
     @Environment(ActivityCenter.self) private var activity
     @Environment(WiFiShortcutInbox.self) private var wifiInbox
+    @Environment(SSHConnectRequest.self) private var sshConnect
 
     /// Sentinel selection that shows the dashboard instead of a tool.
     static let dashboardID = "__dashboard__"
@@ -123,6 +124,14 @@ struct RootView: View {
             if wifiInbox.apply(url) {
                 search = ""
                 selectedToolID = "wifi-info"
+            }
+        }
+        // Another tool asked to open an interactive SSH session (e.g. MikroTik's
+        // "open CLI over SSH") — jump to the SSH tool, which applies the fields.
+        .onChange(of: sshConnect.token) { _, _ in
+            if sshConnect.token > 0 {
+                search = ""
+                selectedToolID = "ssh"
             }
         }
         .task {

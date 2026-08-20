@@ -35,6 +35,7 @@ public struct NetToolboxRootView: View {
     @State private var cloudSync = CloudSync()
     @State private var wifiInbox = WiFiShortcutInbox()
     @State private var knownHosts = KnownHostsStore()
+    @State private var sshConnect = SSHConnectRequest()
     @Environment(\.scenePhase) private var scenePhase
     private let toolSessions = ToolSessions()
 
@@ -66,6 +67,7 @@ public struct NetToolboxRootView: View {
             .environment(cloudSync)
             .environment(wifiInbox)
             .environment(knownHosts)
+            .environment(sshConnect)
             .environment(\.toolSessions, toolSessions)
             .tint(activeTheme.accent)
             // Follow the system appearance by default, or force light/dark.

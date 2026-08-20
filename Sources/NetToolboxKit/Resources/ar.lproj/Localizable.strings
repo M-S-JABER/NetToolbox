@@ -471,6 +471,8 @@
 "mikrotik.input.command" = "الأمر (مثل /system/resource/print)";
 "mikrotik.input.host" = "المضيف أو IP";
 "mikrotik.input.password" = "كلمة المرور";
+"mikrotik.tls" = "API مشفّر (api-ssl، منفذ 8729)";
+"mikrotik.openSSH" = "افتح CLI تفاعلي عبر SSH";
 "mikrotik.input.title" = "الراوتر";
 "mikrotik.input.user" = "اسم المستخدم";
 "mikrotik.note" = "يستخدم واجهة RouterOS (المنفذ 8728) بتسجيل دخول عادي (RouterOS 6.43+). فعّل خدمة API على الراوتر واستخدم حساباً مخصصاً.";

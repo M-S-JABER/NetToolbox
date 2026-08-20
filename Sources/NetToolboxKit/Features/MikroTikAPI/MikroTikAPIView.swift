@@ -2,12 +2,13 @@ import SwiftUI
 import Observation
 
 /// A live RouterOS API connection. Uses plain login (RouterOS 6.43+) over
-/// the API port; the wire framing is handled by `MikroTikProtocol`.
+/// the API port; the wire framing is handled by `MikroTikProtocol`. When `tls`
+/// is set it connects to the encrypted api-ssl service (default port 8729).
 final class MikroTikClient: @unchecked Sendable {
     private let connection: TCPConnection
 
-    init?(host: String, port: UInt16) {
-        guard let connection = TCPConnection(host: host, port: port) else { return nil }
+    init?(host: String, port: UInt16, tls: Bool = false) {
+        guard let connection = TCPConnection(host: host, port: port, tls: tls) else { return nil }
         self.connection = connection
     }
 
@@ -86,6 +87,7 @@ final class MikroTikViewModel {
     var portText = "8728"
     var user = "admin"
     var password = ""
+    var useTLS = false
     var command = "/system/resource/print"
 
     private(set) var isConnected = false {
@@ -131,7 +133,7 @@ final class MikroTikViewModel {
         isBusy = true
         statusMessage = nil
 
-        guard let client = MikroTikClient(host: target, port: port) else {
+        guard let client = MikroTikClient(host: target, port: port, tls: useTLS) else {
             statusMessage = String(localized: "error.probe.invalidHost", bundle: .module)
             isBusy = false
             return
@@ -211,6 +213,15 @@ final class MikroTikViewModel {
         }
     }
 
+    /// Toggles api-ssl, swapping the port between the plaintext (8728) and
+    /// encrypted (8729) defaults when it's still at the other default.
+    func setTLS(_ on: Bool) {
+        useTLS = on
+        let trimmed = portText.trimmingCharacters(in: .whitespaces)
+        if on, trimmed == "8728" { portText = "8729" }
+        if !on, trimmed == "8729" { portText = "8728" }
+    }
+
     func clearTranscript() { transcript.removeAll() }
 
     func disconnect() {
@@ -235,6 +246,7 @@ struct MikroTikAPIView: View {
     @Environment(\.theme) private var theme
     @Environment(\.toolSessions) private var sessions
     @Environment(ActivityCenter.self) private var activity
+    @Environment(SSHConnectRequest.self) private var sshConnect
 
     private var viewModel: MikroTikViewModel {
         sessions.session("mikrotik-api") {
@@ -308,6 +320,13 @@ struct MikroTikAPIView: View {
                 .font(AppTypography.monoBody)
                 .environment(\.layoutDirection, .leftToRight)
 
+            Toggle(isOn: Binding(get: { viewModel.useTLS }, set: { viewModel.setTLS($0) })) {
+                Text(L10n("mikrotik.tls"))
+                    .font(AppTypography.body)
+                    .foregroundStyle(theme.textPrimary)
+            }
+            .disabled(viewModel.isConnected)
+
             HStack {
                 if viewModel.isConnected {
                     Button(L10nString("telnet.disconnect"), role: .destructive) {
@@ -327,6 +346,17 @@ struct MikroTikAPIView: View {
                 }
                 if viewModel.isBusy { ProgressView() }
             }
+
+            // RouterOS's interactive CLI lives on SSH (port 22), not the API —
+            // this hands the router host to the SSH tool for a real live terminal.
+            Button {
+                sshConnect.request(host: viewModel.host, port: "22", username: viewModel.user)
+            } label: {
+                Label(L10nString("mikrotik.openSSH"), systemImage: "terminal")
+                    .font(AppTypography.footnote)
+            }
+            .buttonStyle(.bordered)
+            .disabled(viewModel.host.trimmingCharacters(in: .whitespaces).isEmpty)
 
             if let message = viewModel.statusMessage {
                 Text(message).font(AppTypography.footnote).foregroundStyle(theme.danger)

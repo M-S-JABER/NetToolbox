@@ -471,6 +471,8 @@
 "mikrotik.input.command" = "Command (e.g. /system/resource/print)";
 "mikrotik.input.host" = "Host or IP";
 "mikrotik.input.password" = "Password";
+"mikrotik.tls" = "Encrypted API (api-ssl, port 8729)";
+"mikrotik.openSSH" = "Open interactive CLI over SSH";
 "mikrotik.input.title" = "Router";
 "mikrotik.input.user" = "Username";
 "mikrotik.note" = "Uses the RouterOS API (port 8728) with plain login (RouterOS 6.43+). Enable the API service on the router and use a dedicated account.";

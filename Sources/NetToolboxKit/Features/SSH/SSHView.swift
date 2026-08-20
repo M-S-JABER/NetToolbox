@@ -180,6 +180,8 @@ struct SSHView: View {
     @Environment(ActivityCenter.self) private var activity
     @Environment(SSHProfilesStore.self) private var profiles
     @Environment(KnownHostsStore.self) private var knownHosts
+    @Environment(SSHConnectRequest.self) private var sshConnect
+    @State private var appliedRequestToken = 0
 
     private var viewModel: SSHViewModel {
         sessions.session("ssh") {
@@ -219,6 +221,16 @@ struct SSHView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.ssh.title")))
         .navigationBarTitleDisplayMode(.large)
+        .onChange(of: sshConnect.token, initial: true) { applyConnectRequest() }
+    }
+
+    /// Pre-fills host/port/user when another tool requested an SSH session.
+    private func applyConnectRequest() {
+        guard sshConnect.token > 0, sshConnect.token != appliedRequestToken else { return }
+        appliedRequestToken = sshConnect.token
+        viewModel.host = sshConnect.host
+        if !sshConnect.port.isEmpty { viewModel.portText = sshConnect.port }
+        if !sshConnect.username.isEmpty { viewModel.username = sshConnect.username }
     }
 
     private var profilesMenu: some View {
