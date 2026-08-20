@@ -44,6 +44,23 @@ final class OneShot<Value: Sendable>: @unchecked Sendable {
     }
 }
 
+/// A one-shot flag shared between two racing callbacks (a connection state
+/// change and a timeout): the first `claim()` returns `true`, every later call
+/// returns `false`, so exactly one side acts. Unlike a `DispatchWorkItem`, it
+/// is `Sendable`, so it can be captured in an `NWConnection`'s `@Sendable`
+/// state-update handler.
+final class AtomicFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var claimed = false
+
+    func claim() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        if claimed { return false }
+        claimed = true
+        return true
+    }
+}
+
 /// One-shot TCP connect used for reachability timing and port scanning.
 enum TCPProbe {
     /// Attempts a TCP handshake and returns how long it took to reach
@@ -117,30 +134,33 @@ final class TCPConnection: @unchecked Sendable {
         await withCheckedContinuation { continuation in
             let shot = OneShot(continuation)
             let connection = self.connection
-            // Tear the connection down only if the timeout actually wins the
-            // race. Firing this unconditionally (the old behaviour) cancelled a
-            // perfectly healthy connection `timeout` seconds after it opened —
-            // which silently killed long-lived sessions (Telnet, MikroTik,
-            // banner reads) mid-use. Cancelling the work item on `.ready`
-            // leaves the open connection alone.
-            let timeoutWork = DispatchWorkItem {
-                connection.cancel()   // don't leave a half-open NWConnection dialing
-                shot.resume(.failure(.timeout))
-            }
+            // Whichever of the two callbacks (a state change or the timeout)
+            // fires first "wins" the flag; the loser does nothing. This tears
+            // the connection down ONLY when the timeout wins — the old code
+            // cancelled unconditionally at the deadline, killing a perfectly
+            // healthy connection `timeout` seconds after it opened (which
+            // silently broke long-lived sessions: Telnet, MikroTik, banner
+            // reads). A `DispatchWorkItem` we could cancel isn't usable here —
+            // it isn't `Sendable`, so it can't be captured in the `@Sendable`
+            // state handler — hence the flag.
+            let settled = AtomicFlag()
             connection.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
-                    timeoutWork.cancel()
-                    shot.resume(.success(()))
+                    if settled.claim() { shot.resume(.success(())) }
                 case .failed(let error), .waiting(let error):
-                    timeoutWork.cancel()
-                    shot.resume(.failure(.connection(error.localizedDescription)))
+                    if settled.claim() { shot.resume(.failure(.connection(error.localizedDescription))) }
                 default:
                     break
                 }
             }
             connection.start(queue: queue)
-            queue.asyncAfter(deadline: .now() + timeout, execute: timeoutWork)
+            queue.asyncAfter(deadline: .now() + timeout) {
+                if settled.claim() {
+                    connection.cancel()   // timeout won: don't leave it dialing
+                    shot.resume(.failure(.timeout))
+                }
+            }
         }
     }
 
