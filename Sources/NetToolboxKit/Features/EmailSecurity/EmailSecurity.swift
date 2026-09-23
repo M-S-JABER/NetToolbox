@@ -106,6 +106,11 @@ struct EmailSecurityView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.emailsec.title")))
         .navigationBarTitleDisplayMode(.large)
+        #if DEBUG
+        .task {
+            if let seed = ScreenshotSeed.input { viewModel.domain = seed; await viewModel.run() }
+        }
+        #endif
     }
 
     private var inputSection: some View {

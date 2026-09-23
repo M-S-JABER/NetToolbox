@@ -9,7 +9,7 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
 
 - **Name:** NetToolbox
 - **Bundle ID:** `com.m-s-jaber.nettoolbox`
-- **Version:** 2.3.0 (matches the app playground `displayVersion` and Settings → About)
+- **Version:** 2.3.2 — submitted for review 2026-09-23 as **NetToolbox Pro** (App ID `6803236893`), free, all territories
 - **Category:** Utilities (secondary: Developer Tools)
 - **Supported devices:** iPad + iPhone, iOS 17.0+
 - **Localizations:** English, Arabic (RTL)
@@ -72,6 +72,18 @@ Notes:
 - Design source: `NetToolbox.swiftpm/AppIcon.svg` (1024×1024, no text, teal
   network hub-and-spoke motif). Re-export to `AppIcon.appiconset/AppIcon.png`
   (no alpha) if you tweak the SVG.
+
+## Screenshots
+
+Generated from the real app on the simulator, not drawn: `scripts/store-screenshots.sh`
+(see its header). It relies on **Debug-only** launch-argument hooks in
+`Core/System/ScreenshotSeed.swift` — `-NTShotTool`, `-NTShotInput` and
+`-NTScreenshotDemo`, the last one replacing the machine's real public IP / ISP /
+city with the RFC 5737 address `203.0.113.24`. None of it is compiled into Release.
+
+Sets uploaded for 2.3.2 (en-US + ar-SA): iPhone 6.9" ×6 (dashboard, subnet,
+SSL, DNS, ping, tool list) and iPad 13" ×5. Convert the PNGs to RGB (no alpha)
+before uploading.
 
 ## How to submit
 

@@ -297,6 +297,11 @@ struct SSLCheckerView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.ssl.title")))
         .navigationBarTitleDisplayMode(.large)
+        #if DEBUG
+        .task {
+            if let seed = ScreenshotSeed.input { viewModel.host = seed; await viewModel.check() }
+        }
+        #endif
     }
 
     private var inputSection: some View {
