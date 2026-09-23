@@ -46,7 +46,17 @@ struct SubnetCalculatorView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.subnet.title")))
         .navigationBarTitleDisplayMode(.large)
-        .task { reloadHistory() }
+        .task {
+            reloadHistory()
+            #if DEBUG
+            if let seed = ScreenshotSeed.input {
+                let parts = seed.split(separator: " ").map(String.init)
+                viewModel.addressInput = parts.first ?? ""
+                viewModel.maskInput = parts.count > 1 ? parts[1] : ""
+                calculate()
+            }
+            #endif
+        }
     }
 
     /// Runs the calculation and refreshes the history list.

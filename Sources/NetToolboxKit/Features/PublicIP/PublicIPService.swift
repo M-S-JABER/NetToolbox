@@ -14,6 +14,17 @@ struct PublicIPInfo: Equatable, Sendable {
     var longitude: Double? = nil
 }
 
+#if DEBUG
+extension PublicIPInfo {
+    /// Documentation-range address (RFC 5737) used only for store screenshots.
+    static let screenshotDemo = PublicIPInfo(
+        ip: "203.0.113.24", country: "United Arab Emirates", countryCode: "AE",
+        city: "Dubai", isp: "Example Fiber Networks", organization: "Example Fiber Networks",
+        asn: 64500, timezone: "Asia/Dubai", latitude: 25.2, longitude: 55.27
+    )
+}
+#endif
+
 /// Abstraction so the geo-IP provider can be swapped or mocked in tests.
 protocol PublicIPProviding: Sendable {
     func fetch() async throws -> PublicIPInfo
@@ -48,6 +59,11 @@ struct IpwhoisService: PublicIPProviding {
     }
 
     func fetch() async throws -> PublicIPInfo {
+        #if DEBUG
+        // App Store screenshots run with `-NTScreenshotDemo YES` so the real
+        // public IP / ISP / city of the machine taking them never ships.
+        if UserDefaults.standard.bool(forKey: "NTScreenshotDemo") { return .screenshotDemo }
+        #endif
         guard let url = URL(string: "https://ipwho.is/") else {
             throw NetworkServiceError.invalidURL
         }

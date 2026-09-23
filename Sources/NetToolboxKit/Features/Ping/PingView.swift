@@ -53,6 +53,11 @@ struct PingView: View {
         .background(theme.background)
         .navigationTitle(Text(L10n("tool.ping.title")))
         .navigationBarTitleDisplayMode(.large)
+        #if DEBUG
+        .task {
+            if let seed = ScreenshotSeed.input { viewModel.host = seed; await viewModel.run() }
+        }
+        #endif
     }
 
     private var inputSection: some View {

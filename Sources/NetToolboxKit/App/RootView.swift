@@ -136,6 +136,9 @@ struct RootView: View {
         }
         .task {
             if !onboarded { showOnboarding = true }
+            #if DEBUG
+            if let id = ScreenshotSeed.tool { selectedToolID = id == "__sidebar__" ? nil : id }
+            #endif
         }
         .sheet(isPresented: $showOnboarding) {
             OnboardingView { onboarded = true; showOnboarding = false }
