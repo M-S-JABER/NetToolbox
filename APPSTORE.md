@@ -87,6 +87,8 @@ before uploading.
 
 ## How to submit
 
+> For **updates** after the first release (version bump → TestFlight → new version → review), follow [RELEASING.md](RELEASING.md).
+
 **Prerequisites:** an Apple Developer Program membership ($99/yr) and an app
 record in App Store Connect (`appstoreconnect.apple.com` → Apps → +).
 
