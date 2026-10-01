@@ -83,22 +83,24 @@
     </array>
 
     <!-- ══ أوصاف الصلاحيات ══
+         القيم الإنجليزية هي الاحتياط الافتراضي. النصوص المعروضة للمستخدم
+         تُترجم عبر en.lproj و ar.lproj/InfoPlist.strings في حزمة التطبيق.
          كلها تُطلب عند أول استخدام للميزة، لا عند إقلاع التطبيق. -->
 
     <!-- قفل التطبيق. بدون هذا المفتاح ينهار التطبيق عند أول محاولة
          مصادقة على جهاز حقيقي. -->
     <key>NSFaceIDUsageDescription</key>
-    <string>يُستخدم Face ID لقفل NetToolbox وحماية المضيفات المحفوظة وملفات SSH والكاميرات.</string>
+    <string>Locks NetToolbox so your saved hosts, SSH profiles and cameras stay private.</string>
 
     <key>NSCameraUsageDescription</key>
-    <string>تُستخدم الكاميرا لمسح رموز QR (إعدادات Wi-Fi و WireGuard).</string>
+    <string>Scans QR codes (Wi-Fi and WireGuard settings) with the camera.</string>
 
     <key>NSPhotoLibraryAddUsageDescription</key>
-    <string>يُستخدم لحفظ لقطات الكاميرا في مكتبة الصور.</string>
+    <string>Saves camera snapshots to your photo library.</string>
 
     <!-- اكتشاف الأجهزة والخدمات على الشبكة المحلية عبر Bonjour و mDNS -->
     <key>NSLocalNetworkUsageDescription</key>
-    <string>يُستخدم لاكتشاف الأجهزة والخدمات على شبكتك المحلية (Bonjour، فحص الشبكة، كاميرات IP).</string>
+    <string>Discovers devices and services on your local network (Bonjour, LAN scan, IP cameras).</string>
 
     <!-- أنواع خدمات Bonjour التي يستعلم عنها LANScanner. iOS يرفض أي نوع
          غير مذكور هنا صراحةً. -->
@@ -108,14 +110,21 @@
         <string>_https._tcp</string>
         <string>_ssh._tcp</string>
         <string>_smb._tcp</string>
+        <string>_afpovertcp._tcp</string>
         <string>_airplay._tcp</string>
         <string>_raop._tcp</string>
         <string>_ipp._tcp</string>
         <string>_printer._tcp</string>
+        <string>_pdl-datastream._tcp</string>
         <string>_googlecast._tcp</string>
         <string>_rfb._tcp</string>
         <string>_device-info._tcp</string>
         <string>_homekit._tcp</string>
+        <string>_hap._tcp</string>
+        <string>_workstation._tcp</string>
+        <string>_companion-link._tcp</string>
+        <string>_spotify-connect._tcp</string>
+        <string>_scanner._tcp</string>
     </array>
 </dict>
 </plist>

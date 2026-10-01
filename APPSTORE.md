@@ -38,6 +38,15 @@ does no tracking and collects no data off-device (see `PrivacyInfo.xcprivacy`).
 
 Declared in `NetToolbox.swiftpm/Package.swift` via `.iOSApplication(capabilities:)`:
 
+The App Store Xcode target keeps English fallback values in `App/Info.plist`
+and translates **every** permission purpose string in
+`App/en.lproj/InfoPlist.strings` and `App/ar.lproj/InfoPlist.strings`.
+The app playground carries the same localized files under
+`NetToolbox.swiftpm/`. Keep both variants and the Bonjour service list
+aligned with `LANScannerViewModel.serviceTypes` when adding a permission
+or discovery type. Apple's first review of 2.3.2 rejected the Arabic
+Local Network purpose string displayed over the English app UI.
+
 | Key | Feature |
 | --- | --- |
 | `NSFaceIDUsageDescription` | App lock (Face ID / Touch ID / passcode) |

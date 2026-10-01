@@ -1,0 +1,4 @@
+"NSFaceIDUsageDescription" = "Locks NetToolbox so your saved hosts, SSH profiles and cameras stay private.";
+"NSCameraUsageDescription" = "Scans QR codes (Wi-Fi and WireGuard settings) with the camera.";
+"NSPhotoLibraryAddUsageDescription" = "Saves camera snapshots to your photo library.";
+"NSLocalNetworkUsageDescription" = "Discovers devices and services on your local network (Bonjour, LAN scan, IP cameras).";

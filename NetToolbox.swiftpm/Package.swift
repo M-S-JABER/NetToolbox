@@ -44,14 +44,17 @@ let package = Package(
             // particular, the app-lock's Face ID prompt would crash on device.
             capabilities: [
                 .faceID(purposeString: "Locks NetToolbox so your saved hosts, SSH profiles and cameras stay private."),
-                .camera(purposeString: "Scans QR codes (Wi-Fi and WireGuard configs) with the camera."),
+                .camera(purposeString: "Scans QR codes (Wi-Fi and WireGuard settings) with the camera."),
                 .photoLibraryAdd(purposeString: "Saves camera snapshots to your photo library."),
                 .localNetwork(
                     purposeString: "Discovers devices and services on your local network (Bonjour, LAN scan, IP cameras).",
                     bonjourServiceTypes: [
                         "_http._tcp", "_https._tcp", "_ssh._tcp", "_smb._tcp",
-                        "_airplay._tcp", "_raop._tcp", "_ipp._tcp", "_printer._tcp",
-                        "_googlecast._tcp", "_rfb._tcp", "_device-info._tcp", "_homekit._tcp"
+                        "_afpovertcp._tcp", "_airplay._tcp", "_raop._tcp",
+                        "_ipp._tcp", "_printer._tcp", "_pdl-datastream._tcp",
+                        "_googlecast._tcp", "_rfb._tcp", "_device-info._tcp",
+                        "_homekit._tcp", "_hap._tcp", "_workstation._tcp",
+                        "_companion-link._tcp", "_spotify-connect._tcp", "_scanner._tcp"
                     ]
                 )
             ]

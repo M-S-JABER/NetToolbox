@@ -1,0 +1,4 @@
+"NSFaceIDUsageDescription" = "يُستخدم Face ID لقفل NetToolbox وحماية المضيفات المحفوظة وملفات SSH والكاميرات.";
+"NSCameraUsageDescription" = "تُستخدم الكاميرا لمسح رموز QR لإعدادات Wi-Fi وWireGuard.";
+"NSPhotoLibraryAddUsageDescription" = "يُستخدم لحفظ لقطات الكاميرا في مكتبة الصور.";
+"NSLocalNetworkUsageDescription" = "يُستخدم لاكتشاف الأجهزة والخدمات على شبكتك المحلية، مثل Bonjour وفحص الشبكة وكاميرات IP.";
